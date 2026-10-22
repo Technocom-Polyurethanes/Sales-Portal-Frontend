@@ -1,0 +1,46 @@
+export type BankAccount = {
+  id: string
+  bank: string
+  branch: string
+  accountNumber: string
+  swift: string
+  iban: string
+  currency: string
+}
+
+export type PackageType = {
+  id: string
+  name: string
+  nameAr: string
+  defaultWeightKg: number
+  sizesKg: number[]
+}
+
+export type CompanySettings = {
+  name: string
+  nameAr: string
+  tagline: string
+  taglineAr: string
+  formCode: string
+  referencePrefix: string
+  address: string
+  phone: string
+  email: string
+  logoWidthMm: number
+  logoHeightMm: number
+}
+
+export type ReminderSettings = {
+  remindBeforeExpiry: boolean
+  daysBeforeExpiry: number
+}
+
+export type WorkspaceSettings = {
+  company: CompanySettings
+  banks: BankAccount[]
+  packageTypes: PackageType[]
+  reminders: ReminderSettings
+  defaultCurrency: string
+  defaultTaxPercent: number
+  defaultPaymentTermId: string
+}

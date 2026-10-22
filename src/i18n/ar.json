@@ -1,0 +1,151 @@
+{
+  "app": {
+    "name": "TECHNOCOM",
+    "quotations": "عروض الأسعار",
+    "quotationsAr": "عروض الأسعار"
+  },
+  "common": {
+    "save": "حفظ", "cancel": "إلغاء", "confirm": "تأكيد", "delete": "حذف",
+    "edit": "تعديل", "add": "إضافة", "close": "إغلاق", "back": "رجوع", "next": "التالي",
+    "previous": "السابق", "search": "بحث", "filter": "تصفية", "all": "الكل",
+    "loading": "جارٍ التحميل…", "noResults": "لا توجد نتائج.", "optional": "اختياري",
+    "required": "مطلوب", "retry": "إعادة المحاولة", "print": "طباعة", "export": "تصدير",
+    "english": "English", "arabic": "العربية", "language": "اللغة",
+    "currency": "العملة", "status": "الحالة", "date": "التاريخ", "total": "الإجمالي",
+    "notes": "ملاحظات", "seeAll": "عرض الكل", "showing": "عرض {count} من {total}",
+    "page": "صفحة {page} من {pages}", "somethingWrong": "حدث خطأ ما.",
+    "saved": "تم الحفظ", "yes": "نعم", "no": "لا", "kg": "كجم", "apply": "تطبيق",
+    "reset": "إعادة تعيين", "select": "اختر", "none": "لا شيء", "actions": "إجراءات",
+    "created": "تاريخ الإنشاء", "updated": "آخر تحديث", "copy": "نسخ", "download": "تنزيل",
+    "rightsReserved": "جميع الحقوق محفوظة.", "madeForWork": "صُمم لتسهيل عملك اليومي.",
+    "more": "المزيد", "menu": "القائمة"
+  },
+  "nav": {
+    "home": "الرئيسية", "offers": "عروض الأسعار", "customers": "العملاء",
+    "products": "الخامات والمنتجات", "import": "استيراد البيانات",
+    "settings": "الإعدادات", "account": "حسابي", "workspace": "مساحة العمل"
+  },
+  "shell": {
+    "searchPlaceholder": "ابحث عن عرض أو عميل…",
+    "needHelp": "تحتاج مساعدة؟", "littleHelp": "تحتاج إلى مساعدة؟",
+    "helpText": "نحن هنا لتسهيل عملك.",
+    "openHelpCenter": "افتح مركز المساعدة", "salesTeam": "فريق المبيعات",
+    "signOut": "تسجيل الخروج", "languageSwitch": "تغيير لغة التطبيق",
+    "skipToContent": "تخطَّ إلى المحتوى", "toggleNavigation": "إظهار القائمة",
+    "helpTitle": "مركز المساعدة",
+    "helpBody": "استخدم مربع البحث للعثور على عرض سعر، أو أنشئ عرضاً جديداً من الصفر."
+  },
+  "auth": {
+    "welcomeBack": "مرحباً بعودتك",
+    "subtitle": "سجّل الدخول لإدارة عروض الأسعار.",
+    "username": "اسم المستخدم", "password": "كلمة المرور", "logIn": "تسجيل الدخول",
+    "forgotPassword": "نسيت كلمة المرور؟", "showPassword": "إظهار",
+    "hidePassword": "إخفاء", "resetTitle": "إعادة تعيين كلمة المرور",
+    "resetText": "أدخل اسم المستخدم وسنرسل لك تعليمات إعادة التعيين.",
+    "sendInstructions": "إرسال التعليمات",
+    "invalidCredentials": "اسم المستخدم أو كلمة المرور غير صحيحة."
+  },
+  "dashboard": {
+    "greeting": "صباح الخير، يوسف",
+    "subtitle": "إليك ملخص عروض الأسعار اليوم.",
+    "offersThisMonth": "عروض هذا الشهر", "moreThanLastMonth": "{count} أكثر من الشهر الماضي",
+    "totalValue": "إجمالي القيمة", "acceptanceRate": "نسبة القبول",
+    "awaitingResponse": "بانتظار الرد", "recentOffers": "أحدث العروض",
+    "createNewOffer": "إنشاء عرض سعر جديد", "quickActions": "إجراءات سريعة",
+    "newQuotation": "عرض سعر جديد", "importProducts": "استيراد المنتجات",
+    "addCustomer": "إضافة عميل"
+  },
+  "offers": {
+    "list": {
+      "title": "عروض الأسعار",
+      "subtitle": "ابحث عن عروض الأسعار وتابعها في مكان واحد.",
+      "reference": "رقم العرض", "customer": "العميل", "issueDate": "تاريخ الإصدار",
+      "total": "الإجمالي (ج.م)", "open": "فتح",
+      "empty": "لا توجد عروض. جرّب البحث مرة أخرى.",
+      "create": "إنشاء عرض سعر جديد", "count": "{count} عرض"
+    },
+    "status": {
+      "draft": "مسودة", "issued": "صادر", "accepted": "مقبول",
+      "rejected": "مرفوض", "all": "الكل"
+    },
+    "builder": {
+      "title": "عرض سعر جديد",
+      "subtitle": "أدخل التفاصيل. يتم تحديث المستند تلقائياً.",
+      "step": "الخطوة {step} من {total}", "saveDraft": "حفظ مسودة",
+      "printExport": "طباعة / تصدير PDF", "saveIssue": "حفظ وإصدار العرض",
+      "pdfLanguage": "لغة المستند:", "draftSaved": "تم حفظ المسودة",
+      "chooseCustomer": "يرجى اختيار العميل", "savedAgo": "تم الحفظ منذ لحظات",
+      "packagingHint": "اختر العميل ثم أضف الخامات والكميات.",
+      "steps": {
+        "basics": "العميل والبيانات الأساسية", "packaging": "الخامات والتعبئة",
+        "taxes": "الضرائب والإجماليات", "delivery": "مواعيد التسليم", "notes": "ملاحظات"
+      }
+    },
+    "details": {
+      "title": "تفاصيل عرض السعر", "viewOriginal": "عرض الأصل",
+      "duplicate": "إنشاء نسخة", "changeStatus": "تغيير الحالة",
+      "downloadPdf": "تنزيل PDF", "print": "طباعة",
+      "notFound": "تعذّر العثور على هذا العرض."
+    }
+  },
+  "customers": {
+    "title": "العملاء",
+    "subtitle": "كل عميل تسعّر له، مع سجلّه في مكان واحد.",
+    "name": "العميل", "contact": "جهة الاتصال", "offers": "العروض",
+    "lastOffer": "آخر عرض", "totalValue": "إجمالي القيمة",
+    "history": "سجل عروض الأسعار", "newCustomer": "عميل جديد",
+    "empty": "لا يوجد عملاء بعد. أضف أول عميل لتبدأ التسعير.",
+    "noHistory": "لا توجد عروض أسعار لهذا العميل بعد."
+  },
+  "products": {
+    "title": "الخامات والمنتجات",
+    "subtitle": "احتفظ بكتالوج الخامات والتعبئة والأسعار جاهزاً للتسعير.",
+    "material": "الخامة", "grade": "الدرجة", "defaultPackaging": "التعبئة الافتراضية",
+    "alternativeSize": "الأحجام البديلة", "pricePerKg": "السعر لكل كجم",
+    "empty": "لا توجد خامات بعد. استورد قائمة أو أضف واحدة يدوياً."
+  },
+  "import": {
+    "title": "استيراد البيانات",
+    "subtitle": "أدخل العملاء والخامات والأسعار إلى مساحة العمل.",
+    "chooseSource": "اختر ما تريد استيراده",
+    "customers": "العملاء", "products": "الخامات والمنتجات", "prices": "قائمة الأسعار",
+    "dropFile": "اسحب ملف Excel أو CSV إلى هنا",
+    "orBrowse": "أو تصفح من جهازك",
+    "start": "بدء الاستيراد", "cancel": "إلغاء الاستيراد"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "subtitle": "بيانات الشركة والتعبئة وكل ما يُطبع على عرض السعر.",
+    "tabs": {
+      "company": "الشركة", "packaging": "أنواع العبوات", "banks": "الحسابات البنكية",
+      "reminders": "التذكيرات", "document": "المستند"
+    },
+    "companyName": "اسم الشركة", "companyAddress": "العنوان",
+    "companyPhone": "الهاتف", "companyEmail": "البريد الإلكتروني",
+    "formCode": "كود النموذج", "logoSize": "حجم الشعار",
+    "logoHint": "يُطبع الشعار بحجم ٥٥ × ٢٥ مم تقريباً على كل عرض سعر.",
+    "bankHint": "جميع الحسابات البنكية المدرجة هنا تظهر على كل عرض سعر.",
+    "packageType": "نوع العبوة", "weightPerPackage": "وزن العبوة (كجم)",
+    "addPackageType": "إضافة نوع عبوة",
+    "remindBeforeExpiry": "ذكّرني قبل انتهاء صلاحية العرض",
+    "remindDays": "ذكّرني قبل الانتهاء بهذا العدد من الأيام",
+    "defaultCurrency": "العملة الافتراضية", "defaultTax": "نسبة الضريبة الافتراضية",
+    "defaultPaymentTerms": "شروط الدفع الافتراضية",
+    "appLanguage": "لغة التطبيق",
+    "pdfLanguage": "لغة المستند (PDF)",
+    "pdfLanguageHint": "لغة المستند مستقلة عن لغة التطبيق.",
+    "saved": "تم حفظ الإعدادات"
+  },
+  "account": {
+    "title": "حسابي وتفضيلاتي",
+    "subtitle": "ملفك الشخصي وتفضيلاتك.",
+    "name": "الاسم بالكامل", "role": "الوظيفة", "email": "البريد الإلكتروني", "phone": "الهاتف",
+    "preferences": "التفضيلات", "largeText": "خط أكبر",
+    "largeTextHint": "زيادة حجم النص في جميع أنحاء مساحة العمل."
+  },
+  "notFound": {
+    "title": "الصفحة غير موجودة",
+    "subtitle": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
+    "backHome": "العودة للرئيسية"
+  }
+}
