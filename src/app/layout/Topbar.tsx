@@ -24,7 +24,7 @@ export default function Topbar({ onOpenMenu, onOpenHelp }: TopbarProps) {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-surface/95 px-4 backdrop-blur lg:px-8">
+    <header className="no-print sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-surface/95 px-4 backdrop-blur lg:px-8">
       <button
         type="button"
         onClick={onOpenMenu}

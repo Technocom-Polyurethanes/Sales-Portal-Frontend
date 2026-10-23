@@ -1,0 +1,54 @@
+/**
+ * Print rules of the quotations workspace.
+ *
+ * The offer document is printed on its own: it lives in a portal outside of
+ * the application, so the whole workspace is hidden and only the document
+ * reaches the printer. The table headers repeat on every page.
+ */
+
+#print-root {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+  }
+
+  /* Only the document reaches the printer. */
+  #root {
+    display: none !important;
+  }
+
+  #print-root {
+    display: block !important;
+  }
+
+  .offer-document {
+    width: 100%;
+    max-width: 180mm;
+  }
+
+  .offer-document thead {
+    display: table-header-group;
+  }
+
+  .offer-document tfoot {
+    display: table-footer-group;
+  }
+
+  .offer-document tr,
+  .offer-document .keep-together,
+  .offer-document .doc-section,
+  .offer-document .doc-totals {
+    break-inside: avoid;
+  }
+}

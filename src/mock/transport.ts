@@ -1,7 +1,14 @@
 import type { ApiRequestOptions, Query, Transport } from "../lib/api/types"
 import { ApiError } from "../lib/api/types"
 import type { Offer, OfferStatus } from "../features/offers/types"
-import { db, findCustomer, findOffer, updateOfferStatus } from "./db"
+import {
+  db,
+  findCustomer,
+  findOffer,
+  nextOfferSequence,
+  offerVersions,
+  updateOfferStatus,
+} from "./db"
 
 const LATENCY_MS = 120
 
@@ -74,6 +81,20 @@ const routes: Route[] = [
             .includes(search)
         return matchesStatus && matchesSearch
       })
+    },
+  },
+  {
+    method: "GET",
+    segments: ["offers", "next-sequence"],
+    handle: () => nextOfferSequence(),
+  },
+  {
+    method: "GET",
+    segments: ["offers", ":id", "versions"],
+    handle: ({ params }) => {
+      const offer = findOffer(params[0])
+      if (!offer) throw new ApiError("Offer not found")
+      return offerVersions(offer.id)
     },
   },
   {

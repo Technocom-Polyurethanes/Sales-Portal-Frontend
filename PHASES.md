@@ -22,13 +22,24 @@ starts.
   bar, login screen, footer, mobile bottom bar.
 - The offers list and the dashboard already run on the mock API.
 
-## Phase 2 — Offers
+## Phase 2 — Offers and the printed document (done)
 
 - Five step offer builder (basics, materials and packaging, taxes and totals,
   delivery schedule, notes) with live calculations.
+- The document preview updates on every field change, in the language of the
+  document.
 - Offer list with filters, search and status handling.
 - Offer details with version history, status changes, duplication and a
   review dialog before issuing.
+- `src/pdf` holds the printed offer: `OfferDocument`, the English and Arabic
+  templates, the section components, the A4 styles and the print rules.
+- The Arabic document is a full mirror of the English one: the container
+  switches to right to left, every block and every table flips, and the
+  packaging names are translated. Only the reference number keeps its own
+  direction.
+- Bank table always visible, optional notes, conditional tax, deduction,
+  advance and balance rows.
+- Print styles with pagination safeguards and repeated table headers.
 
 ## Phase 3 — Customers, products, import, settings, account
 
@@ -39,14 +50,10 @@ starts.
   preferences. Terms and conditions and chairman details stay removed.
 - My account with the application language, the PDF language and text size.
 
-## Phase 4 — PDF document
+## Phase 4 — Document comparison and finishing touches
 
-- `OfferDocument` with the shared A4 layout, Arabic and English templates.
-- The Arabic document mirrors the English structure; only the text changes.
-- Bank table always visible, optional notes, conditional tax, deduction,
-  advance and balance rows.
-- Print styles with pagination safeguards and repeated table headers, plus the
-  side by side Arabic and English comparison view.
+- Side by side Arabic and English comparison view of the same offer.
+- Document preferences (letterhead, signature block options) once confirmed.
 
 ## Phase 5 — Polish and verification
 

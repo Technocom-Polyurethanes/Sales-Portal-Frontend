@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom"
 import { ToastProvider } from "../../components/ui/ToastProvider"
 import { I18nProvider } from "../../i18n/I18nProvider"
 import { PdfLanguageProvider } from "../../pdf/PdfLanguageProvider"
+import { PrintProvider } from "../../pdf/PrintProvider"
 import { SessionProvider } from "../../features/account/SessionProvider"
 
 export type AppProvidersProps = {
@@ -17,7 +18,9 @@ export function AppProviders({ children }: AppProvidersProps) {
       <PdfLanguageProvider>
         <ToastProvider>
           <SessionProvider>
-            <BrowserRouter>{children}</BrowserRouter>
+            <PrintProvider>
+              <BrowserRouter>{children}</BrowserRouter>
+            </PrintProvider>
           </SessionProvider>
         </ToastProvider>
       </PdfLanguageProvider>

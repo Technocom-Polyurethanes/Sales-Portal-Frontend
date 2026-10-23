@@ -14,7 +14,7 @@ export default function PageHeader({
   action,
 }: PageHeaderProps) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="no-print mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
         {eyebrow && (
           <p className="mb-1 text-[11px] font-semibold tracking-widest text-muted uppercase">

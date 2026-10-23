@@ -33,7 +33,7 @@ export default function AppShell() {
 
   return (
     <div className="min-h-screen bg-page">
-      <div className="fixed inset-y-0 start-0 z-40 hidden lg:block">
+      <div className="fixed inset-y-0 start-0 z-40 hidden lg:block no-print">
         <Sidebar onOpenHelp={() => setHelpOpen(true)} />
       </div>
 
@@ -56,7 +56,7 @@ export default function AppShell() {
         </div>
       )}
 
-      <div className="flex min-h-screen flex-col lg:ms-60">
+      <div className="app-shell flex min-h-screen flex-col lg:ms-60">
         <Topbar
           onOpenMenu={() => setMenuOpen(true)}
           onOpenHelp={() => setHelpOpen(true)}

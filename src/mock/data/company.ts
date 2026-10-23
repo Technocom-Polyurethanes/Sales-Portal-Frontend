@@ -26,14 +26,14 @@ export const banks: BankAccount[] = [
 
 export const company: CompanySettings = {
   name: "TECHNOCOM",
-  nameAr: "شركة تكنوكوم للتوكيلات التجارية",
-  tagline: "CHEMICALS · COMMERCIAL AGENCIES",
-  taglineAr: "كيماويات · وكالات تجارية",
-  formCode: "TF-06-01A",
+  nameAr: "شركة تكنوكوم",
+  tagline: "For Commercial Agencies",
+  taglineAr: "للتوكيلات تجارية",
+  formCode: "TF-06-01",
   referencePrefix: "YL",
   address: "Cairo, Egypt",
   phone: "+20 2 2456 7890",
-  email: "sales@technocom.example",
+  email: "sales@technocom.org",
   logoWidthMm: 55,
   logoHeightMm: 25,
 }

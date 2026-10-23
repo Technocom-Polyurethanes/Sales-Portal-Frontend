@@ -13,7 +13,7 @@ export default function BottomNav({ onOpenMore }: BottomNavProps) {
   const { t } = useTranslation()
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-line bg-surface lg:hidden">
+    <nav className="no-print fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-line bg-surface lg:hidden">
       {BOTTOM_NAV_ITEMS.map((item) => (
         <NavLink
           key={item.to}

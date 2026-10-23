@@ -65,3 +65,13 @@ export function weekdayIndex(value: string): number {
   if (!parsed) return 0
   return new Date(parsed.year, parsed.month - 1, parsed.day).getDay()
 }
+
+/** Today as an ISO calendar day in the local time zone. */
+export function todayIso(): string {
+  const now = new Date()
+  return toIsoDate({
+    year: now.getFullYear(),
+    month: now.getMonth() + 1,
+    day: now.getDate(),
+  })
+}

@@ -1,5 +1,11 @@
 import { normalizePercent, roundMoney } from "./round"
 
+/**
+ * The commercial and industrial profit tax is a fixed 1% deduction. The
+ * builder never asks for a name or a rate, it only toggles it on and off.
+ */
+export const OTHER_TAX_PERCENT = 1
+
 export type TotalsInput = {
   /** Sum of every priced line before taxes. */
   subtotal: number

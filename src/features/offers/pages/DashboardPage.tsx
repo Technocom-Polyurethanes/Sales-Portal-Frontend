@@ -127,29 +127,20 @@ export default function DashboardPage() {
     [t, navigate, locale],
   )
 
-  const quickActions = [
-    {
-      label: t("dashboard.newQuotation"),
-      icon: "plus" as const,
-      to: "/offers/new",
-    },
-    {
-      label: t("dashboard.importProducts"),
-      icon: "import" as const,
-      to: "/import",
-    },
-    {
-      label: t("dashboard.addCustomer"),
-      icon: "customers" as const,
-      to: "/customers",
-    },
-  ]
-
   return (
     <>
       <PageHeader
         title={t("dashboard.greeting")}
         subtitle={t("dashboard.subtitle")}
+        action={
+          <Button
+            variant="primary"
+            icon={<Icon name="plus" size={16} />}
+            onClick={() => navigate("/offers/new")}
+          >
+            {t("dashboard.createNewOffer")}
+          </Button>
+        }
       />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -167,58 +158,29 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        <section className="rounded-lg border border-line bg-surface lg:col-span-2">
-          <header className="flex items-center justify-between border-b border-line-soft px-5 py-4">
-            <h2 className="text-base font-semibold text-ink">
-              {t("dashboard.recentOffers")}
-            </h2>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/offers")}
-            >
-              {t("common.seeAll")}
-            </Button>
-          </header>
+      <section className="mt-6 rounded-lg border border-line bg-surface">
+        <header className="flex items-center justify-between border-b border-line-soft px-5 py-4">
+          <h2 className="text-base font-semibold text-ink">
+            {t("dashboard.recentOffers")}
+          </h2>
+          <Button variant="ghost" size="sm" onClick={() => navigate("/offers")}>
+            {t("common.seeAll")}
+          </Button>
+        </header>
 
-          {loading ? (
-            <div className="flex justify-center py-16">
-              <Spinner size={26} />
-            </div>
-          ) : (
-            <DataTable
-              columns={columns}
-              rows={(offers ?? []).slice(0, 5)}
-              rowKey={(offer) => offer.id}
-              onRowClick={(offer) => navigate(`/offers/${offer.id}`)}
-            />
-          )}
-        </section>
-
-        <section className="rounded-lg border border-line bg-surface">
-          <header className="border-b border-line-soft px-5 py-4">
-            <h2 className="text-base font-semibold text-ink">
-              {t("dashboard.quickActions")}
-            </h2>
-          </header>
-          <div className="flex flex-col gap-2 p-4">
-            {quickActions.map((action) => (
-              <button
-                key={action.to}
-                type="button"
-                onClick={() => navigate(action.to)}
-                className="flex items-center gap-3 rounded-md border border-line px-3 py-3 text-sm text-ink transition-colors hover:border-primary hover:bg-primary-soft"
-              >
-                <span className="text-primary">
-                  <Icon name={action.icon} size={18} />
-                </span>
-                {action.label}
-              </button>
-            ))}
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <Spinner size={26} />
           </div>
-        </section>
-      </div>
+        ) : (
+          <DataTable
+            columns={columns}
+            rows={(offers ?? []).slice(0, 5)}
+            rowKey={(offer) => offer.id}
+            onRowClick={(offer) => navigate(`/offers/${offer.id}`)}
+          />
+        )}
+      </section>
     </>
   )
 }

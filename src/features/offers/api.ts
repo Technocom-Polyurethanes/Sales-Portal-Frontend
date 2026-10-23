@@ -22,4 +22,12 @@ export const offersApi = {
   setStatus(id: string, status: OfferStatus): Promise<Offer> {
     return api.patch<Offer>(`/offers/${id}/status`, { status })
   },
+  /** The sequence number the next issued offer will use. */
+  nextSequence(): Promise<number> {
+    return api.get<number>("/offers/next-sequence")
+  },
+  /** The offer and every version created from it, oldest first. */
+  versions(id: string): Promise<Offer[]> {
+    return api.get<Offer[]>(`/offers/${id}/versions`)
+  },
 }

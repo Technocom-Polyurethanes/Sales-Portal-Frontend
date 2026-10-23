@@ -1,3 +1,4 @@
+import { formatCurrencyLabel } from "./currency"
 import type { Locale } from "./locale"
 
 const LOCALE_FORMATTERS: Record<Locale, Intl.NumberFormat> = {
@@ -28,13 +29,13 @@ export function formatCompactNumber(
   )
 }
 
-/** Formats a monetary amount with the currency code appended. */
+/** Formats a monetary amount with the currency label appended. */
 export function formatCurrency(
   value: number,
   currency: string,
   locale: Locale = "en-US",
 ): string {
-  return `${formatNumber(value, locale)} ${currency}`
+  return `${formatNumber(value, locale)} ${formatCurrencyLabel(currency, locale)}`
 }
 
 /** Formats a weight in kilograms. */

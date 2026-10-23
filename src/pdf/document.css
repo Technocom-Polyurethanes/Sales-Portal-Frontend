@@ -1,0 +1,355 @@
+/**
+ * Styles of the printed offer.
+ *
+ * The Arabic document is a full mirror of the English one: the container
+ * switches to right to left, every block flips and the tables follow the
+ * reading direction. Only the reference number stays left to right.
+ *
+ * Sizes are in millimetres and points so the preview and the printed page
+ * match exactly.
+ */
+
+.offer-document {
+  --doc-ink: #1f2933;
+  --doc-muted: #5b6670;
+  --doc-line: #ddd8d0;
+  --doc-primary: #1f4e79;
+  --doc-deduction: #984c3f;
+
+  width: 180mm;
+  box-sizing: border-box;
+  background: #fff;
+  color: var(--doc-ink);
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  font-size: 9pt;
+  line-height: 1.5;
+}
+
+.offer-document[dir="rtl"] {
+  font-family: "Cairo", ui-sans-serif, system-ui, sans-serif;
+}
+
+.offer-document .doc-ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* Header ------------------------------------------------------------------ */
+
+.offer-document .doc-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10mm;
+  min-height: 25mm;
+  padding-bottom: 4mm;
+  border-bottom: 1.5pt solid var(--doc-primary);
+}
+
+.offer-document .doc-logo {
+  display: flex;
+  width: 55mm;
+  height: 25mm;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.5mm;
+}
+
+.offer-document .doc-wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1mm;
+  font-size: 26pt;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1;
+  color: var(--doc-primary);
+}
+
+.offer-document .doc-wordmark-ar {
+  font-size: 14pt;
+  letter-spacing: 0;
+}
+
+.offer-document .doc-wordmark span {
+  display: inline-block;
+  width: 2mm;
+  height: 2mm;
+  border-radius: 50%;
+  background: #ad8957;
+}
+
+.offer-document .doc-tagline {
+  font-size: 7pt;
+  letter-spacing: 0.6pt;
+  text-transform: uppercase;
+  color: var(--doc-muted);
+}
+
+.offer-document .doc-form-code {
+  padding: 2mm 3mm;
+  border: 1px solid #6b7378;
+  font-size: 12pt;
+  font-weight: 700;
+  letter-spacing: 0.6pt;
+  white-space: nowrap;
+}
+
+.offer-document .doc-title {
+  margin: 6mm 0 5mm;
+  font-size: 16pt;
+  font-weight: 700;
+  letter-spacing: 0.4pt;
+  text-align: center;
+}
+
+/* Bill to and reference --------------------------------------------------- */
+
+.offer-document .doc-top {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: 28px;
+  margin-bottom: 6mm;
+}
+
+.offer-document .doc-block-title {
+  margin-bottom: 1.5mm;
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.5pt;
+  text-transform: uppercase;
+  color: var(--doc-primary);
+}
+
+.offer-document .doc-bill-to strong {
+  display: block;
+  font-size: 10pt;
+  line-height: 1.4;
+}
+
+.offer-document .doc-bill-to p {
+  font-size: 8.5pt;
+  color: var(--doc-muted);
+  line-height: 1.6;
+}
+
+.offer-document .doc-reference {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 8.5pt;
+}
+
+.offer-document .doc-reference th {
+  width: 38%;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  background: #f1f5f9;
+  text-align: start;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.offer-document .doc-reference td {
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #1e293b;
+}
+
+/* Tables ------------------------------------------------------------------ */
+
+.offer-document .doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 8.5pt;
+}
+
+.offer-document .doc-table th {
+  padding: 6px 8px;
+  border: 1px solid #cbd5e1;
+  background: #f1f5f9;
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 0.3pt;
+  text-transform: uppercase;
+  text-align: start;
+  color: #1e293b;
+}
+
+.offer-document .doc-table td {
+  padding: 6px 8px;
+  border: 1px solid #cbd5e1;
+  vertical-align: top;
+}
+
+.offer-document .doc-table .doc-num {
+  text-align: end;
+  white-space: nowrap;
+}
+
+.offer-document .doc-table .doc-index {
+  width: 8mm;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.offer-document .doc-table .doc-total-row th {
+  text-align: start;
+}
+
+.offer-document .doc-table .doc-total-row th,
+.offer-document .doc-table .doc-total-row td {
+  background: #f1f5f9;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.offer-document .doc-item-name {
+  font-weight: 600;
+}
+
+.offer-document .doc-item-meta {
+  margin-top: 0.8mm;
+  font-size: 7.5pt;
+  color: var(--doc-muted);
+}
+
+.offer-document .doc-subrow td {
+  padding: 4px 8px;
+  background: #f8fafc;
+  font-size: 7.5pt;
+  color: var(--doc-ink);
+}
+
+.offer-document .doc-subrow .doc-subrow-label {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.offer-document .doc-schedule th,
+.offer-document .doc-schedule td {
+  padding: 4px 6px;
+  font-size: 7.5pt;
+}
+
+.offer-document .doc-banks th,
+.offer-document .doc-banks td {
+  padding: 4px 6px;
+  font-size: 7.5pt;
+}
+
+.offer-document .doc-wrap {
+  overflow-wrap: anywhere;
+}
+
+/* Totals ------------------------------------------------------------------ */
+
+.offer-document .doc-totals {
+  width: 48%;
+  margin-block: 17px 22px;
+  margin-inline-start: auto;
+  margin-inline-end: 0;
+  border-collapse: collapse;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 8.5pt;
+}
+
+.offer-document .doc-totals th {
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  background: #f1f5f9;
+  text-align: start;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.offer-document .doc-totals td {
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  text-align: end;
+  white-space: nowrap;
+  color: #1e293b;
+}
+
+.offer-document .doc-totals .doc-deduction th,
+.offer-document .doc-totals .doc-deduction td {
+  color: var(--doc-deduction);
+}
+
+.offer-document .doc-totals .doc-grand th,
+.offer-document .doc-totals .doc-grand td {
+  background: #f1f5f9;
+  color: #1e293b;
+  font-size: 10pt;
+  font-weight: 700;
+}
+
+/* Sections ---------------------------------------------------------------- */
+
+.offer-document .doc-section {
+  margin-top: 6mm;
+  break-inside: avoid;
+}
+
+.offer-document .doc-section h3 {
+  margin-bottom: 2mm;
+  font-size: 9pt;
+  font-weight: 700;
+  letter-spacing: 0.4pt;
+  text-transform: uppercase;
+  color: var(--doc-primary);
+}
+
+.offer-document .doc-notes p {
+  font-size: 8.5pt;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.offer-document .doc-footer {
+  margin-top: 8mm;
+  padding-top: 3mm;
+  border-top: 0.5pt solid var(--doc-line);
+  font-size: 7.5pt;
+  text-align: center;
+  color: var(--doc-muted);
+}
+
+/* Preview ----------------------------------------------------------------- */
+
+/*
+ * The preview shows a real A4 sheet: 210mm wide, 297mm tall, with the same
+ * 15mm margins as the printed page. The whole sheet is scaled down to fit
+ * the panel, never the document alone.
+ */
+
+.offer-preview {
+  background: #e8e5e0;
+  padding: 16px;
+}
+
+.offer-preview__frame {
+  position: relative;
+  overflow: hidden;
+  margin-inline: auto;
+  background: #fff;
+  box-shadow: 0 2px 14px rgb(31 41 51 / 18%);
+}
+
+.offer-preview__page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 210mm;
+  min-height: 297mm;
+  padding: 15mm;
+  box-sizing: border-box;
+  background: #fff;
+  transform-origin: top left;
+}

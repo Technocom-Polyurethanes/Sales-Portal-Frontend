@@ -27,12 +27,24 @@ path is missing, or when the repository contradicts this guide.
 - `src/components/ui/` - shared UI: buttons, inputs, selects, textareas, fields, tables, dialogs, badges, toasts, toggle, stepper, spinner, icons
 - `src/features/` - one folder per business area
   - `src/features/offers/` - offer builder, list, details, hooks, api
+    - `src/features/offers/calculations.ts` - pure maths of a draft (line amounts, totals, reference, due date, scheduled packages)
+    - `src/features/offers/draft.ts` - draft creation and draft to offer conversion
+    - `src/features/offers/document.ts` - maps an offer to the data of the printed document
   - `src/features/customers/` - customer directory and history
   - `src/features/products/` - materials and products catalogue
   - `src/features/import/` - data import flow
   - `src/features/settings/` - company, packaging types, bank accounts, reminders
   - `src/features/account/` - profile, preferences, session
-- `src/pdf/` - `OfferDocument`, Arabic and English templates, print styles, PDF language provider
+- `src/pdf/` - the printed offer
+  - `src/pdf/OfferDocument.tsx` - the document, mirrors itself in Arabic
+  - `src/pdf/OfferDocumentPreview.tsx` - scaled preview used by the builder and the details page
+  - `src/pdf/sections/` - one component per block of the document
+  - `src/pdf/templates/` - English and Arabic document strings
+  - `src/pdf/document.css` - A4 layout of the document
+  - `src/pdf/print.css` - `@page` rules, repeated table headers, hidden app chrome
+  - `src/pdf/PrintProvider.tsx` - prints the document on its own, in a portal outside the application
+  - `src/pdf/format.ts` - document formatting (numbers, dates, packaging summary, category names)
+  - `src/pdf/PdfLanguageProvider.tsx` - the document language setting
 - `src/lib/` - business logic
   - `src/lib/calculations/` - packaging, tax, other tax subtraction, due date, reference number (with unit tests)
   - `src/lib/formatters/` - number, currency and date formatting
@@ -74,9 +86,22 @@ path is missing, or when the repository contradicts this guide.
   `src/lib/calculations/tax.ts`.
 - **Due date**: the issue date shifted by the payment term. See
   `src/lib/calculations/dueDate.ts`.
+- **Page size**: the printed area of an A4 page with 15mm margins, so the
+  document is 180mm wide. The preview shows a real 210 × 297mm sheet with the
+  same margins, and scales the whole sheet to fit the panel. Never scale the
+  document on its own, the white sheet and the document have to stay together.
 - **Languages**: the application language and the PDF language are two separate
-  settings. The Arabic document keeps the same layout as the English one; only
-  the text changes.
+  settings. The Arabic document is a full mirror of the English one: the
+  container switches to `dir="rtl"`, every block and every table flips, and
+  the packaging names are translated. Only the reference number keeps its own
+  direction. Use logical CSS properties in `src/pdf/document.css` so the
+  mirroring is automatic, and isolate the Latin values with the `doc-ltr`
+  class instead of putting `direction: ltr` on a table cell, which would
+  also flip the meaning of `text-align: end`.
+- **Printing**: never call `window.print()` from a page, it would print the
+  whole workspace. Use `usePrintOffer()` from `src/pdf/PrintProvider.tsx`, it
+  renders the document in a portal outside of the application so that only the
+  document reaches the printer.
 
 ## API layer
 
@@ -84,6 +109,22 @@ Feature modules never import the mock data directly. They call their own
 `api.ts` module, which uses the shared client in `src/lib/api`. The mock
 transport in `src/mock` is registered once in `src/app/App.tsx`; a backend
 replaces that single registration with an HTTP transport.
+
+The backend already exists in `../backend` (ASP.NET Core 8, EF Core,
+PostgreSQL). Its answers use the same field names as the mock, the material
+id is exposed as `productId` and the printed number as `reference`, so the
+HTTP transport can replace the mock one without touching a feature module.
+See `../backend/README.md` for the endpoints, the data model and the money
+rules.
+
+Routes served by the mock transport:
+
+- `GET /offers` - list, filter and search the offers
+- `GET /offers/:id` - one offer
+- `POST /offers` - create an offer
+- `PATCH /offers/:id` - update the status of an offer
+- `GET /offers/next-sequence` - the next reference sequence
+- `GET /offers/:id/versions` - the version chain of an offer
 
 ## Styling
 
