@@ -61,6 +61,7 @@ export function createEmptyDraft(
   return {
     reference: "",
     customerId: "",
+    attention: "",
     issueDate: todayIso(),
     currency: "EGP",
     paymentTermId: "bank-transfer-purchase-order",
@@ -109,6 +110,7 @@ export function draftToOffer(
     reference: calculations.reference,
     customerId: draft.customerId,
     customerName: customer?.name ?? "",
+    attention: draft.attention.trim(),
     issueDate: draft.issueDate,
     dueDate: calculations.dueDate,
     currency: draft.currency,
@@ -142,6 +144,7 @@ export function offerToDraft(offer: Offer): OfferDraft {
   return {
     reference: offer.reference,
     customerId: offer.customerId,
+    attention: offer.attention ?? "",
     issueDate: offer.issueDate,
     currency: offer.currency,
     paymentTermId: offer.paymentTermId,

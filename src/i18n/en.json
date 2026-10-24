@@ -153,6 +153,9 @@
         "referenceHint": "The reference is entered by hand",
         "referenceInputHint": "Type the offer number exactly as it should be printed.",
         "referencePreview": "{date} → {reference} · due {dueDate}",
+        "attention": "Attention (Contact Person)",
+        "attentionHint": "This name is printed on the offer and can be edited per offer.",
+        "attentionPlaceholder": "Enter contact person name...",
         "dueDate": "Due date"
       },
       "packaging": {

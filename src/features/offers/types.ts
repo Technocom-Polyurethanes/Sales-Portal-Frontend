@@ -43,6 +43,8 @@ export type OfferDraft = {
   /** Typed by the user, printed verbatim on the document. */
   reference: string
   customerId: string
+  /** Contact person printed in the "Attention" line, editable per offer. */
+  attention: string
   issueDate: string
   currency: string
   paymentTermId: string
@@ -76,6 +78,8 @@ export type Offer = {
   reference: string
   customerId: string
   customerName: string
+  /** Contact person printed in the "Attention" line of the document. */
+  attention: string
   issueDate: string
   dueDate: string
   currency: string

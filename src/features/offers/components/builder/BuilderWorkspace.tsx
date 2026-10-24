@@ -49,6 +49,7 @@ export default function BuilderWorkspace({
   const controller = useOfferBuilder({
     sequence: catalog.sequence,
     packageTypes: catalog.packageTypes,
+    customers: catalog.customers,
     initialDraft:
       initialDraft ??
       createEmptyDraft({ documentLanguage: defaultDocumentLanguage }),
@@ -70,6 +71,7 @@ export default function BuilderWorkspace({
           currency: draft.currency,
           paymentTermId: draft.paymentTermId,
           customerId: draft.customerId,
+          attention: draft.attention,
           lines: draft.lines.map((line, index) => ({
             productId: line.productId,
             materialName: line.materialName,

@@ -25,6 +25,8 @@ export type DocumentSource = {
   currency: string
   paymentTermId: string
   customerId: string
+  /** Contact person printed in the "Attention" line, empty hides it. */
+  attention: string
   lines: {
     productId: string
     materialName: string
@@ -127,7 +129,7 @@ export function buildDocumentData(
     formCode: options.company.formCode,
     customerName: options.customer?.name ?? "",
     customerAddress: options.customer?.address ?? "",
-    attention: options.customer?.contactPerson ?? "",
+    attention: source.attention.trim(),
     reference: source.reference,
     issueDate: source.issueDate,
     dueDate: source.dueDate,
@@ -215,5 +217,6 @@ export function offerToDocumentSource(offer: Offer): DocumentSource {
     total: offer.totals.total,
     delivery: offer.delivery,
     notes: offer.notes,
+    attention: offer.attention ?? "",
   }
 }

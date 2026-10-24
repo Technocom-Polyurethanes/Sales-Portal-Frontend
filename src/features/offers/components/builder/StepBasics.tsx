@@ -75,6 +75,21 @@ export default function StepBasics({
         </Select>
       </Field>
 
+      <div className="sm:col-span-2">
+        <Field
+          label={t("offers.builder.basics.attention")}
+          htmlFor="offer-attention"
+          hint={t("offers.builder.basics.attentionHint")}
+        >
+          <Input
+            id="offer-attention"
+            value={draft.attention}
+            placeholder={t("offers.builder.basics.attentionPlaceholder")}
+            onChange={(event) => onChange({ attention: event.target.value })}
+          />
+        </Field>
+      </div>
+
       <Field
         label={t("offers.builder.basics.paymentTerm")}
         htmlFor="offer-term"

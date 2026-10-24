@@ -32,6 +32,7 @@ const data: OfferDocumentData = {
   delivery: [],
   banks: [],
   notes: "",
+
 }
 
 function PrintButton() {

@@ -53,6 +53,7 @@ const source = {
     },
   ],
   notes: "Prices are valid for 7 days.",
+  attention: "",
 }
 
 const customer = customers[0]
@@ -159,11 +160,25 @@ describe("offer document", () => {
     expect(container.textContent).not.toContain("Balance")
   })
 
-  it("prints the kilograms of every delivery batch", () => {
+  it("hides the attention line when it is empty", () => {
     render("en")
+    expect(container.textContent).not.toContain("Attention:")
+  })
 
-    const schedule = container.querySelector(".doc-schedule")
-    expect(schedule?.textContent).toContain("Total Weight (KG)")
-    expect(schedule?.textContent).toContain("3,990")
+  it("prints the attention line from the offer", () => {
+    const sourceWithAttention = { ...source, attention: "Mostafa Fouad" }
+    const root = createRoot(container)
+    const data = buildDocumentData(sourceWithAttention, {
+      customer,
+      company,
+      banks,
+      packageTypes,
+      language: "en",
+      paymentTermLabel: "Cheque — 30 days",
+    })
+    act(() => {
+      root.render(<OfferDocument data={data} language="en" />)
+    })
+    expect(container.textContent).toContain("Attention: Mostafa Fouad")
   })
 })

@@ -4,6 +4,7 @@ import { referenceNumber } from "../../../lib/calculations/reference"
 import { OTHER_TAX_PERCENT } from "../../../lib/calculations/tax"
 import type { PackagingLine } from "../../../lib/calculations/packaging"
 import type { Product } from "../../products/types"
+import type { Customer } from "../../customers/types"
 import type { PackageType } from "../../settings/types"
 import {
   calculateDraft,
@@ -44,6 +45,7 @@ export type UseOfferBuilderOptions = {
   initialDraft?: OfferDraft
   sequence: number
   packageTypes: PackageType[]
+  customers: Customer[]
 }
 
 /** State of the five step offer builder. */
@@ -51,6 +53,7 @@ export function useOfferBuilder({
   initialDraft,
   sequence,
   packageTypes,
+  customers,
 }: UseOfferBuilderOptions): OfferBuilderController {
   const [draft, setDraftState] = useState<OfferDraft>(() => {
     const base = initialDraft ?? createEmptyDraft()
@@ -66,9 +69,38 @@ export function useOfferBuilder({
   })
   const [step, setStep] = useState(0)
 
-  const setDraft = useCallback((patch: Partial<OfferDraft>) => {
-    setDraftState((current) => ({ ...current, ...patch }))
-  }, [])
+  const setDraft = useCallback(
+    (patch: Partial<OfferDraft>) => {
+      setDraftState((current) => {
+        const next = { ...current, ...patch }
+
+        // Selecting a customer prefills the attention with the contact person
+        // of the customer record, unless the user already typed their own.
+        if (
+          patch.attention === undefined &&
+          patch.customerId &&
+          patch.customerId !== current.customerId
+        ) {
+          const previous = customers.find(
+            (item) => item.id === current.customerId,
+          )
+          const untouched =
+            current.attention.trim() === "" ||
+            current.attention.trim() === previous?.contactPerson.trim()
+
+          if (untouched) {
+            const selected = customers.find(
+              (item) => item.id === patch.customerId,
+            )
+            next.attention = selected?.contactPerson ?? ""
+          }
+        }
+
+        return next
+      })
+    },
+    [customers],
+  )
 
   const calculations = useMemo(() => calculateDraft(draft), [draft])
 

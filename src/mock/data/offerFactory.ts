@@ -137,6 +137,7 @@ export function buildOffer(spec: OfferSpec): Offer {
     notes: spec.notes ?? "",
     status: spec.status,
     version: spec.version,
+    attention: customer.contactPerson ?? "",
     totals,
     documentLanguage: spec.documentLanguage ?? "en",
     createdAt: spec.issueDate,
