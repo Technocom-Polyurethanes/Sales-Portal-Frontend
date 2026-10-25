@@ -71,6 +71,7 @@ export default function StepBasics({
               customerId: customer.id,
               attention: customer.contactPerson ?? "",
               taxId: customer.taxId ?? "",
+              paymentTermId: customer.paymentTermId ?? draft.paymentTermId,
             })
             setOpen(false)
           }}
