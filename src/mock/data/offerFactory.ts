@@ -93,12 +93,26 @@ function buildLines(specs: LineSpec[]): OfferLine[] {
 function buildDelivery(
   issueDate: string,
   batches: DeliverySpec[] | undefined,
+  lines?: OfferLine[],
 ): DeliveryBatch[] {
   return (batches ?? []).map((batch, index) => ({
     id: `batch-${index + 1}`,
     batchNumber: index + 1,
     date: batch.date,
-    allocations: batch.allocations,
+    allocations: batch.allocations.map((allocation) => {
+      if (allocation.packagingRowId) return allocation
+      const line = lines?.find((l) => l.productId === allocation.productId)
+      if (!line) return allocation
+      const row = line.packaging.find((r, i) => i === (allocation as any).rowIndex || !allocation.packagingRowId) ?? line.packaging[0]
+      if (!row) return allocation
+      return {
+        ...allocation,
+        packagingRowId: row.id,
+        packageTypeId: row.packageTypeId,
+        packageTypeName: row.packageTypeName,
+        weightPerPackageKg: row.weightPerPackageKg,
+      }
+    }),
   }))
 }
 
@@ -117,6 +131,8 @@ export function buildOffer(spec: OfferSpec): Offer {
     orderDiscountPercent: 0,
   })
 
+  const delivery = buildDelivery(spec.issueDate, spec.delivery, lines)
+
   return {
     id: `offer-${spec.sequence}`,
     reference: referenceNumber(spec.sequence, spec.issueDate),
@@ -127,7 +143,7 @@ export function buildOffer(spec: OfferSpec): Offer {
     currency: "EGP",
     paymentTermId: customer.paymentTermId,
     lines,
-    delivery: buildDelivery(spec.issueDate, spec.delivery),
+    delivery,
     taxPercent: spec.taxPercent ?? 14,
     otherTaxEnabled: spec.otherTaxEnabled ?? false,
     otherTaxName: "Other tax",

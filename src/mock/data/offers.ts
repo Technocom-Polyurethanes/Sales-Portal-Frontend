@@ -32,15 +32,15 @@ const specs: OfferSpec[] = [
       {
         date: "2026-10-25",
         allocations: [
-          { productId: "prod-1", packages: 10 },
-          { productId: "prod-2", packages: 8 },
+          { productId: "prod-1", packages: 10 } as any,
+          { productId: "prod-2", packages: 8 } as any,
         ],
       },
       {
         date: "2026-11-05",
         allocations: [
-          { productId: "prod-1", packages: 9 },
-          { productId: "prod-2", packages: 6 },
+          { productId: "prod-1", packages: 9 } as any,
+          { productId: "prod-2", packages: 6 } as any,
         ],
       },
     ],
