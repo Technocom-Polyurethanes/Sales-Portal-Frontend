@@ -6,6 +6,7 @@ import {
   formatDocumentDate,
   formatDocumentNumber,
   formatDocumentWeekday,
+  translateCategory,
 } from "./format"
 import type { DocumentLanguage } from "./PdfLanguageProvider"
 import BankAccountsTable from "./sections/BankAccountsTable"
@@ -92,14 +93,24 @@ function buildTotalsRows(
   return rows
 }
 
-function deliveryColumns(data: OfferDocumentData): string[] {
-  const columns: string[] = []
+function deliveryColumns(data: OfferDocumentData, language: DocumentLanguage): Array<{ key: string; label: string }> {
+  const map = new Map<string, string>()
+  for (const line of data.lines) {
+    const key = line.productId ?? line.name
+    if (!key) continue
+    const label = `${translateCategory(line.category, language)} — ${line.name}`
+    if (!map.has(key)) map.set(key, label)
+  }
   for (const batch of data.delivery) {
     for (const allocation of batch.allocations) {
-      if (!columns.includes(allocation.label)) columns.push(allocation.label)
+      const key = allocation.productId ?? allocation.label
+      if (!key) continue
+      if (!map.has(key)) {
+        map.set(key, allocation.label)
+      }
     }
   }
-  return columns
+  return Array.from(map.entries()).map(([key, label]) => ({ key, label }))
 }
 
 /**
@@ -111,7 +122,7 @@ export default function OfferDocument({ data, language }: OfferDocumentProps) {
   const arabic = language === "ar"
   const referenceRows = buildReferenceRows(data, template)
   const totalsRows = buildTotalsRows(data, template, language)
-  const columns = deliveryColumns(data)
+  const columns = deliveryColumns(data, language)
   const currency = formatDocumentCurrency(data.currency, language)
   const weightUnit = arabic ? "كجم" : "kg"
 

@@ -11,7 +11,7 @@ export type DeliveryScheduleTableProps = {
     total: string
   }
   batches: OfferDocumentBatch[]
-  columns: string[]
+  columns: Array<string | { key: string; label: string }>
   weightUnit: string
   formatDate: (value: string) => string
   formatNumber: (value: number) => string
@@ -46,15 +46,10 @@ export default function DeliveryScheduleTable({
           <tr>
             <th scope="col">{headings.deliveryDate}</th>
             {columns.map((column) => {
-              const line = source?.lines.find((l) => (language === "ar" ? l.category === column : l.name.includes(column) || column.includes(l.category)))
-              const header = source?.lines.find((l) => l.category === column) ?? source?.lines.find((l) => l.name === column)
-              const label = header
-                ? language === "ar"
-                  ? `${header.category} — ${header.name}`
-                  : `${header.category} — ${header.name}`
-                : column
+              const label = typeof column === "string" ? column : column.label
+              const key = typeof column === "string" ? column : column.key
               return (
-                <th scope="col" key={column} className="doc-num">
+                <th scope="col" key={key} className="doc-num">
                   {label}
                 </th>
               )
@@ -88,20 +83,23 @@ export default function DeliveryScheduleTable({
                 )}
               </td>
               {columns.map((column) => {
+                const label = typeof column === "string" ? column : column.label
+                const key = typeof column === "string" ? column : column.key
                 const allocations = batch.allocations.filter(
-                  (item) => item.label === column && item.packages > 0,
+                  (item) => (item.productId === key) || (item.label === label && !item.productId),
                 )
-                if (allocations.length === 0) {
+                const filtered = allocations.filter((item) => item.packages > 0)
+                if (filtered.length === 0) {
                   return (
-                    <td key={column} className="doc-num">
+                    <td key={key} className="doc-num">
                       —
                     </td>
                   )
                 }
-                const totalKg = allocations.reduce((sum, item) => sum + item.weightKg, 0)
+                const totalKg = filtered.reduce((sum, item) => sum + item.weightKg, 0)
                 return (
-                  <td key={column} className="doc-num">
-                    {allocations.map((allocation, idx) => (
+                  <td key={key} className="doc-num">
+                    {filtered.map((allocation, idx) => (
                       <div key={idx}>
                         {allocation.packages} {allocation.packageTypeName || ""}
                       </div>
@@ -133,19 +131,21 @@ export default function DeliveryScheduleTable({
           <tr className="doc-total-row">
             <th scope="row">{headings.total}</th>
             {columns.map((column) => {
+              const label = typeof column === "string" ? column : column.label
+              const key = typeof column === "string" ? column : column.key
               const columnEntries = new Map<string, number>()
               let columnWeight = 0
               for (const batch of batches) {
                 for (const allocation of batch.allocations) {
-                  if (allocation.label === column && allocation.packages > 0) {
-                    const key = allocation.packageTypeName || ""
-                    columnEntries.set(key, (columnEntries.get(key) ?? 0) + allocation.packages)
+                  if (((allocation.productId && allocation.productId === key) || (allocation.label === label && !allocation.productId)) && allocation.packages > 0) {
+                    const typeKey = allocation.packageTypeName || ""
+                    columnEntries.set(typeKey, (columnEntries.get(typeKey) ?? 0) + allocation.packages)
                     columnWeight += allocation.weightKg
                   }
                 }
               }
               return (
-                <td key={column} className="doc-num">
+                <td key={key} className="doc-num">
                   {columnEntries.size > 0 ? (
                     <>
                       {Array.from(columnEntries.entries()).map(([type, count]) => (

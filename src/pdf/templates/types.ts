@@ -37,6 +37,7 @@ export type OfferTemplate = {
 
 /** Everything the document needs, already calculated by the feature layer. */
 export type OfferDocumentLine = {
+  productId?: string
   name: string
   code: string
   category: string
@@ -48,6 +49,8 @@ export type OfferDocumentLine = {
 
 export type OfferDocumentAllocation = {
   label: string
+  productId?: string
+  materialName?: string
   packages: number
   weightKg: number
   packageTypeName?: string
