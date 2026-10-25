@@ -10,6 +10,12 @@
   display: none;
 }
 
+.offer-document,
+.offer-document * {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
 @media print {
   @page {
     size: A4 portrait;

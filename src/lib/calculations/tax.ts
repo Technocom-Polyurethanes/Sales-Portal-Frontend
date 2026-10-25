@@ -34,6 +34,7 @@ export type Totals = {
   /** Order level discount amount. */
   orderDiscount: number
   extraExpenses: number
+  netBeforeTax?: number
   total: number
   advancePayment: number
   balanceDue: number
@@ -71,12 +72,11 @@ export function calculateTotals(input: TotalsInput): Totals {
   const extraExpenses = roundMoney(input.extraExpenses ?? 0)
   const advancePayment = roundMoney(input.advancePayment ?? 0)
 
-  const taxAmount = calculateTax(subtotal, taxPercent)
-  const otherTaxAmount = calculateOtherTax(subtotal, otherTaxPercent)
+  const netBeforeTax = roundMoney(subtotal - orderDiscount + extraExpenses)
+  const taxAmount = calculateTax(netBeforeTax, taxPercent)
+  const otherTaxAmount = calculateOtherTax(netBeforeTax, otherTaxPercent)
 
-  const total = roundMoney(
-    subtotal - orderDiscount + extraExpenses + taxAmount - otherTaxAmount,
-  )
+  const total = roundMoney(netBeforeTax + taxAmount - otherTaxAmount)
 
   return {
     subtotal,
@@ -87,6 +87,7 @@ export function calculateTotals(input: TotalsInput): Totals {
     orderDiscountPercent,
     orderDiscount,
     extraExpenses,
+    netBeforeTax,
     total,
     advancePayment,
     balanceDue: roundMoney(total - advancePayment),

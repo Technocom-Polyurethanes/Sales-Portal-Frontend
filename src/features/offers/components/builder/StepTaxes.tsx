@@ -1,6 +1,6 @@
 import Field from "../../../../components/ui/Field"
-import Input from "../../../../components/ui/Input"
 import Toggle from "../../../../components/ui/Toggle"
+import DecimalInput from "../../../../components/ui/DecimalInput"
 import { useTranslation } from "../../../../i18n/I18nProvider"
 import { OTHER_TAX_PERCENT } from "../../../../lib/calculations/tax"
 import type { Totals } from "../../../../lib/calculations/tax"
@@ -26,22 +26,11 @@ export default function StepTaxes({ draft, totals, onChange }: StepTaxesProps) {
             hint={t("offers.builder.taxes.taxHint")}
             htmlFor="offer-tax"
           >
-            <Input
+            <DecimalInput
               id="offer-tax"
-              type="text"
-              inputMode="decimal"
-              value={draft.taxPercent === 0 ? "" : String(draft.taxPercent)}
-              onChange={(event) => {
-                const value = event.target.value.replace(/[^0-9.]/g, "")
-                if (value === "" || value === ".") {
-                  onChange({ taxPercent: 0 })
-                  return
-                }
-                const parsed = Number(value)
-                if (!Number.isNaN(parsed)) {
-                  onChange({ taxPercent: Math.min(Math.max(parsed, 0), 100) })
-                }
-              }}
+              value={draft.taxPercent}
+              max={100}
+              onValueChange={(taxPercent) => onChange({ taxPercent })}
             />
           </Field>
 
@@ -49,22 +38,11 @@ export default function StepTaxes({ draft, totals, onChange }: StepTaxesProps) {
             label={`${t("offers.builder.taxes.orderDiscount")} (%)`}
             htmlFor="offer-discount"
           >
-            <Input
+            <DecimalInput
               id="offer-discount"
-              type="text"
-              inputMode="decimal"
-              value={draft.orderDiscountPercent === 0 ? "" : String(draft.orderDiscountPercent)}
-              onChange={(event) => {
-                const value = event.target.value.replace(/[^0-9.]/g, "")
-                if (value === "" || value === ".") {
-                  onChange({ orderDiscountPercent: 0 })
-                  return
-                }
-                const parsed = Number(value)
-                if (!Number.isNaN(parsed)) {
-                  onChange({ orderDiscountPercent: Math.min(Math.max(parsed, 0), 100) })
-                }
-              }}
+              value={draft.orderDiscountPercent}
+              max={100}
+              onValueChange={(orderDiscountPercent) => onChange({ orderDiscountPercent })}
             />
           </Field>
         </div>

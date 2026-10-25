@@ -1,6 +1,6 @@
 import Button from "../../../../components/ui/Button"
 import Icon from "../../../../components/ui/Icon"
-import Input from "../../../../components/ui/Input"
+import DecimalInput from "../../../../components/ui/DecimalInput"
 import Select from "../../../../components/ui/Select"
 import Stepper from "../../../../components/ui/Stepper"
 import { useTranslation } from "../../../../i18n/I18nProvider"
@@ -51,26 +51,9 @@ export default function PackagingRowEditor({
 
       <label className="flex flex-col gap-1 text-[13px] font-medium text-ink">
         {t("offers.builder.packaging.weight")}
-        <Input
-          type="text"
-          inputMode="decimal"
-          value={row.weightPerPackageKg === 0 ? "" : String(row.weightPerPackageKg)}
-          onChange={(event) => {
-            const value = event.target.value.replace(/[^0-9.]/g, "")
-            if (value === "" || value === ".") {
-              onChange({ weightPerPackageKg: 0 })
-              return
-            }
-            const parsed = Number(value)
-            if (!Number.isNaN(parsed)) {
-              onChange({ weightPerPackageKg: parsed })
-            }
-          }}
-          onBlur={() => {
-            if (row.weightPerPackageKg < 0) {
-              onChange({ weightPerPackageKg: 0 })
-            }
-          }}
+        <DecimalInput
+          value={row.weightPerPackageKg}
+          onValueChange={(weightPerPackageKg) => onChange({ weightPerPackageKg })}
         />
       </label>
 

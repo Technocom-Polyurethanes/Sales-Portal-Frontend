@@ -1,6 +1,6 @@
 import Button from "../../../../components/ui/Button"
 import Icon from "../../../../components/ui/Icon"
-import Input from "../../../../components/ui/Input"
+import DecimalInput from "../../../../components/ui/DecimalInput"
 import { useTranslation } from "../../../../i18n/I18nProvider"
 import type { PackagingLine } from "../../../../lib/calculations/packaging"
 import { formatNumber } from "../../../../lib/formatters/number"
@@ -56,26 +56,9 @@ export default function MaterialLineEditor({
       <div className="grid gap-3 py-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-[13px] font-medium text-ink">
           {t("offers.builder.packaging.rate")}
-          <Input
-            type="text"
-            inputMode="decimal"
-            value={line.ratePerKg === 0 ? "" : String(line.ratePerKg)}
-            onChange={(event) => {
-              const value = event.target.value.replace(/[^0-9.]/g, "")
-              if (value === "" || value === ".") {
-                onChange({ ratePerKg: 0 })
-                return
-              }
-              const parsed = Number(value)
-              if (!Number.isNaN(parsed)) {
-                onChange({ ratePerKg: parsed })
-              }
-            }}
-            onBlur={() => {
-              if (line.ratePerKg < 0) {
-                onChange({ ratePerKg: 0 })
-              }
-            }}
+          <DecimalInput
+            value={line.ratePerKg}
+            onValueChange={(ratePerKg) => onChange({ ratePerKg })}
           />
         </label>
       </div>

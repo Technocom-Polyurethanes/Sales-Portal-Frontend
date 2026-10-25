@@ -78,6 +78,7 @@ export function buildDocumentData(
     }))
 
     return {
+      productId: line.productId,
       name: line.materialName,
       code: line.materialCode,
       category: line.category,
@@ -139,7 +140,9 @@ export function buildDocumentData(
     tagline: options.company.tagline,
     taglineAr: options.company.taglineAr,
     formCode: options.company.formCode,
-    customerName: options.customer?.name ?? "",
+    customerName: arabic
+      ? (options.customer?.nameAr ?? options.customer?.name ?? "")
+      : (options.customer?.name ?? ""),
     customerAddress: options.customer?.address ?? "",
     attention: source.attention.trim(),
     reference: source.reference,
