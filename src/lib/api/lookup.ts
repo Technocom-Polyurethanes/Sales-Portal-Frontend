@@ -46,7 +46,7 @@ export function queryCustomers<T extends { id: string; code?: string; customerCo
   params: LookupQueryParams,
 ): PaginatedResult<T> {
   const filtered = customers.filter((customer) =>
-    matchesSearch(customer, params.search ?? "", ["code", "customerCode", "erpNextId", "name", "nameAr", "id"]),
+    matchesSearch(customer, params.search ?? "", ["code", "customerCode", "erpNextId", "name", "nameAr"]),
   )
   return paginate(filtered, params)
 }
@@ -56,7 +56,7 @@ export function queryMaterials<T extends { id: string; code?: string; itemCode?:
   params: LookupQueryParams,
 ): PaginatedResult<T> {
   const filtered = materials.filter((material) =>
-    matchesSearch(material, params.search ?? "", ["code", "itemCode", "erpNextItemCode", "name", "category", "id"]),
+    matchesSearch(material, params.search ?? "", ["code", "itemCode", "erpNextItemCode", "name", "category"]),
   )
   return paginate(filtered, params)
 }
