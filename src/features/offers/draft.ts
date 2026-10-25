@@ -5,7 +5,7 @@ import type { Customer } from "../customers/types"
 import type { Product } from "../products/types"
 import type { PackageType } from "../settings/types"
 import { calculateDraft, type DraftCalculations } from "./calculations"
-import type { Offer, OfferDraft, OfferDraftLine, OfferLine } from "./types"
+import type { DeliveryBatch, Offer, OfferDraft, OfferDraftLine, OfferLine } from "./types"
 
 let counter = 0
 
@@ -138,8 +138,70 @@ export function recalculate(draft: OfferDraft): DraftCalculations {
   return calculateDraft(draft)
 }
 
+
+
+const roundMoney = (value: number) => Math.round(value * 100) / 100
+
+/** Keeps delivery allocations consistent with the current packaging rows. */
+export function reconcileDelivery(
+  lines: OfferDraftLine[],
+  delivery: DeliveryBatch[],
+): DeliveryBatch[] {
+  const rows = new Map<string, { productId: string; row: PackagingLine }>()
+  for (const line of lines) {
+    for (const row of line.packaging) {
+      rows.set(row.id, { productId: line.productId, row })
+    }
+  }
+
+  const used = new Map<string, number>()
+
+  return delivery.map((batch) => ({
+    ...batch,
+    allocations: batch.allocations.flatMap((allocation) => {
+      if (!allocation.packagingRowId) {
+        // legacy allocation: keep while the material exists
+        return lines.some((l) => l.productId === allocation.productId) ? [allocation] : []
+      }
+      const hit = rows.get(allocation.packagingRowId)
+      if (!hit) return []
+      const left = hit.row.packages - (used.get(hit.row.id) ?? 0)
+      const packages = Math.max(0, Math.min(allocation.packages, left))
+      if (packages === 0) return []
+      used.set(hit.row.id, (used.get(hit.row.id) ?? 0) + packages)
+      return [
+        {
+          ...allocation,
+          productId: hit.productId,
+          packageTypeId: hit.row.packageTypeId,
+          packageTypeName: hit.row.packageTypeName,
+          weightPerPackageKg: hit.row.weightPerPackageKg,
+          packages,
+        },
+      ]
+    }),
+  }))
+}
+
 /** Turns a stored offer back into an editable draft. */
 export function offerToDraft(offer: Offer): OfferDraft {
+  const rowIds = new Map<string, string>()
+
+  const lines = offer.lines.map((line) => ({
+    id: draftId("line"),
+    productId: line.productId,
+    materialName: line.materialName,
+    materialCode: line.materialCode,
+    category: line.category,
+    ratePerKg: line.ratePerKg,
+    discountPercent: line.discountPercent,
+    packaging: line.packaging.map((row) => {
+      const id = draftId("pack")
+      rowIds.set(row.id, id)
+      return { ...row, id }
+    }),
+  }))
+
   return {
     reference: offer.reference,
     customerId: offer.customerId,
@@ -148,19 +210,7 @@ export function offerToDraft(offer: Offer): OfferDraft {
     issueDate: offer.issueDate,
     currency: offer.currency,
     paymentTermId: offer.paymentTermId,
-    lines: offer.lines.map((line) => ({
-      id: draftId("line"),
-      productId: line.productId,
-      materialName: line.materialName,
-      materialCode: line.materialCode,
-      category: line.category,
-      ratePerKg: line.ratePerKg,
-      discountPercent: line.discountPercent,
-      packaging: line.packaging.map((row) => ({
-        ...row,
-        id: draftId("pack"),
-      })),
-    })),
+    lines,
     taxPercent: offer.taxPercent,
     otherTaxEnabled: offer.otherTaxEnabled,
     otherTaxPercent: offer.otherTaxEnabled ? OTHER_TAX_PERCENT : 0,
@@ -168,7 +218,12 @@ export function offerToDraft(offer: Offer): OfferDraft {
     delivery: offer.delivery.map((batch) => ({
       ...batch,
       id: draftId("batch"),
-      allocations: batch.allocations.map((allocation) => ({ ...allocation })),
+      allocations: batch.allocations.map((allocation) => ({
+        ...allocation,
+        packagingRowId: allocation.packagingRowId
+          ? rowIds.get(allocation.packagingRowId) ?? allocation.packagingRowId
+          : allocation.packagingRowId,
+      })),
     })),
     notes: offer.notes,
     documentLanguage: offer.documentLanguage,

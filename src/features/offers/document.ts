@@ -26,7 +26,7 @@ export type DocumentSource = {
   paymentTermId: string
   customerId: string
   /** Contact person printed in the "Attention" line, empty hides it. */
-  attention: string
+  attention?: string
   taxId?: string
   lines: {
     productId: string
@@ -97,8 +97,6 @@ export function buildDocumentData(
     categories.set(line.productId, line.category)
   }
 
-  const weightPerPackage = perPackageWeights(source.lines)
-
   const delivery: OfferDocumentBatch[] = source.delivery.map((batch) => {
     const allocations = batch.allocations
       .filter((allocation) => categories.has(allocation.productId))
@@ -106,21 +104,25 @@ export function buildDocumentData(
         const line = source.lines.find((l) => l.productId === allocation.productId)
         const row = allocation.packagingRowId
           ? line?.packaging.find((r) => r.id === allocation.packagingRowId)
-          : line?.packaging.find((r) => r.packageTypeId === allocation.packageTypeId)
-        const packageTypeName = allocation.packageTypeName ?? row?.packageTypeName ?? ""
-        const weightPerPkg =
-          allocation.weightPerPackageKg ?? row?.weightPerPackageKg ?? weightPerPackage.get(allocation.productId) ?? 0
+          : undefined
+        if (!row) return null
+        const baseName = row.packageTypeName ?? allocation.packageTypeName ?? ""
+        const typeId = row.packageTypeId ?? allocation.packageTypeId ?? ""
+        const packageTypeName = arabic ? (names.get(typeId) ?? baseName) : baseName
+        const weightPerPkg = row.weightPerPackageKg ?? allocation.weightPerPackageKg ?? 0
         return {
           label: translateCategory(
             categories.get(allocation.productId) ?? allocation.productId,
             options.language,
           ),
+          productId: allocation.productId,
+          materialName: line?.materialName ?? "",
           packages: allocation.packages,
           weightKg: roundMoney(allocation.packages * weightPerPkg),
           packageTypeName,
         }
       })
-      .filter((allocation) => allocation.packages > 0)
+      .filter((allocation): allocation is NonNullable<typeof allocation> => allocation !== null && allocation.packages > 0)
 
     return {
       batchNumber: batch.batchNumber,
@@ -144,7 +146,12 @@ export function buildDocumentData(
       ? (options.customer?.nameAr ?? options.customer?.name ?? "")
       : (options.customer?.name ?? ""),
     customerAddress: options.customer?.address ?? "",
-    attention: source.attention.trim(),
+    attention:
+      source.attention === undefined
+        ? (options.customer?.contactPerson ?? "").trim()
+        : source.attention.trim() === ""
+          ? ""
+          : source.attention.trim(),
     reference: source.reference,
     issueDate: source.issueDate,
     dueDate: source.dueDate,
@@ -236,6 +243,6 @@ export function offerToDocumentSource(offer: Offer): DocumentSource {
     total: offer.totals.total,
     delivery: offer.delivery,
     notes: offer.notes,
-    attention: offer.attention ?? "",
+    attention: offer.attention,
   }
 }

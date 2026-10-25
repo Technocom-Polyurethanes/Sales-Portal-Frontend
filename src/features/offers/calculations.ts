@@ -86,20 +86,29 @@ export function calculateDraft(draft: OfferDraft): DraftCalculations {
   })
 
   const scheduled: Record<string, number> = {}
+  const scheduledByRow: Record<string, number> = {}
   for (const batch of draft.delivery) {
     for (const allocation of batch.allocations) {
       scheduled[allocation.productId] =
         (scheduled[allocation.productId] ?? 0) + allocation.packages
+      if (allocation.packagingRowId) {
+        scheduledByRow[allocation.packagingRowId] =
+          (scheduledByRow[allocation.packagingRowId] ?? 0) + allocation.packages
+      }
     }
   }
 
   const ordered: Record<string, number> = {}
+  const orderedByRow: Record<string, number> = {}
   const quantity: Record<string, number> = {}
   for (const line of draft.lines) {
     ordered[line.productId] =
       (ordered[line.productId] ?? 0) + totalPackages(line.packaging)
     quantity[line.productId] =
       (quantity[line.productId] ?? 0) + totalQuantityKg(line.packaging)
+    for (const row of line.packaging) {
+      orderedByRow[row.id] = row.packages
+    }
   }
 
   const weightPerPackage: Record<string, number> = {}
@@ -117,8 +126,7 @@ export function calculateDraft(draft: OfferDraft): DraftCalculations {
       ordered[productId] - (scheduled[productId] ?? 0),
     )
   }
-
-  return {
+  const result: DraftCalculations = {
     lines,
     subtotal,
     totals,
@@ -129,4 +137,7 @@ export function calculateDraft(draft: OfferDraft): DraftCalculations {
     ordered,
     weightPerPackage,
   }
+  ;(result as any).scheduledByRow = scheduledByRow
+  ;(result as any).orderedByRow = orderedByRow
+  return result
 }

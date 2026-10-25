@@ -16,6 +16,7 @@ import {
   createEmptyDraft,
   createPackagingRow,
   draftId,
+  reconcileDelivery,
 } from "../draft"
 import type { DeliveryBatch, OfferDraft, OfferDraftLine } from "../types"
 
@@ -135,39 +136,34 @@ export function useOfferBuilder({
   const removeLine = useCallback((lineId: string) => {
     setDraftState((current) => {
       const lines = current.lines.filter((line) => line.id !== lineId)
-      const productIds = new Set(lines.map((line) => line.productId))
-
       return {
         ...current,
         lines,
-        // A material that is gone cannot keep packages in a delivery batch.
-        delivery: current.delivery.map((batch) => ({
-          ...batch,
-          allocations: batch.allocations.filter((allocation) =>
-            productIds.has(allocation.productId),
-          ),
-        })),
+        delivery: reconcileDelivery(lines, current.delivery),
       }
     })
   }, [])
 
   const updateLine = useCallback(
     (lineId: string, patch: Partial<OfferDraftLine>) => {
-      setDraftState((current) => ({
-        ...current,
-        lines: current.lines.map((line) =>
+      setDraftState((current) => {
+        const lines = current.lines.map((line) =>
           line.id === lineId ? { ...line, ...patch } : line,
-        ),
-      }))
+        )
+        return {
+          ...current,
+          lines,
+          delivery: reconcileDelivery(lines, current.delivery),
+        }
+      })
     },
     [],
   )
 
   const updatePackaging = useCallback(
     (lineId: string, rowId: string, patch: Partial<PackagingLine>) => {
-      setDraftState((current) => ({
-        ...current,
-        lines: current.lines.map((line) =>
+      setDraftState((current) => {
+        const lines = current.lines.map((line) =>
           line.id === lineId
             ? {
                 ...line,
@@ -176,8 +172,13 @@ export function useOfferBuilder({
                 ),
               }
             : line,
-        ),
-      }))
+        )
+        return {
+          ...current,
+          lines,
+          delivery: reconcileDelivery(lines, current.delivery),
+        }
+      })
     },
     [],
   )
@@ -187,33 +188,41 @@ export function useOfferBuilder({
       const fallback = packageTypes[0]
       if (!fallback) return
 
-      setDraftState((current) => ({
-        ...current,
-        lines: current.lines.map((line) =>
+      setDraftState((current) => {
+        const lines = current.lines.map((line) =>
           line.id === lineId
             ? {
                 ...line,
                 packaging: [...line.packaging, createPackagingRow(fallback)],
               }
             : line,
-        ),
-      }))
+        )
+        return {
+          ...current,
+          lines,
+          delivery: reconcileDelivery(lines, current.delivery),
+        }
+      })
     },
     [packageTypes],
   )
 
   const removePackaging = useCallback((lineId: string, rowId: string) => {
-    setDraftState((current) => ({
-      ...current,
-      lines: current.lines.map((line) =>
+    setDraftState((current) => {
+      const lines = current.lines.map((line) =>
         line.id === lineId
           ? {
               ...line,
               packaging: line.packaging.filter((row) => row.id !== rowId),
             }
           : line,
-      ),
-    }))
+      )
+      return {
+        ...current,
+        lines,
+        delivery: reconcileDelivery(lines, current.delivery),
+      }
+    })
   }, [])
 
   const addBatch = useCallback(() => {
