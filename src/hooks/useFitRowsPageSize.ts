@@ -5,10 +5,12 @@ export function useFitRowsPageSize(
   headerHeight = 44,
   rowHeight = 48,
   padding = 0,
+  enabled = true,
 ): number {
   const [pageSize, setPageSize] = useState(8)
 
   useEffect(() => {
+    if (!enabled) return
     const element = containerRef.current
     if (!element) return
 
@@ -27,7 +29,7 @@ export function useFitRowsPageSize(
     const observer = new ResizeObserver(update)
     observer.observe(element)
     return () => observer.disconnect()
-  }, [containerRef, headerHeight, rowHeight, padding])
+  }, [containerRef, headerHeight, rowHeight, padding, enabled])
 
   return pageSize
 }

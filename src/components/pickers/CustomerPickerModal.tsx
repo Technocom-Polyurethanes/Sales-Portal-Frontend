@@ -26,7 +26,7 @@ export default function CustomerPickerModal({
   const [highlight, setHighlight] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const pageSize = useFitRowsPageSize(containerRef, 44, 48)
+  const pageSize = useFitRowsPageSize(containerRef, 44, 48, 0, open)
 
   useEffect(() => {
     if (open) {
