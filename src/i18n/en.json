@@ -94,7 +94,10 @@
     "invalidCredentials": "Wrong username or password."
   },
   "dashboard": {
-    "greeting": "Good morning, Amgad",
+    "greeting": "Good morning",
+    "greetingMorning": "Good morning, {name}",
+    "greetingAfternoon": "Good afternoon, {name}",
+    "greetingEvening": "Good evening, {name}",
     "subtitle": "Here's what's happening with your quotations today.",
     "offersThisMonth": "Offers this month",
     "moreThanLastMonth": "{count} more than last month",
@@ -111,7 +114,7 @@
       "reference": "Offer no.",
       "customer": "Customer",
       "issueDate": "Issue date",
-      "total": "Total (EGP)",
+      "total": "Total",
       "open": "Open",
       "empty": "No offers found. Try another search.",
       "create": "Create new offer",

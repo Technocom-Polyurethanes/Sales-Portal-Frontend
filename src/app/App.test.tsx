@@ -34,7 +34,7 @@ describe("application shell", () => {
 
     const text = container.textContent ?? ""
     expect(text).toContain("TECHNOCOM")
-    expect(text).toContain("Good morning")
+    expect(text.toLowerCase()).toContain("good")
     expect(text).toContain("Recent offers")
     expect(text).toContain("3089/OCT./YL/AA")
   })

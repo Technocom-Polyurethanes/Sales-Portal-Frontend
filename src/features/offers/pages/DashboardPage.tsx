@@ -15,6 +15,7 @@ import {
 } from "../../../lib/formatters"
 import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatIsoDay } from "../../../lib/formatters/date"
+import { useSession } from "../../account/SessionProvider"
 import { useOffers } from "../hooks/useOffers"
 import type { Offer } from "../types"
 
@@ -28,19 +29,28 @@ export default function DashboardPage() {
   const { t, language } = useTranslation()
   const navigate = useNavigate()
   const { data: offers, loading } = useOffers()
+  const { user } = useSession()
   const locale = localeForLanguage(language)
+
+  const getGreeting = () => {
+    const hour = new Date().getHours()
+    const name = user?.name ?? user?.email ?? ""
+    if (hour < 12) {
+      return t("dashboard.greetingMorning", { name })
+    }
+    if (hour < 18) {
+      return t("dashboard.greetingAfternoon", { name })
+    }
+    return t("dashboard.greetingEvening", { name })
+  }
 
   const stats = useMemo<StatCard[]>(() => {
     const list = offers ?? []
-    const monthKey = list[0]?.issueDate.slice(0, 7)
+    const monthKey = new Date().toISOString().slice(0, 7)
     const thisMonth = list.filter((offer) =>
-      offer.issueDate.startsWith(monthKey ?? ""),
+      offer.issueDate.startsWith(monthKey),
     ).length
-    const totalValue = list
-      .filter(
-        (offer) => offer.status === "issued" || offer.status === "accepted",
-      )
-      .reduce((sum, offer) => sum + offer.totals.total, 0)
+    const totalValue = list.reduce((sum, offer) => sum + offer.totals.total, 0)
     const closed = list.filter(
       (offer) => offer.status === "accepted" || offer.status === "rejected",
     )
@@ -51,12 +61,12 @@ export default function DashboardPage() {
       {
         label: t("dashboard.offersThisMonth"),
         value: String(thisMonth),
-        note: t("dashboard.moreThanLastMonth", { count: 6 }),
+        note: "",
       },
       {
         label: t("dashboard.totalValue"),
         value: formatCompactNumber(totalValue, locale),
-        note: "EGP",
+        note: "",
       },
       {
         label: t("dashboard.acceptanceRate"),
@@ -64,7 +74,7 @@ export default function DashboardPage() {
           closed.length ? (accepted.length / closed.length) * 100 : 0,
           locale,
         ),
-        note: t("dashboard.awaitingResponse"),
+        note: closed.length > 0 ? `${accepted.length}/${closed.length}` : "",
       },
       {
         label: t("dashboard.awaitingResponse"),
@@ -130,7 +140,7 @@ export default function DashboardPage() {
   return (
     <>
       <PageHeader
-        title={t("dashboard.greeting")}
+        title={getGreeting()}
         subtitle={t("dashboard.subtitle")}
         action={
           <Button

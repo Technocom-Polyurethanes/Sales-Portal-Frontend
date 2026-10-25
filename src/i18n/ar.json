@@ -94,7 +94,10 @@
     "invalidCredentials": "اسم المستخدم أو كلمة المرور غير صحيحة."
   },
   "dashboard": {
-    "greeting": "صباح الخير، يوسف",
+    "greeting": "مرحباً",
+    "greetingMorning": "صباح الخير، {name}",
+    "greetingAfternoon": "مساء الخير، {name}",
+    "greetingEvening": "مساء الخير، {name}",
     "subtitle": "إليك ملخص عروض الأسعار اليوم.",
     "offersThisMonth": "عروض هذا الشهر",
     "moreThanLastMonth": "{count} أكثر من الشهر الماضي",
@@ -111,7 +114,7 @@
       "reference": "رقم العرض",
       "customer": "العميل",
       "issueDate": "تاريخ الإصدار",
-      "total": "الإجمالي (ج.م)",
+      "total": "الإجمالي",
       "open": "فتح",
       "empty": "لا توجد عروض. جرّب البحث مرة أخرى.",
       "create": "إنشاء عرض سعر جديد",
