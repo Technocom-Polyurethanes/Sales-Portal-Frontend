@@ -4,11 +4,12 @@ export const products: Product[] = [
   {
     id: "prod-1",
     code: "POL-001",
+    itemCode: "POL-001",
+    erpNextItemCode: "ERP-POL-001",
     name: "DALTORIM EG 26200 - D",
     category: "Polyol",
     defaultPackageTypeId: "drum",
     defaultWeightKg: 210,
-    availableSizesKg: [200, 210, 220, 250],
     referencePrice: 10,
     specifications: "Technical specifications available on request.",
   },
@@ -19,7 +20,6 @@ export const products: Product[] = [
     category: "Iso",
     defaultPackageTypeId: "drum",
     defaultWeightKg: 250,
-    availableSizesKg: [200, 210, 220, 250],
     referencePrice: 23.115384615,
   },
   {
@@ -29,7 +29,6 @@ export const products: Product[] = [
     category: "System",
     defaultPackageTypeId: "drum",
     defaultWeightKg: 220,
-    availableSizesKg: [200, 210, 220, 250],
     referencePrice: 19.5,
   },
   {
@@ -39,7 +38,6 @@ export const products: Product[] = [
     category: "Polyol",
     defaultPackageTypeId: "drum",
     defaultWeightKg: 200,
-    availableSizesKg: [200, 210, 220, 250],
     referencePrice: 9.75,
   },
   {
@@ -49,7 +47,6 @@ export const products: Product[] = [
     category: "Additive",
     defaultPackageTypeId: "pail",
     defaultWeightKg: 25,
-    availableSizesKg: [20, 25, 30],
     referencePrice: 46.5,
   },
 ]

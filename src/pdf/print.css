@@ -35,6 +35,7 @@
   .offer-document {
     width: 100%;
     max-width: 180mm;
+    min-height: 257mm;
   }
 
   .offer-document thead {

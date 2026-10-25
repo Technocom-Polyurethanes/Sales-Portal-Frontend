@@ -27,6 +27,7 @@ export type DocumentSource = {
   customerId: string
   /** Contact person printed in the "Attention" line, empty hides it. */
   attention: string
+  taxId?: string
   lines: {
     productId: string
     materialName: string
@@ -38,6 +39,8 @@ export type DocumentSource = {
     amount: number
   }[]
   subtotal: number
+  /** Order discount percentage applied to the subtotal. */
+  orderDiscountPercent: number
   orderDiscount: number
   taxPercent: number
   taxAmount: number
@@ -77,6 +80,7 @@ export function buildDocumentData(
     return {
       name: line.materialName,
       code: line.materialCode,
+      category: line.category,
       packagingSummary: formatPackagingSummaryDocument(
         packaging,
         options.language,
@@ -97,17 +101,25 @@ export function buildDocumentData(
   const delivery: OfferDocumentBatch[] = source.delivery.map((batch) => {
     const allocations = batch.allocations
       .filter((allocation) => categories.has(allocation.productId))
-      .map((allocation) => ({
-        label: translateCategory(
-          categories.get(allocation.productId) ?? allocation.productId,
-          options.language,
-        ),
-        packages: allocation.packages,
-        weightKg: roundMoney(
-          allocation.packages *
-            (weightPerPackage.get(allocation.productId) ?? 0),
-        ),
-      }))
+      .map((allocation) => {
+        const line = source.lines.find((l) => l.productId === allocation.productId)
+        const row = allocation.packagingRowId
+          ? line?.packaging.find((r) => r.id === allocation.packagingRowId)
+          : line?.packaging.find((r) => r.packageTypeId === allocation.packageTypeId)
+        const packageTypeName = allocation.packageTypeName ?? row?.packageTypeName ?? ""
+        const weightPerPkg =
+          allocation.weightPerPackageKg ?? row?.weightPerPackageKg ?? weightPerPackage.get(allocation.productId) ?? 0
+        return {
+          label: translateCategory(
+            categories.get(allocation.productId) ?? allocation.productId,
+            options.language,
+          ),
+          packages: allocation.packages,
+          weightKg: roundMoney(allocation.packages * weightPerPkg),
+          packageTypeName,
+        }
+      })
+      .filter((allocation) => allocation.packages > 0)
 
     return {
       batchNumber: batch.batchNumber,
@@ -135,8 +147,10 @@ export function buildDocumentData(
     dueDate: source.dueDate,
     paymentTerm: options.paymentTermLabel,
     currency: source.currency,
+    taxId: source.taxId ?? "",
     lines,
     subtotal: source.subtotal,
+    orderDiscountPercent: source.orderDiscountPercent ?? 0,
     orderDiscount: source.orderDiscount,
     taxPercent: source.taxPercent,
     taxAmount: source.taxAmount,
@@ -197,6 +211,7 @@ export function offerToDocumentSource(offer: Offer): DocumentSource {
     currency: offer.currency,
     paymentTermId: offer.paymentTermId,
     customerId: offer.customerId,
+    taxId: offer.taxId ?? "",
     lines: offer.lines.map((line) => ({
       productId: line.productId,
       materialName: line.materialName,
@@ -208,6 +223,7 @@ export function offerToDocumentSource(offer: Offer): DocumentSource {
       amount: line.amount,
     })),
     subtotal: offer.totals.subtotal,
+    orderDiscountPercent: offer.orderDiscountPercent ?? offer.totals.orderDiscountPercent ?? 0,
     orderDiscount: offer.totals.orderDiscount,
     taxPercent: offer.totals.taxPercent,
     taxAmount: offer.totals.taxAmount,

@@ -22,9 +22,8 @@ export default function Sidebar({
 
   return (
     <aside className="flex h-full w-60 flex-col border-e border-line bg-surface">
-      <div className="flex items-center gap-2 border-b border-line-soft px-5 py-4">
+      <div className="flex items-center justify-center gap-2 border-b border-line-soft px-5 py-4">
         <Wordmark size="md" />
-        <span className="text-xs text-muted">{t("app.quotations")}</span>
       </div>
 
       <p className="px-5 pt-5 pb-2 text-[11px] font-semibold tracking-widest text-muted uppercase">

@@ -32,7 +32,7 @@ export default function TotalsSummary({
 
         {totals.orderDiscount > 0 && (
           <Row
-            label={t("offers.builder.taxes.orderDiscount")}
+            label={`${t("offers.builder.taxes.orderDiscount")} (${totals.orderDiscountPercent}%)`}
             value={formatNumber(-totals.orderDiscount)}
           />
         )}

@@ -1,4 +1,5 @@
-import type { OfferDocumentBatch } from "../templates/types"
+import type { OfferDocumentBatch, OfferDocumentData } from "../templates/types"
+import type { DocumentLanguage } from "../PdfLanguageProvider"
 
 export type DeliveryScheduleTableProps = {
   heading: string
@@ -14,6 +15,8 @@ export type DeliveryScheduleTableProps = {
   weightUnit: string
   formatDate: (value: string) => string
   formatNumber: (value: number) => string
+  language: DocumentLanguage
+  source?: OfferDocumentData
 }
 
 /** Delivery batches with the packages and the kilograms per material. */
@@ -25,13 +28,11 @@ export default function DeliveryScheduleTable({
   weightUnit,
   formatDate,
   formatNumber,
+  language,
+  source,
 }: DeliveryScheduleTableProps) {
   if (batches.length === 0) return null
 
-  const totalPackages = batches.reduce(
-    (sum, batch) => sum + batch.totalPackages,
-    0,
-  )
   const totalWeightKg = batches.reduce(
     (sum, batch) => sum + batch.totalWeightKg,
     0,
@@ -43,13 +44,21 @@ export default function DeliveryScheduleTable({
       <table className="doc-table doc-schedule">
         <thead>
           <tr>
-            <th scope="col">{headings.batch}</th>
             <th scope="col">{headings.deliveryDate}</th>
-            {columns.map((column) => (
-              <th scope="col" key={column} className="doc-num">
-                {column}
-              </th>
-            ))}
+            {columns.map((column) => {
+              const line = source?.lines.find((l) => (language === "ar" ? l.category === column : l.name.includes(column) || column.includes(l.category)))
+              const header = source?.lines.find((l) => l.category === column) ?? source?.lines.find((l) => l.name === column)
+              const label = header
+                ? language === "ar"
+                  ? `${header.category} — ${header.name}`
+                  : `${header.category} — ${header.name}`
+                : column
+              return (
+                <th scope="col" key={column} className="doc-num">
+                  {label}
+                </th>
+              )
+            })}
             <th scope="col" className="doc-num">
               {headings.packages}
             </th>
@@ -59,11 +68,19 @@ export default function DeliveryScheduleTable({
           </tr>
         </thead>
         <tbody>
-          {batches.map((batch) => (
+          {batches.map((batch) => {
+            const batchTotalsByType = new Map<string, number>()
+            for (const allocation of batch.allocations) {
+              if (allocation.packages > 0) {
+                const key = allocation.packageTypeName || ""
+                batchTotalsByType.set(
+                  key,
+                  (batchTotalsByType.get(key) ?? 0) + allocation.packages,
+                )
+              }
+            }
+            return (
             <tr key={batch.batchNumber}>
-              <td>
-                <span className="doc-ltr">{batch.batchNumber}</span>
-              </td>
               <td>
                 <span className="doc-ltr">{formatDate(batch.date)}</span>
                 {batch.weekday && (
@@ -71,33 +88,39 @@ export default function DeliveryScheduleTable({
                 )}
               </td>
               {columns.map((column) => {
-                const allocation = batch.allocations.find(
-                  (item) => item.label === column,
+                const allocations = batch.allocations.filter(
+                  (item) => item.label === column && item.packages > 0,
                 )
+                if (allocations.length === 0) {
+                  return (
+                    <td key={column} className="doc-num">
+                      —
+                    </td>
+                  )
+                }
+                const totalKg = allocations.reduce((sum, item) => sum + item.weightKg, 0)
                 return (
                   <td key={column} className="doc-num">
-                    {allocation ? (
-                      <>
-                        <span className="doc-ltr">
-                          {formatNumber(allocation.packages)}
-                        </span>
-                        <div className="doc-item-meta">
-                          <span className="doc-ltr">
-                            {formatNumber(allocation.weightKg)}
-                          </span>{" "}
-                          {weightUnit}
-                        </div>
-                      </>
-                    ) : (
-                      "—"
-                    )}
+                    {allocations.map((allocation, idx) => (
+                      <div key={idx}>
+                        {allocation.packages} {allocation.packageTypeName || ""}
+                      </div>
+                    ))}
+                    <div className="doc-item-meta doc-batch-weight">
+                      <span className="doc-ltr">
+                        {formatNumber(totalKg)}
+                      </span>{" "}
+                      {weightUnit}
+                    </div>
                   </td>
                 )
               })}
               <td className="doc-num">
-                <span className="doc-ltr">
-                  {formatNumber(batch.totalPackages)}
-                </span>
+                {Array.from(batchTotalsByType.entries()).map(([type, count]) => (
+                  <div key={type}>
+                    {count} {type}
+                  </div>
+                ))}
               </td>
               <td className="doc-num">
                 <span className="doc-ltr">
@@ -105,16 +128,61 @@ export default function DeliveryScheduleTable({
                 </span>
               </td>
             </tr>
-          ))}
+            )
+          })}
           <tr className="doc-total-row">
-            <th scope="row" colSpan={2}>
-              {headings.total}
-            </th>
-            {columns.map((column) => (
-              <td key={column} />
-            ))}
+            <th scope="row">{headings.total}</th>
+            {columns.map((column) => {
+              const columnEntries = new Map<string, number>()
+              let columnWeight = 0
+              for (const batch of batches) {
+                for (const allocation of batch.allocations) {
+                  if (allocation.label === column && allocation.packages > 0) {
+                    const key = allocation.packageTypeName || ""
+                    columnEntries.set(key, (columnEntries.get(key) ?? 0) + allocation.packages)
+                    columnWeight += allocation.weightKg
+                  }
+                }
+              }
+              return (
+                <td key={column} className="doc-num">
+                  {columnEntries.size > 0 ? (
+                    <>
+                      {Array.from(columnEntries.entries()).map(([type, count]) => (
+                        <div key={type}>
+                          {count} {type}
+                        </div>
+                      ))}
+                      <div className="doc-item-meta doc-batch-weight">
+                        <span className="doc-ltr">
+                          {formatNumber(columnWeight)}
+                        </span>{" "}
+                        {weightUnit}
+                      </div>
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </td>
+              )
+            })}
             <td className="doc-num">
-              <span className="doc-ltr">{formatNumber(totalPackages)}</span>
+              {(() => {
+                const grandTotals = new Map<string, number>()
+                for (const batch of batches) {
+                  for (const allocation of batch.allocations) {
+                    if (allocation.packages > 0) {
+                      const key = allocation.packageTypeName || ""
+                      grandTotals.set(key, (grandTotals.get(key) ?? 0) + allocation.packages)
+                    }
+                  }
+                }
+                return Array.from(grandTotals.entries()).map(([type, count]) => (
+                  <div key={type}>
+                    {count} {type}
+                  </div>
+                ))
+              })()}
             </td>
             <td className="doc-num">
               <span className="doc-ltr">{formatNumber(totalWeightKg)}</span>{" "}

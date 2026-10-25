@@ -72,6 +72,7 @@ export default function BuilderWorkspace({
           paymentTermId: draft.paymentTermId,
           customerId: draft.customerId,
           attention: draft.attention,
+          taxId: draft.taxId ?? "",
           lines: draft.lines.map((line, index) => ({
             productId: line.productId,
             materialName: line.materialName,
@@ -83,7 +84,8 @@ export default function BuilderWorkspace({
             amount: calculations.lines[index]?.amount ?? 0,
           })),
           subtotal: calculations.subtotal,
-          orderDiscount: draft.orderDiscount,
+          orderDiscountPercent: draft.orderDiscountPercent,
+          orderDiscount: calculations.totals.orderDiscount,
           taxPercent: draft.taxPercent,
           taxAmount: calculations.totals.taxAmount,
           otherTaxEnabled: draft.otherTaxEnabled,

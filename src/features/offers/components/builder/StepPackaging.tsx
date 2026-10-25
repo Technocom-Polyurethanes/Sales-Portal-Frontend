@@ -22,7 +22,11 @@ export default function StepPackaging({
 
   return (
     <div className="space-y-4">
-      <MaterialPicker products={products} onAdd={controller.addLine} />
+      <MaterialPicker
+        products={products}
+        existingProductIds={controller.draft.lines.map((line) => line.productId)}
+        onAdd={controller.addLine}
+      />
 
       {draft.lines.length === 0 ? (
         <p className="rounded-md border border-line-soft bg-page/50 px-4 py-6 text-center text-sm text-muted">

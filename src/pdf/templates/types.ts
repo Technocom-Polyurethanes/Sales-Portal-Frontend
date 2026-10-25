@@ -4,6 +4,7 @@ export type OfferTemplate = {
   title: string
   billTo: string
   attention: string
+  taxId: string
   reference: string
   date: string
   terms: string
@@ -38,6 +39,7 @@ export type OfferTemplate = {
 export type OfferDocumentLine = {
   name: string
   code: string
+  category: string
   packagingSummary: string
   quantityKg: number
   ratePerKg: number
@@ -48,6 +50,7 @@ export type OfferDocumentAllocation = {
   label: string
   packages: number
   weightKg: number
+  packageTypeName?: string
 }
 
 export type OfferDocumentBatch = {
@@ -68,6 +71,7 @@ export type OfferDocumentData = {
   customerName: string
   customerAddress: string
   attention: string
+  taxId?: string
   reference: string
   issueDate: string
   dueDate: string
@@ -75,6 +79,8 @@ export type OfferDocumentData = {
   currency: string
   lines: OfferDocumentLine[]
   subtotal: number
+  /** Order discount percentage applied to the subtotal. */
+  orderDiscountPercent: number
   orderDiscount: number
   taxPercent: number
   taxAmount: number

@@ -82,7 +82,7 @@ export function calculateDraft(draft: OfferDraft): DraftCalculations {
     taxPercent: draft.taxPercent,
     otherTaxEnabled: draft.otherTaxEnabled,
     otherTaxPercent: draft.otherTaxEnabled ? OTHER_TAX_PERCENT : 0,
-    orderDiscount: draft.orderDiscount,
+    orderDiscountPercent: draft.orderDiscountPercent,
   })
 
   const scheduled: Record<string, number> = {}

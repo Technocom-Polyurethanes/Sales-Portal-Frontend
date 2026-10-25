@@ -52,13 +52,25 @@ export default function PackagingRowEditor({
       <label className="flex flex-col gap-1 text-[13px] font-medium text-ink">
         {t("offers.builder.packaging.weight")}
         <Input
-          type="number"
-          min={0}
-          step="any"
-          value={row.weightPerPackageKg}
-          onChange={(event) =>
-            onChange({ weightPerPackageKg: Number(event.target.value) || 0 })
-          }
+          type="text"
+          inputMode="decimal"
+          value={row.weightPerPackageKg === 0 ? "" : String(row.weightPerPackageKg)}
+          onChange={(event) => {
+            const value = event.target.value.replace(/[^0-9.]/g, "")
+            if (value === "" || value === ".") {
+              onChange({ weightPerPackageKg: 0 })
+              return
+            }
+            const parsed = Number(value)
+            if (!Number.isNaN(parsed)) {
+              onChange({ weightPerPackageKg: parsed })
+            }
+          }}
+          onBlur={() => {
+            if (row.weightPerPackageKg < 0) {
+              onChange({ weightPerPackageKg: 0 })
+            }
+          }}
         />
       </label>
 

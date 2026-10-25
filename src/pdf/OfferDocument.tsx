@@ -29,7 +29,6 @@ export type OfferDocumentProps = {
 function buildReferenceRows(
   data: OfferDocumentData,
   template: ReturnType<typeof getTemplate>,
-  language: DocumentLanguage,
 ): ReferenceRow[] {
   return [
     { label: template.reference, value: data.reference, ltr: true },
@@ -43,11 +42,6 @@ function buildReferenceRows(
       label: template.dueDate,
       value: formatDocumentDate(data.dueDate),
       ltr: true,
-    },
-    {
-      label: template.currency,
-      value: formatDocumentCurrency(data.currency, language),
-      ltr: language === "en",
     },
   ]
 }
@@ -68,7 +62,7 @@ function buildTotalsRows(
 
   if (data.orderDiscount > 0) {
     rows.push({
-      label: template.discount,
+      label: `${template.discount} (${data.orderDiscountPercent}%)`,
       value: `- ${formatDocumentNumber(data.orderDiscount)}`,
     })
   }
@@ -115,7 +109,7 @@ function deliveryColumns(data: OfferDocumentData): string[] {
 export default function OfferDocument({ data, language }: OfferDocumentProps) {
   const template = getTemplate(language)
   const arabic = language === "ar"
-  const referenceRows = buildReferenceRows(data, template, language)
+  const referenceRows = buildReferenceRows(data, template)
   const totalsRows = buildTotalsRows(data, template, language)
   const columns = deliveryColumns(data)
   const currency = formatDocumentCurrency(data.currency, language)
@@ -145,6 +139,8 @@ export default function OfferDocument({ data, language }: OfferDocumentProps) {
           heading={template.billTo}
           customerName={data.customerName}
           address={data.customerAddress}
+          taxId={data.taxId}
+          taxIdLabel={template.taxId ?? "Tax ID"}
           attention={data.attention}
           attentionLabel={template.attention}
         />
@@ -162,7 +158,12 @@ export default function OfferDocument({ data, language }: OfferDocumentProps) {
         lines={data.lines}
         currency={currency}
         weightUnit={weightUnit}
-        formatNumber={formatDocumentNumber}
+        formatNumber={(value) =>
+          value.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+        }
       />
 
       <TotalsBlock rows={totalsRows} />
@@ -181,6 +182,8 @@ export default function OfferDocument({ data, language }: OfferDocumentProps) {
         weightUnit={weightUnit}
         formatDate={formatDocumentDate}
         formatNumber={formatDocumentNumber}
+        language={language}
+        source={data}
       />
 
       <BankAccountsTable

@@ -47,7 +47,6 @@ export function formatPackagingSummaryDocument(
 const CATEGORY_NAMES_AR: Record<string, string> = {
   Polyol: "بوليول",
   Iso: "إيزو",
-  System: "نظام",
   Additive: "إضافي",
   Material: "خامة",
 }

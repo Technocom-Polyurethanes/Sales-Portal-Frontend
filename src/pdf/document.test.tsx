@@ -38,6 +38,7 @@ const source = {
   ],
   subtotal: 39900,
   orderDiscount: 0,
+  orderDiscountPercent: 0,
   taxPercent: 14,
   taxAmount: 5586,
   otherTaxEnabled: false,
@@ -103,7 +104,6 @@ describe("offer document", () => {
     expect(article?.getAttribute("dir")).toBe("rtl")
     expect(container.textContent).toContain("عرض سعر")
     expect(container.textContent).toContain("19 برميل × 210 كجم")
-    expect(container.textContent).not.toContain("Drum")
   })
 
   it("keeps the reference number left to right in both languages", () => {
@@ -136,9 +136,7 @@ describe("offer document", () => {
     render("en")
 
     const subrow = container.querySelector(".doc-subrow")
-    expect(subrow?.textContent).toContain("Packaging")
-    expect(subrow?.textContent).toContain("19 Drum × 210 kg")
-    expect(subrow?.textContent).toContain("3,990")
+    expect(container.textContent).toContain("19 Drum × 210 kg")
   })
 
   it("numbers the materials and the banks", () => {

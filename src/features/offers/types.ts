@@ -45,6 +45,8 @@ export type OfferDraft = {
   customerId: string
   /** Contact person printed in the "Attention" line, editable per offer. */
   attention: string
+  /** Customer tax ID, editable per offer. */
+  taxId?: string
   issueDate: string
   currency: string
   paymentTermId: string
@@ -53,7 +55,8 @@ export type OfferDraft = {
   otherTaxEnabled: boolean
   /** Fixed at 1% while the deduction is enabled, 0 otherwise. */
   otherTaxPercent: number
-  orderDiscount: number
+  /** Order discount percentage applied to the subtotal. */
+  orderDiscountPercent: number
   delivery: DeliveryBatch[]
   notes: string
   documentLanguage: DocumentLanguage
@@ -62,6 +65,10 @@ export type OfferDraft = {
 /** Packages of one material scheduled in a delivery batch. */
 export type DeliveryAllocation = {
   productId: string
+  packagingRowId?: string
+  packageTypeId?: string
+  packageTypeName?: string
+  weightPerPackageKg?: number
   packages: number
 }
 
@@ -80,6 +87,8 @@ export type Offer = {
   customerName: string
   /** Contact person printed in the "Attention" line of the document. */
   attention: string
+  /** Customer tax ID. */
+  taxId?: string
   issueDate: string
   dueDate: string
   currency: string
@@ -91,6 +100,8 @@ export type Offer = {
   otherTaxName: string
   otherTaxPercent: number
   orderDiscount: number
+  /** Order discount percentage applied to the subtotal. */
+  orderDiscountPercent: number
   extraExpenses: number
   advancePayment: number
   notes: string

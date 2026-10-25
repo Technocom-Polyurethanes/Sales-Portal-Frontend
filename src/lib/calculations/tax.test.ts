@@ -60,10 +60,11 @@ describe("tax calculations", () => {
     const totals = calculateTotals({
       subtotal: 100_000,
       taxPercent: 0,
-      orderDiscount: 5_000,
+      orderDiscountPercent: 5,
       extraExpenses: 2_500,
     })
 
+    expect(totals.orderDiscount).toBe(5_000)
     expect(totals.total).toBe(97_500)
   })
 

@@ -15,11 +15,6 @@ export default function Wordmark({
   className = "",
 }: WordmarkProps) {
   return (
-    <span
-      className={`inline-flex items-center gap-1 font-bold tracking-tight text-ink ${SIZES[size]} ${className}`}
-    >
-      TECHNOCOM
-      <span className="inline-block h-2 w-2 rounded-full bg-primary" />
-    </span>
+    <span className={`inline-flex items-center gap-1 font-bold tracking-tight text-ink ${SIZES[size]} ${className}`}> Sales Portal </span>
   )
 }

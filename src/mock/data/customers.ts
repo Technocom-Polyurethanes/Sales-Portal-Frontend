@@ -4,6 +4,8 @@ export const customers: Customer[] = [
   {
     id: "cust-1",
     code: "C-1001",
+    customerCode: "C-1001",
+    erpNextId: "ERP-C-1001",
     name: "Duravit Egypt for Sanitary Ware",
     nameAr: "شركة ديورافيت إيجيبت لصناعة الأدوات الصحية",
     contactPerson: "Nader William",
@@ -11,6 +13,7 @@ export const customers: Customer[] = [
     phone: "+20 10 1234 5678",
     city: "10th of Ramadan City",
     address: "10th of Ramadan City, Egypt",
+    taxId: "200-145-890",
     paymentTermId: "bank-transfer-purchase-order",
     offersCount: 24,
     totalValue: 4_286_500,

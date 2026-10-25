@@ -5,6 +5,7 @@ export const arabicTemplate: OfferTemplate = {
   title: "عرض سعر",
   billTo: "السادة / عنوان الشحن",
   attention: "عناية",
+  taxId: "رقم التسجيل الضريبي",
   reference: "المرجع",
   date: "التاريخ",
   terms: "شروط الدفع",

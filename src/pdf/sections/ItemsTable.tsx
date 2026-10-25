@@ -52,15 +52,13 @@ export default function ItemsTable({
               </td>
               <td>
                 <span className="doc-item-name">{line.name}</span>
-                <div className="doc-item-meta">
-                  <span className="doc-ltr">{line.code}</span>
-                </div>
               </td>
               <td className="doc-num">
-                <span className="doc-ltr">{formatNumber(line.quantityKg)}</span>
+                <span className="doc-ltr">{Math.round(line.quantityKg).toLocaleString("en-US")}</span>
               </td>
               <td className="doc-num">
-                <span className="doc-ltr">{formatNumber(line.ratePerKg)}</span>
+                <span className="doc-ltr">{formatNumber(line.ratePerKg)}</span>{" "}
+                {currency}
               </td>
               <td className="doc-num">
                 <span className="doc-ltr">{formatNumber(line.amount)}</span>{" "}
@@ -73,11 +71,7 @@ export default function ItemsTable({
                   <span className="doc-subrow-label">
                     {headings.packaging}:
                   </span>{" "}
-                  {line.packagingSummary} ={" "}
-                  <span className="doc-ltr">
-                    {formatNumber(line.quantityKg)}
-                  </span>{" "}
-                  {weightUnit}
+                  {line.packagingSummary}
                 </td>
               </tr>
             )}

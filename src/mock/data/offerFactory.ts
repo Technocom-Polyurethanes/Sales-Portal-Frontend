@@ -114,6 +114,7 @@ export function buildOffer(spec: OfferSpec): Offer {
     otherTaxEnabled: spec.otherTaxEnabled ?? false,
     otherTaxPercent: spec.otherTaxPercent ?? 0,
     advancePayment: spec.advancePayment ?? 0,
+    orderDiscountPercent: 0,
   })
 
   return {
@@ -131,7 +132,8 @@ export function buildOffer(spec: OfferSpec): Offer {
     otherTaxEnabled: spec.otherTaxEnabled ?? false,
     otherTaxName: "Other tax",
     otherTaxPercent: spec.otherTaxPercent ?? 0,
-    orderDiscount: 0,
+    orderDiscount: totals.orderDiscount,
+    orderDiscountPercent: totals.orderDiscountPercent,
     extraExpenses: 0,
     advancePayment: spec.advancePayment ?? 0,
     notes: spec.notes ?? "",

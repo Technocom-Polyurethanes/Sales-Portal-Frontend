@@ -38,10 +38,6 @@ export function createDraftLine(
     packageTypes.find((type) => type.id === product.defaultPackageTypeId) ??
     packageTypes[0]
 
-  const weight = product.availableSizesKg.includes(product.defaultWeightKg)
-    ? product.defaultWeightKg
-    : (packageType?.sizesKg[0] ?? product.defaultWeightKg)
-
   return {
     id: draftId("line"),
     productId: product.id,
@@ -50,7 +46,7 @@ export function createDraftLine(
     category: product.category,
     ratePerKg: product.referencePrice,
     discountPercent: 0,
-    packaging: packageType ? [createPackagingRow(packageType, weight)] : [],
+    packaging: packageType ? [createPackagingRow(packageType, product.defaultWeightKg)] : [],
   }
 }
 
@@ -62,6 +58,7 @@ export function createEmptyDraft(
     reference: "",
     customerId: "",
     attention: "",
+    taxId: "",
     issueDate: todayIso(),
     currency: "EGP",
     paymentTermId: "bank-transfer-purchase-order",
@@ -69,7 +66,7 @@ export function createEmptyDraft(
     taxPercent: 14,
     otherTaxEnabled: false,
     otherTaxPercent: 0,
-    orderDiscount: 0,
+    orderDiscountPercent: 0,
     delivery: [],
     notes: "",
     documentLanguage: "en",
@@ -111,6 +108,7 @@ export function draftToOffer(
     customerId: draft.customerId,
     customerName: customer?.name ?? "",
     attention: draft.attention.trim(),
+    taxId: draft.taxId ?? customer?.taxId ?? "",
     issueDate: draft.issueDate,
     dueDate: calculations.dueDate,
     currency: draft.currency,
@@ -121,7 +119,8 @@ export function draftToOffer(
     otherTaxEnabled: draft.otherTaxEnabled,
     otherTaxName: "",
     otherTaxPercent: draft.otherTaxPercent,
-    orderDiscount: draft.orderDiscount,
+    orderDiscount: calculations.totals.orderDiscount,
+    orderDiscountPercent: draft.orderDiscountPercent,
     extraExpenses: 0,
     advancePayment: 0,
     notes: draft.notes,
@@ -145,6 +144,7 @@ export function offerToDraft(offer: Offer): OfferDraft {
     reference: offer.reference,
     customerId: offer.customerId,
     attention: offer.attention ?? "",
+    taxId: offer.taxId ?? "",
     issueDate: offer.issueDate,
     currency: offer.currency,
     paymentTermId: offer.paymentTermId,
@@ -164,7 +164,7 @@ export function offerToDraft(offer: Offer): OfferDraft {
     taxPercent: offer.taxPercent,
     otherTaxEnabled: offer.otherTaxEnabled,
     otherTaxPercent: offer.otherTaxEnabled ? OTHER_TAX_PERCENT : 0,
-    orderDiscount: offer.orderDiscount,
+    orderDiscountPercent: offer.orderDiscountPercent ?? 0,
     delivery: offer.delivery.map((batch) => ({
       ...batch,
       id: draftId("batch"),

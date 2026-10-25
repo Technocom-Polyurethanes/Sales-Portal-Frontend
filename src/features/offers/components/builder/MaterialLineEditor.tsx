@@ -57,13 +57,25 @@ export default function MaterialLineEditor({
         <label className="flex flex-col gap-1 text-[13px] font-medium text-ink">
           {t("offers.builder.packaging.rate")}
           <Input
-            type="number"
-            min={0}
-            step={0.01}
-            value={line.ratePerKg}
-            onChange={(event) =>
-              onChange({ ratePerKg: Number(event.target.value) || 0 })
-            }
+            type="text"
+            inputMode="decimal"
+            value={line.ratePerKg === 0 ? "" : String(line.ratePerKg)}
+            onChange={(event) => {
+              const value = event.target.value.replace(/[^0-9.]/g, "")
+              if (value === "" || value === ".") {
+                onChange({ ratePerKg: 0 })
+                return
+              }
+              const parsed = Number(value)
+              if (!Number.isNaN(parsed)) {
+                onChange({ ratePerKg: parsed })
+              }
+            }}
+            onBlur={() => {
+              if (line.ratePerKg < 0) {
+                onChange({ ratePerKg: 0 })
+              }
+            }}
           />
         </label>
       </div>

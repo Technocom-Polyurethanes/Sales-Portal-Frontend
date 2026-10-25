@@ -5,6 +5,7 @@ export const englishTemplate: OfferTemplate = {
   title: "Offer",
   billTo: "Bill To / Ship To",
   attention: "Attention",
+  taxId: "Tax ID",
   reference: "Reference",
   date: "Date",
   terms: "Payment Terms",

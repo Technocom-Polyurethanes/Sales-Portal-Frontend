@@ -33,7 +33,6 @@ const product: Product = {
   category: "Polyol",
   defaultPackageTypeId: "drum",
   defaultWeightKg: 210,
-  availableSizesKg: [200, 210, 220, 250],
   referencePrice: 10,
 }
 

@@ -12,11 +12,15 @@
 .offer-document {
   --doc-ink: #1f2933;
   --doc-muted: #5b6670;
-  --doc-line: #ddd8d0;
+  --doc-line: #cbd5e1;
+  --doc-border: #cbd5e1;
   --doc-primary: #1f4e79;
   --doc-deduction: #984c3f;
 
   width: 180mm;
+  min-height: 257mm;
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
   background: #fff;
   color: var(--doc-ink);
@@ -170,14 +174,14 @@
 
 .offer-document .doc-table th {
   padding: 6px 8px;
-  border: 1px solid #cbd5e1;
-  background: #f1f5f9;
+  border: 1px solid #1e293b;
+  background: #1e293b;
   font-size: 7.5pt;
   font-weight: 700;
   letter-spacing: 0.3pt;
   text-transform: uppercase;
   text-align: start;
-  color: #1e293b;
+  color: #ffffff;
 }
 
 .offer-document .doc-table td {
@@ -254,14 +258,14 @@
   margin-inline-start: auto;
   margin-inline-end: 0;
   border-collapse: collapse;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--doc-border);
   border-radius: 4px;
   font-size: 8.5pt;
 }
 
 .offer-document .doc-totals th {
   padding: 6px 10px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--doc-border);
   background: #f1f5f9;
   text-align: start;
   font-weight: 600;
@@ -270,7 +274,7 @@
 
 .offer-document .doc-totals td {
   padding: 6px 10px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--doc-border);
   background: #fff;
   text-align: end;
   white-space: nowrap;
@@ -313,9 +317,9 @@
 }
 
 .offer-document .doc-footer {
-  margin-top: 8mm;
+  margin-top: auto;
   padding-top: 3mm;
-  border-top: 0.5pt solid var(--doc-line);
+  border-top: 0.5pt solid var(--doc-border);
   font-size: 7.5pt;
   text-align: center;
   color: var(--doc-muted);

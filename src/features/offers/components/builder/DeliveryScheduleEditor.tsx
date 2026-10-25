@@ -19,6 +19,7 @@ export type DeliveryScheduleEditorProps = {
     batchId: string,
     productId: string,
     packages: number,
+    packagingRowId?: string,
   ) => void
 }
 
@@ -63,10 +64,16 @@ export default function DeliveryScheduleEditor({
               0,
             )
             const batchWeight = batch.allocations.reduce(
-              (sum, allocation) =>
-                sum +
-                allocation.packages *
-                  (calculations.weightPerPackage[allocation.productId] ?? 0),
+              (sum, allocation) => {
+                const line = draft.lines.find(
+                  (item) => item.productId === allocation.productId,
+                )
+                const row = allocation.packagingRowId
+                  ? line?.packaging.find((item) => item.id === allocation.packagingRowId)
+                  : line?.packaging[0]
+                const weight = allocation.weightPerPackageKg ?? row?.weightPerPackageKg ?? calculations.weightPerPackage[allocation.productId] ?? 0
+                return sum + allocation.packages * weight
+              },
               0,
             )
 
@@ -91,10 +98,21 @@ export default function DeliveryScheduleEditor({
 
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-muted">
-                      {t("offers.builder.delivery.batchTotal", {
-                        count: formatNumber(batchPackages),
-                        weight: formatNumber(batchWeight),
-                      })}
+                      {(() => {
+                        const map = new Map<string, number>()
+                        for (const a of batch.allocations) {
+                          if (a.packages > 0) {
+                            const type = packageTypes.find((pt) => pt.id === a.packageTypeId)
+                            const label = language === "ar" ? type?.nameAr ?? a.packageTypeName ?? "" : type?.name ?? a.packageTypeName ?? ""
+                            map.set(label, (map.get(label) ?? 0) + a.packages)
+                          }
+                        }
+                        return Array.from(map.entries())
+                          .map(([label, count]) => `${count} ${label}`)
+                          .join(", ")
+                      })()}
+                      {batch.allocations.some((a) => a.packages > 0) ? " • " : ""}
+                      {formatNumber(batchWeight)} kg
                     </span>
                     <Button
                       variant="ghost"
@@ -110,26 +128,15 @@ export default function DeliveryScheduleEditor({
                 <div className="grid gap-3 pt-3 sm:grid-cols-2">
                   {materials.map((line) => {
                     const productId = line.productId
-                    const allocation = batch.allocations.find(
-                      (item) => item.productId === productId,
-                    )
-                    const current = allocation?.packages ?? 0
                     const ordered = calculations.ordered[productId] ?? 0
                     const scheduled = calculations.scheduled[productId] ?? 0
-                    const scheduledElsewhere = Math.max(0, scheduled - current)
-                    const maxForBatch = Math.max(
-                      0,
-                      ordered - scheduledElsewhere,
-                    )
                     const remaining = calculations.remaining[productId] ?? 0
                     const complete = remaining === 0 && ordered > 0
-                    const weight =
-                      current * (calculations.weightPerPackage[productId] ?? 0)
 
                     return (
                       <div
                         key={productId}
-                        className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-line-soft bg-page/50 px-3 py-2.5"
+                        className="flex flex-col gap-2 rounded-md border border-line-soft bg-page/50 px-3 py-2.5"
                       >
                         <div className="min-w-0">
                           <p className="truncate text-sm font-medium text-ink">
@@ -148,24 +155,80 @@ export default function DeliveryScheduleEditor({
                                   scheduled: formatNumber(scheduled),
                                 })}
                           </p>
-                          <p className="text-[11px] text-muted">
-                            {t("offers.builder.delivery.batchWeight", {
-                              count: formatNumber(current),
-                              unit: unitLabel(line),
-                              weight: formatNumber(weight),
-                            })}
-                          </p>
                         </div>
 
-                        <Stepper
-                          value={current}
-                          min={0}
-                          max={maxForBatch}
-                          onChange={(packages) =>
-                            onSetAllocation(batch.id, productId, packages)
-                          }
-                          ariaLabel={line.materialName}
-                        />
+                        <div className="flex flex-col gap-2">
+                          {line.packaging.map((row) => {
+                            const allocation = batch.allocations.find(
+                              (item) =>
+                                item.productId === productId &&
+                                (item.packagingRowId === row.id ||
+                                  (!item.packagingRowId && line.packaging[0]?.id === row.id)),
+                            )
+                            const current = allocation?.packages ?? 0
+                            const rowOrdered = row.packages
+                            const rowScheduledElsewhere = draft.delivery.reduce(
+                              (sum, b) =>
+                                b.id === batch.id
+                                  ? sum
+                                  : sum +
+                                    (b.allocations.find(
+                                      (item) =>
+                                        item.productId === productId &&
+                                        (item.packagingRowId === row.id ||
+                                          (!item.packagingRowId && line.packaging[0]?.id === row.id)),
+                                    )?.packages ?? 0),
+                              0,
+                            )
+                            const maxForBatch = Math.max(0, rowOrdered - rowScheduledElsewhere)
+                            const rowRemaining = Math.max(0, rowOrdered - rowScheduledElsewhere - current)
+                            const weight = current * row.weightPerPackageKg
+                            const type = packageTypes.find((item) => item.id === row.packageTypeId)
+                            const label = language === "ar" ? type?.nameAr ?? row.packageTypeName : type?.name ?? row.packageTypeName
+
+                            return (
+                              <div
+                                key={row.id}
+                                className="flex items-center justify-between gap-3 rounded-md border border-line bg-surface px-2.5 py-2"
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-sm font-semibold text-slate-900">
+                                    {label} ({row.weightPerPackageKg} kg)
+                                  </p>
+                                  <p className="truncate text-xs text-slate-500">
+                                    {rowRemaining === 0
+                                      ? `Fully scheduled (${formatNumber(weight)} kg)`
+                                      : `${current} / ${rowOrdered} scheduled (${formatNumber(weight)} kg) • ${rowRemaining} open`}
+                                  </p>
+                                </div>
+
+                                <div className="inline-flex shrink-0 items-center overflow-hidden rounded-lg border border-slate-300 bg-white">
+                                  <button
+                                    type="button"
+                                    className="flex h-9 w-9 items-center justify-center hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    disabled={current <= 0}
+                                    onClick={() => onSetAllocation(batch.id, productId, Math.max(0, current - 1), row.id)}
+                                  >
+                                    -
+                                  </button>
+                                  <input
+                                    className="h-9 w-16 border-x border-slate-300 text-center text-sm font-semibold focus:outline-none"
+                                    value={current}
+                                    readOnly
+                                  />
+                                  <button
+                                    type="button"
+                                    className="flex h-9 w-9 items-center justify-center hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    disabled={current >= maxForBatch}
+                                    onClick={() => onSetAllocation(batch.id, productId, Math.min(maxForBatch, current + 1), row.id)}
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
                     )
                   })}

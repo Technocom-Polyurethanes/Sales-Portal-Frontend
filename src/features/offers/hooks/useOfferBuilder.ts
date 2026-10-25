@@ -96,6 +96,24 @@ export function useOfferBuilder({
           }
         }
 
+        if (
+          patch.taxId === undefined &&
+          patch.customerId &&
+          patch.customerId !== current.customerId
+        ) {
+          const selected = customers.find(
+            (item) => item.id === patch.customerId,
+          )
+          if (current.taxId === undefined || current.taxId === "") {
+            next.taxId = selected?.taxId ?? ""
+          } else if (
+            customers.find((item) => item.id === current.customerId)?.taxId ===
+              current.taxId
+          ) {
+            next.taxId = selected?.taxId ?? ""
+          }
+        }
+
         return next
       })
     },
@@ -207,9 +225,16 @@ export function useOfferBuilder({
           id: draftId("batch"),
           batchNumber: current.delivery.length + 1,
           date: current.issueDate,
-          allocations: [
-            ...new Set(current.lines.map((line) => line.productId)),
-          ].map((productId) => ({ productId, packages: 0 })),
+          allocations: current.lines.flatMap((line) =>
+            line.packaging.map((row) => ({
+              productId: line.productId,
+              packagingRowId: row.id,
+              packageTypeId: row.packageTypeId,
+              packageTypeName: row.packageTypeName,
+              weightPerPackageKg: row.weightPerPackageKg,
+              packages: 0,
+            })),
+          ),
         },
       ],
     }))
@@ -237,39 +262,77 @@ export function useOfferBuilder({
   )
 
   const setAllocation = useCallback(
-    (batchId: string, productId: string, packages: number) => {
+    (
+      batchId: string,
+      productId: string,
+      packages: number,
+      packagingRowId?: string,
+    ) => {
       setDraftState((current) => {
-        const ordered = orderedPackages(current.lines, productId)
+        const line = current.lines.find((item) => item.productId === productId)
+        const row = packagingRowId
+          ? line?.packaging.find((item) => item.id === packagingRowId)
+          : line?.packaging[0]
+        const ordered = row?.packages ?? 0
         const scheduledElsewhere = current.delivery.reduce(
           (sum, batch) =>
             batch.id === batchId
               ? sum
               : sum +
                 (batch.allocations.find(
-                  (allocation) => allocation.productId === productId,
+                  (allocation) =>
+                    allocation.productId === productId &&
+                    (packagingRowId
+                      ? allocation.packagingRowId === packagingRowId
+                      : !allocation.packagingRowId),
                 )?.packages ?? 0),
           0,
         )
         const maxAllowed = Math.max(0, ordered - scheduledElsewhere)
         const safe = Number.isFinite(packages) ? packages : 0
-        const next = Math.min(maxAllowed, Math.max(0, safe))
+        const next = Math.min(maxAllowed, Math.max(0, Math.floor(safe)))
 
         return {
           ...current,
           delivery: current.delivery.map((batch) => {
             if (batch.id !== batchId) return batch
 
-            const exists = batch.allocations.some(
-              (allocation) => allocation.productId === productId,
-            )
-
-            const allocations = exists
-              ? batch.allocations.map((allocation) =>
+            const allocations = batch.allocations.map((allocation) => {
+              const match = packagingRowId
+                ? allocation.packagingRowId === packagingRowId &&
                   allocation.productId === productId
-                    ? { ...allocation, packages: next }
-                    : allocation,
-                )
-              : [...batch.allocations, { productId, packages: next }]
+                : allocation.productId === productId && !allocation.packagingRowId
+              if (!match) return allocation
+              return {
+                ...allocation,
+                productId,
+                packagingRowId: packagingRowId ?? row?.id,
+                packageTypeId: row?.packageTypeId ?? allocation.packageTypeId,
+                packageTypeName: row?.packageTypeName ?? allocation.packageTypeName,
+                weightPerPackageKg:
+                  row?.weightPerPackageKg ?? allocation.weightPerPackageKg,
+                packages: next,
+              }
+            })
+
+            const hasMatch = allocations.some((allocation) => {
+              const match = packagingRowId
+                ? allocation.packagingRowId === packagingRowId &&
+                  allocation.productId === productId
+                : allocation.productId === productId && !allocation.packagingRowId
+              return match
+            })
+
+            if (!hasMatch && row) {
+              allocations.push({
+                productId,
+                packagingRowId: row.id,
+                packageTypeId: row.packageTypeId,
+                packageTypeName: row.packageTypeName,
+                weightPerPackageKg: row.weightPerPackageKg,
+                packages: next,
+              })
+            }
 
             return { ...batch, allocations }
           }),

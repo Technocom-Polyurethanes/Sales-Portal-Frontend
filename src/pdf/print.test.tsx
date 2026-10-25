@@ -23,6 +23,7 @@ const data: OfferDocumentData = {
   lines: [],
   subtotal: 0,
   orderDiscount: 0,
+  orderDiscountPercent: 0,
   taxPercent: 14,
   taxAmount: 0,
   otherTaxEnabled: false,

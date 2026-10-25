@@ -1,6 +1,8 @@
 export type Customer = {
   id: string
   code: string
+  customerCode?: string
+  erpNextId?: string
   name: string
   nameAr?: string
   contactPerson: string
@@ -8,6 +10,7 @@ export type Customer = {
   phone: string
   city: string
   address: string
+  taxId?: string
   paymentTermId: string
   offersCount: number
   totalValue: number

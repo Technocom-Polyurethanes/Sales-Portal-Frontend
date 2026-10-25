@@ -28,30 +28,43 @@ export default function StepTaxes({ draft, totals, onChange }: StepTaxesProps) {
           >
             <Input
               id="offer-tax"
-              type="number"
-              min={0}
-              max={100}
-              step={0.5}
-              value={draft.taxPercent}
-              onChange={(event) =>
-                onChange({ taxPercent: Number(event.target.value) || 0 })
-              }
+              type="text"
+              inputMode="decimal"
+              value={draft.taxPercent === 0 ? "" : String(draft.taxPercent)}
+              onChange={(event) => {
+                const value = event.target.value.replace(/[^0-9.]/g, "")
+                if (value === "" || value === ".") {
+                  onChange({ taxPercent: 0 })
+                  return
+                }
+                const parsed = Number(value)
+                if (!Number.isNaN(parsed)) {
+                  onChange({ taxPercent: Math.min(Math.max(parsed, 0), 100) })
+                }
+              }}
             />
           </Field>
 
           <Field
-            label={t("offers.builder.taxes.orderDiscount")}
+            label={`${t("offers.builder.taxes.orderDiscount")} (%)`}
             htmlFor="offer-discount"
           >
             <Input
               id="offer-discount"
-              type="number"
-              min={0}
-              step={0.01}
-              value={draft.orderDiscount}
-              onChange={(event) =>
-                onChange({ orderDiscount: Number(event.target.value) || 0 })
-              }
+              type="text"
+              inputMode="decimal"
+              value={draft.orderDiscountPercent === 0 ? "" : String(draft.orderDiscountPercent)}
+              onChange={(event) => {
+                const value = event.target.value.replace(/[^0-9.]/g, "")
+                if (value === "" || value === ".") {
+                  onChange({ orderDiscountPercent: 0 })
+                  return
+                }
+                const parsed = Number(value)
+                if (!Number.isNaN(parsed)) {
+                  onChange({ orderDiscountPercent: Math.min(Math.max(parsed, 0), 100) })
+                }
+              }}
             />
           </Field>
         </div>

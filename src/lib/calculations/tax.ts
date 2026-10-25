@@ -17,8 +17,8 @@ export type TotalsInput = {
   otherTaxEnabled?: boolean
   /** Amount already paid by the customer. */
   advancePayment?: number
-  /** Order level discount applied before taxes. */
-  orderDiscount?: number
+  /** Order level discount percentage applied before taxes. */
+  orderDiscountPercent?: number
   /** Extra expenses added before taxes. */
   extraExpenses?: number
 }
@@ -29,6 +29,9 @@ export type Totals = {
   taxAmount: number
   otherTaxPercent: number
   otherTaxAmount: number
+  /** Order level discount percentage. */
+  orderDiscountPercent: number
+  /** Order level discount amount. */
   orderDiscount: number
   extraExpenses: number
   total: number
@@ -63,7 +66,8 @@ export function calculateTotals(input: TotalsInput): Totals {
   const otherTaxPercent = input.otherTaxEnabled
     ? normalizePercent(input.otherTaxPercent ?? 0)
     : 0
-  const orderDiscount = roundMoney(input.orderDiscount ?? 0)
+  const orderDiscountPercent = normalizePercent(input.orderDiscountPercent ?? 0)
+  const orderDiscount = roundMoney((subtotal * orderDiscountPercent) / 100)
   const extraExpenses = roundMoney(input.extraExpenses ?? 0)
   const advancePayment = roundMoney(input.advancePayment ?? 0)
 
@@ -80,6 +84,7 @@ export function calculateTotals(input: TotalsInput): Totals {
     taxAmount,
     otherTaxPercent,
     otherTaxAmount,
+    orderDiscountPercent,
     orderDiscount,
     extraExpenses,
     total,
