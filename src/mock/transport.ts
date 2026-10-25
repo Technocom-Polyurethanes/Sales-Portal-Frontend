@@ -111,6 +111,12 @@ const routes: Route[] = [
     segments: ["offers"],
     handle: ({ body }) => {
       const offer = structuredClone(body) as Offer
+      if (offer.reference) {
+        const exists = db.offers.some((o) => o.reference === offer.reference)
+        if (exists) {
+          throw new ApiError("Reference already exists", 409)
+        }
+      }
       offer.id = `offer-${Date.now()}`
       offer.createdAt = new Date().toISOString()
       db.offers.unshift(offer)

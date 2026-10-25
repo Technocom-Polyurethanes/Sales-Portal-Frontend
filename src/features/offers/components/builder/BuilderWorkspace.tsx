@@ -123,6 +123,10 @@ export default function BuilderWorkspace({
       setError(t("offers.builder.validation.customer"))
       return false
     }
+    if (!draft.reference?.trim()) {
+      setError("Reference is required")
+      return false
+    }
     if (draft.lines.length === 0) {
       setError(t("offers.builder.validation.lines"))
       return false
