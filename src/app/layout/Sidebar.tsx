@@ -4,6 +4,7 @@ import { NAV_ITEMS } from "../navigation"
 import { useTranslation } from "../../i18n/I18nProvider"
 import Icon from "../../components/ui/Icon"
 import Wordmark from "../../components/ui/Wordmark"
+import Button from "../../components/ui/Button"
 import { useSession } from "../../features/account/hooks/useSession"
 
 export type SidebarProps = {
@@ -18,7 +19,7 @@ export default function Sidebar({
   offersCount,
 }: SidebarProps) {
   const { t } = useTranslation()
-  const { user } = useSession()
+  const { user, signOut } = useSession()
 
   return (
     <aside className="flex h-full w-60 flex-col border-e border-line bg-surface">
@@ -82,11 +83,11 @@ export default function Sidebar({
           className="flex items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-page"
         >
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold text-primary">
-            {user?.initials ?? "AA"}
+            {user?.initials ?? ""}
           </span>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-medium text-ink">
-              {user?.name ?? "Amgad Anwar"}
+              {user?.name ?? ""}
             </span>
             <span className="block truncate text-xs text-muted">
               {t("shell.salesTeam")}

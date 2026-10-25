@@ -14,8 +14,8 @@ export type LoginScreenProps = {
 
 export default function LoginScreen({ onLogin }: LoginScreenProps) {
   const { t, language, toggleLanguage } = useTranslation()
-  const [username, setUsername] = useState("Amgad.Anwar")
-  const [password, setPassword] = useState("password")
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
   const [loading, setLoading] = useState(false)
