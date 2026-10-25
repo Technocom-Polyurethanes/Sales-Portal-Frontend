@@ -44,7 +44,7 @@ export default function StepBasics({
         >
           <button
             type="button"
-            className="flex w-full items-center justify-between rounded-md border border-line bg-surface px-3 py-2 text-left"
+            className="flex w-full items-center justify-between rounded-md border border-line bg-surface px-3 py-2 text-start"
             onClick={() => setOpen(true)}
           >
             <span className="text-sm text-ink">

@@ -37,6 +37,8 @@ export type DraftCalculations = {
   ordered: Record<string, number>
   /** Average weight of one package per product, used by the delivery weights. */
   weightPerPackage: Record<string, number>
+  scheduledByRow?: Record<string, number>
+  orderedByRow?: Record<string, number>
 }
 
 /** Packages of one material across every line that uses it. */
@@ -136,8 +138,8 @@ export function calculateDraft(draft: OfferDraft): DraftCalculations {
     remaining,
     ordered,
     weightPerPackage,
+    scheduledByRow,
+    orderedByRow,
   }
-  ;(result as any).scheduledByRow = scheduledByRow
-  ;(result as any).orderedByRow = orderedByRow
   return result
 }

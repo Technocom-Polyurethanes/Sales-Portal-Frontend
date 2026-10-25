@@ -192,33 +192,33 @@ export default function DeliveryScheduleEditor({
                                 className="flex items-center justify-between gap-3 rounded-md border border-line bg-surface px-2.5 py-2"
                               >
                                 <div className="min-w-0 flex-1">
-                                  <p className="truncate text-sm font-semibold text-slate-900">
+                                  <p className="truncate text-sm font-semibold text-ink">
                                     {label} ({row.weightPerPackageKg} kg)
                                   </p>
-                                  <p className="truncate text-xs text-slate-500">
+                                  <p className="truncate text-xs text-muted">
                                     {rowRemaining === 0
-                                      ? `Fully scheduled (${formatNumber(weight)} kg)`
+                                      ? `${t("offers.builder.delivery.fullyScheduled")} (${formatNumber(weight)} kg)`
                                       : `${current} / ${rowOrdered} scheduled (${formatNumber(weight)} kg) • ${rowRemaining} open`}
                                   </p>
                                 </div>
 
-                                <div className="inline-flex shrink-0 items-center overflow-hidden rounded-lg border border-slate-300 bg-white">
+                                <div className="inline-flex shrink-0 items-center overflow-hidden rounded-lg border border-line bg-surface">
                                   <button
                                     type="button"
-                                    className="flex h-9 w-9 items-center justify-center hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    className="flex h-9 w-9 items-center justify-center hover:bg-page disabled:opacity-40 disabled:cursor-not-allowed"
                                     disabled={current <= 0}
                                     onClick={() => onSetAllocation(batch.id, productId, Math.max(0, current - 1), row.id)}
                                   >
                                     -
                                   </button>
                                   <input
-                                    className="h-9 w-16 border-x border-slate-300 text-center text-sm font-semibold focus:outline-none"
+                                    className="h-9 w-16 border-x border-line text-center text-sm font-semibold focus:outline-none"
                                     value={current}
                                     readOnly
                                   />
                                   <button
                                     type="button"
-                                    className="flex h-9 w-9 items-center justify-center hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    className="flex h-9 w-9 items-center justify-center hover:bg-page disabled:opacity-40 disabled:cursor-not-allowed"
                                     disabled={current >= maxForBatch}
                                     onClick={() => onSetAllocation(batch.id, productId, Math.min(maxForBatch, current + 1), row.id)}
                                   >
