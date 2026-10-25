@@ -40,8 +40,7 @@
 
   .offer-document {
     width: 100%;
-    max-width: 180mm;
-    min-height: 257mm;
+    max-width: var(--content-w, 180mm);
   }
 
   .offer-document thead {

@@ -9,6 +9,15 @@
  * match exactly.
  */
 
+:root {
+  --page-w: 210mm;
+  --page-h: 297mm;
+  --page-margin: 15mm;
+  --content-w: 180mm;
+  --content-h: 267mm;
+  --page-width: var(--page-w);
+}
+
 .offer-document {
   --doc-ink: #1f2933;
   --doc-muted: #5b6670;
@@ -17,8 +26,7 @@
   --doc-primary: #1f4e79;
   --doc-deduction: #984c3f;
 
-  width: 180mm;
-  min-height: 257mm;
+  width: var(--content-w);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
