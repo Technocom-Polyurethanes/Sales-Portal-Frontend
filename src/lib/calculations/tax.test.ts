@@ -68,6 +68,12 @@ describe("tax calculations", () => {
     expect(totals.total).toBe(97_500)
   })
 
+  it("taxes the amount after the order discount", () => {
+    const totals = calculateTotals({ subtotal: 100_000, taxPercent: 14, orderDiscountPercent: 5 })
+    expect(totals.taxAmount).toBe(13_300)
+    expect(totals.total).toBe(108_300)
+  })
+
   it("rounds money to two decimals", () => {
     const totals = calculateTotals({ subtotal: 1_000.005, taxPercent: 14 })
     expect(totals.taxAmount).toBe(140.0)
