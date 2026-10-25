@@ -38,9 +38,13 @@ export default function MaterialPicker({
         materials={products}
         existingProductIds={existingProductIds}
         onSelect={(product) => {
+          if (existingProductIds.includes(product.id)) {
+            setOpen(false)
+            return
+          }
           onAdd(product)
-          setOpen(false)}
-        }
+          setOpen(false)
+        }}
         onClose={() => setOpen(false)}
       />
     </div>
