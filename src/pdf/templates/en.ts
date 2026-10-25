@@ -33,5 +33,4 @@ export const englishTemplate: OfferTemplate = {
   iban: "IBAN",
   currency: "Currency",
   notes: "Notes",
-  page: "Page 1 of 1",
 }

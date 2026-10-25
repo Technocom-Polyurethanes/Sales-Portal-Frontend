@@ -214,7 +214,7 @@ export default function OfferDocument({ data, language }: OfferDocumentProps) {
       <NotesBlock heading={template.notes} notes={data.notes} />
 
       <footer className="doc-footer">
-        {arabic ? data.companyNameAr : data.companyName} · {template.page}
+        {arabic ? data.companyNameAr : data.companyName}
       </footer>
     </article>
   )

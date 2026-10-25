@@ -32,7 +32,6 @@ export type OfferTemplate = {
   iban: string
   currency: string
   notes: string
-  page: string
 }
 
 /** Everything the document needs, already calculated by the feature layer. */

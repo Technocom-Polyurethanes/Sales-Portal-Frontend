@@ -33,5 +33,4 @@ export const arabicTemplate: OfferTemplate = {
   iban: "آيبان",
   currency: "العملة",
   notes: "ملاحظات",
-  page: "صفحة 1 من 1",
 }
