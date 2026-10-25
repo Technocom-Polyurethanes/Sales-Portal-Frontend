@@ -1,4 +1,4 @@
-import { totalPackages } from "../../lib/calculations/packaging"
+
 import { roundMoney } from "../../lib/calculations/round"
 import { translateCategory } from "../../pdf/format"
 import { formatPackagingSummaryDocument } from "../../pdf/format"
@@ -181,36 +181,7 @@ export function buildDocumentData(
   }
 }
 
-/**
- * Average weight of one package per material. A material may mix packaging
- * types, so the kilograms of a batch follow its share of the ordered packages.
- */
-function perPackageWeights(
-  lines: DocumentSource["lines"],
-): Map<string, number> {
-  const packages = new Map<string, number>()
-  const kilograms = new Map<string, number>()
 
-  for (const line of lines) {
-    packages.set(
-      line.productId,
-      (packages.get(line.productId) ?? 0) + totalPackages(line.packaging),
-    )
-    kilograms.set(
-      line.productId,
-      (kilograms.get(line.productId) ?? 0) + line.quantityKg,
-    )
-  }
-
-  const weights = new Map<string, number>()
-  for (const [productId, count] of packages) {
-    weights.set(
-      productId,
-      count > 0 ? (kilograms.get(productId) ?? 0) / count : 0,
-    )
-  }
-  return weights
-}
 
 /** The document source of an offer that is already stored. */
 export function offerToDocumentSource(offer: Offer): DocumentSource {
