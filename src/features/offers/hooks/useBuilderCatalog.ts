@@ -1,4 +1,5 @@
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
+import { api } from "../../../lib/api/client"
 import { customersApi } from "../../customers/api"
 import type { Customer } from "../../customers/types"
 import { productsApi } from "../../products/api"
@@ -8,36 +9,66 @@ import type {
   BankAccount,
   CompanySettings,
   PackageType,
+  PaymentTerm,
 } from "../../settings/types"
 import { offersApi } from "../api"
 
-/** Everything the builder needs to know about the workspace. */
 export type BuilderCatalog = {
   customers: Customer[]
   products: Product[]
   packageTypes: PackageType[]
+  paymentTerms: PaymentTerm[]
   company: CompanySettings
   banks: BankAccount[]
   sequence: number
+  workspaceSettings?: Record<string, unknown>
 }
 
-/** Loads the catalogue used by the offer builder in one round trip. */
 export function useBuilderCatalog() {
   return useAsyncData<BuilderCatalog>(async () => {
-    const [customers, products, settings, sequence] = await Promise.all([
-      customersApi.list(),
-      productsApi.list(),
-      settingsApi.load(),
-      offersApi.nextSequence(),
-    ])
+    try {
+      const bootstrap: any = await api
+        .get<any>("/catalog/bootstrap")
+        .catch(() => api.get<any>("/settings/bootstrap"))
+      const [customers, products, sequence] = await Promise.all([
+        customersApi.list().catch(() => []),
+        productsApi.list().catch(() => []),
+        offersApi.nextSequence().catch(() => 1),
+      ])
 
-    return {
-      customers,
-      products,
-      packageTypes: settings.packageTypes,
-      company: settings.company,
-      banks: settings.banks,
-      sequence,
+      return {
+        customers: Array.isArray(customers) ? customers : [],
+        products: Array.isArray(products) ? products : [],
+        packageTypes:
+          bootstrap.packageTypes ??
+          bootstrap.packageTypesList ??
+          bootstrap.packagingTypes ??
+          [],
+        paymentTerms: bootstrap.paymentTerms ?? [],
+        company: bootstrap.companySettings ?? bootstrap.company ?? {},
+        banks: bootstrap.bankAccounts ?? bootstrap.banks ?? [],
+        sequence: typeof sequence === "number" ? sequence : Number(sequence) || 1,
+        workspaceSettings: bootstrap.workspaceSettings ?? bootstrap,
+      }
+    } catch {
+      const [customers, products, settings, sequence] = await Promise.all([
+        customersApi.list().catch(() => []),
+        productsApi.list().catch(() => []),
+        settingsApi.load().catch(() => ({} as any)),
+        offersApi.nextSequence().catch(() => 1),
+      ])
+
+      return {
+        customers: Array.isArray(customers) ? customers : [],
+        products: Array.isArray(products) ? products : [],
+        packageTypes: settings?.packageTypes ?? [],
+        paymentTerms: settings?.paymentTerms ?? [],
+        company: settings?.company ?? {},
+        banks: settings?.banks ?? [],
+        sequence: typeof sequence === "number" ? sequence : Number(sequence) || 1,
+      }
+
     }
   }, [])
 }
+

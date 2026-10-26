@@ -5,6 +5,7 @@ import Input from "../ui/Input"
 import { useTranslation } from "../../i18n/I18nProvider"
 import { queryCustomers } from "../../lib/api/lookup"
 import { useFitRowsPageSize } from "../../hooks/useFitRowsPageSize"
+import { api } from "../../lib/api/client"
 import type { Customer } from "../../features/customers/types"
 
 export type CustomerPickerModalProps = {
@@ -27,12 +28,54 @@ export default function CustomerPickerModal({
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const pageSize = useFitRowsPageSize(containerRef, 44, 48, 0, open)
+  const [remoteItems, setRemoteItems] = useState<Customer[] | null>(null)
+  const [remoteTotalCount, setRemoteTotalCount] = useState(0)
+  const [remoteTotalPages, setRemoteTotalPages] = useState(1)
+  const [useRemote, setUseRemote] = useState(true)
+
+  useEffect(() => {
+    if (!open) {
+      setRemoteItems(null)
+      return
+    }
+    if (!useRemote) return
+    const controller = new AbortController()
+    const timeout = window.setTimeout(async () => {
+      try {
+        const response: any = await api.get<any>("/customers/lookup", {
+          search: search || undefined,
+          page,
+          pageSize,
+        })
+        if (controller.signal.aborted) return
+        const items = Array.isArray(response)
+          ? response
+          : response.items ?? response.data ?? []
+        const totalCount =
+          response.totalCount ?? response.total ?? items.length
+        const totalPages =
+          response.totalPages ??
+          (Array.isArray(response) ? 1 : Math.max(1, Math.ceil(totalCount / pageSize)))
+        setRemoteItems(items)
+        setRemoteTotalCount(totalCount)
+        setRemoteTotalPages(totalPages)
+      } catch {
+        if (controller.signal.aborted) return
+        setUseRemote(false)
+      }
+    }, 200)
+    return () => {
+      controller.abort()
+      window.clearTimeout(timeout)
+    }
+  }, [open, search, page, pageSize, useRemote])
 
   useEffect(() => {
     if (open) {
       setSearch("")
       setPage(1)
       setHighlight(0)
+      setRemoteItems(null)
       setTimeout(() => inputRef.current?.focus(), 0)
     }
   }, [open])
@@ -42,10 +85,23 @@ export default function CustomerPickerModal({
     setHighlight(0)
   }, [search, pageSize])
 
-  const result = useMemo(
-    () => queryCustomers(customers, { search, page, pageSize }),
-    [customers, search, page, pageSize],
-  )
+  const result = useMemo(() => {
+    if (useRemote && remoteItems) {
+      const totalCount = remoteTotalCount || remoteItems.length
+      const totalPages = remoteTotalPages || 1
+      const currentPage = Math.min(Math.max(1, page), totalPages)
+      return {
+        items: remoteItems,
+        page: currentPage,
+        pageSize,
+        totalCount,
+        totalPages,
+      }
+    }
+    const local = queryCustomers(customers, { search, page, pageSize })
+    return local
+  }, [customers, page, pageSize, remoteItems, remoteTotalCount, remoteTotalPages, search, useRemote])
+
 
   const start = result.totalCount === 0 ? 0 : (result.page - 1) * result.pageSize + 1
   const end = Math.min(result.page * result.pageSize, result.totalCount)

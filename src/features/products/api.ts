@@ -3,6 +3,9 @@ import type { Product } from "./types"
 
 export const productsApi = {
   list(search = ""): Promise<Product[]> {
-    return api.get<Product[]>("/products", { search })
+    return api.get<Product[]>("/materials", { search }).catch(() =>
+      api.get<Product[]>("/products", { search }),
+    )
   },
 }
+

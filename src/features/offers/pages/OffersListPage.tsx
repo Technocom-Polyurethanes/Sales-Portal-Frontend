@@ -146,20 +146,6 @@ export default function OffersListPage() {
             {t(`offers.status.${option}`)}
           </button>
         ))}
-
-        <div className="relative ms-auto w-full sm:w-64">
-          <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-muted">
-            <Icon name="search" size={16} />
-          </span>
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder={t("shell.searchPlaceholder")}
-            aria-label={t("shell.searchPlaceholder")}
-            className="h-9 w-full rounded-md border border-line bg-surface ps-9 pe-3 text-sm text-ink placeholder:text-muted/70 focus:border-primary"
-          />
-        </div>
       </div>
 
       <div className="rounded-lg border border-line bg-surface">
@@ -188,6 +174,11 @@ export default function OffersListPage() {
               />
             }
           />
+        )}
+        {!loading && (offers ?? []).length === 0 && (
+          <div className="border-t border-line px-6 py-8 text-center text-sm text-muted">
+            {t("offers.list.empty")}
+          </div>
         )}
 
         {!loading && offers && offers.length > 0 && (

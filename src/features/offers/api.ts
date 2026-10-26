@@ -24,8 +24,12 @@ export const offersApi = {
   },
   /** The sequence number the next issued offer will use. */
   nextSequence(): Promise<number> {
-    return api.get<number>("/offers/next-sequence")
+    return api
+      .get<number>("/offers/next-sequence")
+      .catch(() => api.get<number>("/offers/next/sequence"))
+      .catch(() => 1)
   },
+
   /** The offer and every version created from it, oldest first. */
   versions(id: string): Promise<Offer[]> {
     return api.get<Offer[]>(`/offers/${id}/versions`)

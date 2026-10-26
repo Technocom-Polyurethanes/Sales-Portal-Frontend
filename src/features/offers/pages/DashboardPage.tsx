@@ -45,17 +45,13 @@ export default function DashboardPage() {
   }
 
   const stats = useMemo<StatCard[]>(() => {
-    const list = offers ?? []
+    const safeList: any[] = Array.isArray(offers) ? (offers as any[]) : ((offers as any)?.items ?? [])
     const monthKey = new Date().toISOString().slice(0, 7)
-    const thisMonth = list.filter((offer) =>
-      offer.issueDate.startsWith(monthKey),
-    ).length
-    const totalValue = list.reduce((sum, offer) => sum + offer.totals.total, 0)
-    const closed = list.filter(
-      (offer) => offer.status === "accepted" || offer.status === "rejected",
-    )
-    const accepted = list.filter((offer) => offer.status === "accepted")
-    const awaiting = list.filter((offer) => offer.status === "issued")
+    const thisMonth = safeList.filter((offer: any) => offer?.issueDate?.startsWith(monthKey)).length
+    const totalValue = safeList.reduce((sum: number, offer: any) => sum + (offer?.totals?.total || 0), 0)
+    const closed = safeList.filter((offer: any) => offer?.status === "accepted" || offer?.status === "rejected")
+    const accepted = safeList.filter((offer: any) => offer?.status === "accepted")
+    const awaiting = safeList.filter((offer: any) => offer?.status === "issued")
 
     return [
       {
@@ -185,9 +181,9 @@ export default function DashboardPage() {
         ) : (
           <DataTable
             columns={columns}
-            rows={(offers ?? []).slice(0, 5)}
-            rowKey={(offer) => offer.id}
-            onRowClick={(offer) => navigate(`/offers/${offer.id}`)}
+            rows={(Array.isArray(offers) ? (offers as any[]) : ((offers as any)?.items ?? [])).slice(0, 5)}
+            rowKey={(offer: any) => offer.id}
+            onRowClick={(offer: any) => navigate(`/offers/${offer.id}`)}
           />
         )}
       </section>
