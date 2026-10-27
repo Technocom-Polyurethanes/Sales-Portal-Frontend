@@ -66,19 +66,9 @@ export default function Topbar({ onOpenMenu, onOpenHelp }: TopbarProps) {
           className="flex h-9 items-center gap-1 rounded-md border border-line px-3 text-xs font-medium text-ink transition-colors hover:bg-page"
         >
           {language === "ar" ? "EN" : "العربية"}
-          <span className="text-muted">⌄</span>
         </button>
 
         <span className="hidden h-6 w-px bg-line sm:block" />
-
-        <button
-          type="button"
-          onClick={onOpenHelp}
-          aria-label={t("shell.needHelp")}
-          className="hidden rounded-md p-2 text-muted transition-colors hover:bg-page hover:text-ink sm:block"
-        >
-          <Icon name="help" size={19} />
-        </button>
 
         <button
           type="button"

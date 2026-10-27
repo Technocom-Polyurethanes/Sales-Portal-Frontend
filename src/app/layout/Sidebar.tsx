@@ -57,26 +57,6 @@ export default function Sidebar({
       </nav>
 
       <div className="mt-auto flex flex-col gap-3 px-4 pb-4">
-        <div className="rounded-lg border border-line bg-page p-4">
-          <span className="text-primary">
-            <Icon name="help" size={18} />
-          </span>
-          <p className="mt-2 text-sm font-semibold text-ink">
-            {t("shell.littleHelp")}
-          </p>
-          <p className="mt-1 text-xs leading-relaxed text-muted">
-            {t("shell.helpText")}
-          </p>
-          <button
-            type="button"
-            onClick={onOpenHelp}
-            className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-primary transition-colors hover:text-primary-hover"
-          >
-            {t("shell.openHelpCenter")}
-            <Icon name="arrow" size={14} />
-          </button>
-        </div>
-
         <NavLink
           to="/account"
           onClick={onNavigate}
