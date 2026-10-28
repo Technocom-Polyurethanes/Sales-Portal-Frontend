@@ -2,8 +2,10 @@ import { AppProviders } from "./providers/AppProviders"
 import { AppRouter } from "./router"
 
 async function setupTransport() {
-  const mode = import.meta.env.VITE_API_MODE
-  if (mode === "mock") {
+  const useMock =
+    import.meta.env.VITE_USE_MOCK === "true" ||
+    import.meta.env.VITE_API_MODE === "mock"
+  if (useMock) {
     await import("@/mock")
     return
   }
@@ -24,4 +26,5 @@ export default function App() {
     </AppProviders>
   )
 }
+
 

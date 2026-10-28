@@ -8,6 +8,7 @@ import EmptyState from "../../../components/ui/EmptyState"
 import Icon from "../../../components/ui/Icon"
 import Spinner from "../../../components/ui/Spinner"
 import PageHeader from "../../../app/layout/PageHeader"
+import TableState from "../../../components/TableState"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import { formatCurrency } from "../../../lib/formatters"
 import { localeForLanguage } from "../../../lib/formatters/locale"
@@ -115,6 +116,16 @@ export default function OffersListPage() {
     setSearchParams(next, { replace: true })
   }
 
+  const offersList = offers ?? []
+  const hasActiveFilters = search.trim() !== "" || status !== "all"
+  const tableState = loading
+    ? "loading"
+    : offersList.length === 0 && hasActiveFilters
+      ? "empty-results"
+      : offersList.length === 0
+        ? "empty-data"
+        : "data"
+
   return (
     <>
       <PageHeader
@@ -149,41 +160,27 @@ export default function OffersListPage() {
       </div>
 
       <div className="rounded-lg border border-line bg-surface">
-        {loading ? (
-          <div className="flex justify-center py-16">
-            <Spinner size={26} />
-          </div>
-        ) : (
+        <TableState
+          state={tableState}
+          query={search}
+          onClearSearch={() => setSearch("")}
+          onClearFilters={() => setStatus("all")}
+          createLabel={t("offers.list.create")}
+          onCreate={() => navigate("/offers/new")}
+          emptyTitle={t("offers.list.empty")}
+          emptyDescription={t("offers.list.subtitle")}
+        >
           <DataTable
             columns={columns}
-            rows={offers ?? []}
+            rows={offersList}
             rowKey={(offer) => offer.id}
             onRowClick={(offer) => navigate(`/offers/${offer.id}`)}
-            empty={
-              <EmptyState
-                title={t("offers.list.empty")}
-                icon={<Icon name="offers" size={30} />}
-                action={
-                  <Button
-                    variant="primary"
-                    onClick={() => navigate("/offers/new")}
-                  >
-                    {t("offers.list.create")}
-                  </Button>
-                }
-              />
-            }
           />
-        )}
-        {!loading && (offers ?? []).length === 0 && (
-          <div className="border-t border-line px-6 py-8 text-center text-sm text-muted">
-            {t("offers.list.empty")}
-          </div>
-        )}
+        </TableState>
 
-        {!loading && offers && offers.length > 0 && (
+        {!loading && offersList.length > 0 && (
           <div className="flex items-center justify-between border-t border-line px-4 py-3 text-xs text-muted">
-            <span>{t("offers.list.count", { count: offers.length })}</span>
+            <span>{t("offers.list.count", { count: offersList.length })}</span>
             <span>{t("common.page", { page: 1, pages: 1 })}</span>
           </div>
         )}

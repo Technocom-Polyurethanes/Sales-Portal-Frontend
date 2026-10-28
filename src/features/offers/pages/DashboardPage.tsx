@@ -7,6 +7,7 @@ import DataTable, { type Column } from "../../../components/ui/DataTable"
 import Icon from "../../../components/ui/Icon"
 import Spinner from "../../../components/ui/Spinner"
 import PageHeader from "../../../app/layout/PageHeader"
+import TableState from "../../../components/TableState"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import {
   formatCompactNumber,
@@ -174,18 +175,26 @@ export default function DashboardPage() {
           </Button>
         </header>
 
-        {loading ? (
-          <div className="flex justify-center py-16">
-            <Spinner size={26} />
-          </div>
-        ) : (
+        <TableState
+          state={
+            loading
+              ? "loading"
+              : ((Array.isArray(offers) ? (offers as any[]) : ((offers as any)?.items ?? [])).length === 0)
+                ? "empty-data"
+                : "data"
+          }
+          createLabel={t("offers.list.create")}
+          onCreate={() => navigate("/offers/new")}
+          emptyTitle={t("offers.list.empty")}
+          emptyDescription={t("dashboard.subtitle")}
+        >
           <DataTable
             columns={columns}
             rows={(Array.isArray(offers) ? (offers as any[]) : ((offers as any)?.items ?? [])).slice(0, 5)}
             rowKey={(offer: any) => offer.id}
             onRowClick={(offer: any) => navigate(`/offers/${offer.id}`)}
           />
-        )}
+        </TableState>
       </section>
     </>
   )

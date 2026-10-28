@@ -1,4 +1,5 @@
 import type { Transport } from "./types"
+import { ApiError } from "./types"
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5000/api"
@@ -95,7 +96,7 @@ async function handleResponse(response: Response): Promise<unknown> {
     if (typeof window !== "undefined") {
       window.location.href = "/login"
     }
-    throw new Error("Unauthorized")
+    throw new ApiError("Unauthorized", 401)
   }
 
   const contentType = response.headers.get("content-type") ?? ""
@@ -112,18 +113,27 @@ async function handleResponse(response: Response): Promise<unknown> {
   }
 
   if (!response.ok) {
-    const message =
-      typeof data === "object" && data && "message" in data
-        ? String((data as any).message)
-        : typeof data === "object" && data && "title" in data
-          ? String((data as any).title)
-          : typeof data === "string" && data
-            ? data
-            : `Request failed with status ${response.status}`
-    const error: any = new Error(message)
-    error.status = response.status
-    error.data = data
-    throw error
+    if (typeof data === "object" && data) {
+      const problem = data as any
+      const message =
+        problem.detail ||
+        problem.title ||
+        problem.message ||
+        `Request failed with status ${response.status}`
+      const fieldErrors =
+        problem.errors && typeof problem.errors === "object"
+          ? problem.errors
+          : undefined
+      throw new ApiError(message, response.status, {
+        title: problem.title,
+        detail: problem.detail,
+        errors: fieldErrors,
+      })
+    }
+    if (typeof data === "string" && data) {
+      throw new ApiError(data, response.status)
+    }
+    throw new ApiError(`Request failed with status ${response.status}`, response.status)
   }
 
   return data
