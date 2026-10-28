@@ -114,5 +114,38 @@ export type Offer = {
   createdAt: string
 }
 
+export type OfferListItem = {
+  id: string
+  reference: string
+  serialNumber: number
+  version: number
+  customerId: string
+  customerName: string
+  customerNameAr: string | null
+  issueDate: string
+  dueDate: string
+  currency: string
+  status: OfferStatus // lowercased by the mapper below
+  total: number
+  createdByName: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type OfferListPage = {
+  items: OfferListItem[]
+  page: number
+  pageSize: number
+  totalCount: number
+  totalPages: number
+}
+
+export type OfferListParams = {
+  status?: OfferStatus | "all"
+  search?: string
+  page?: number
+  pageSize?: number
+}
+
 /** Payload used when a new offer is issued. */
 export type CreateOfferInput = Omit<Offer, "id" | "createdAt" | "totals" | "status" | "version">

@@ -14,7 +14,7 @@ import { formatCurrency } from "../../../lib/formatters"
 import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatIsoDay } from "../../../lib/formatters/date"
 import { useOffers } from "../hooks/useOffers"
-import type { Offer, OfferStatus } from "../types"
+import type { OfferListItem, OfferStatus } from "../types"
 
 const STATUS_FILTERS: (OfferStatus | "all")[] = [
   "all",
@@ -31,10 +31,10 @@ export default function OffersListPage() {
   const [status, setStatus] = useState<OfferStatus | "all">("all")
 
   const search = searchParams.get("search") ?? ""
-  const { data: offers, loading } = useOffers({ status, search })
+  const { data, loading, error } = useOffers({ status, search })
   const locale = localeForLanguage(language)
 
-  const columns = useMemo<Column<Offer>[]>(
+  const columns = useMemo<Column<OfferListItem>[]>(
     () => [
       {
         key: "reference",
@@ -77,7 +77,7 @@ export default function OffersListPage() {
         align: "end",
         render: (offer) => (
           <span className="font-medium text-ink">
-            {formatCurrency(offer.totals.total, offer.currency, locale)}
+            {formatCurrency(offer.total, offer.currency, locale)}
           </span>
         ),
       },
@@ -106,7 +106,7 @@ export default function OffersListPage() {
         ),
       },
     ],
-    [t, navigate, locale],
+    [t, navigate, locale, language],
   )
 
   const setSearch = (value: string) => {
@@ -116,7 +116,7 @@ export default function OffersListPage() {
     setSearchParams(next, { replace: true })
   }
 
-  const offersList = offers ?? []
+  const offersList = data?.items ?? []
   const hasActiveFilters = search.trim() !== "" || status !== "all"
   const tableState = loading
     ? "loading"
@@ -178,10 +178,10 @@ export default function OffersListPage() {
           />
         </TableState>
 
-        {!loading && offersList.length > 0 && (
+        {!loading && !error && offersList.length > 0 && data && (
           <div className="flex items-center justify-between border-t border-line px-4 py-3 text-xs text-muted">
-            <span>{t("offers.list.count", { count: offersList.length })}</span>
-            <span>{t("common.page", { page: 1, pages: 1 })}</span>
+            <span>{t("offers.list.count", { count: data.totalCount })}</span>
+            <span>{t("common.page", { page: data.page, pages: data.totalPages })}</span>
           </div>
         )}
       </div>

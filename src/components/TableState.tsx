@@ -71,14 +71,10 @@ export default function TableState({
   if (state === "empty-results") {
     const title =
       resultsTitle ||
-      (language === "ar"
-        ? `لا توجد نتائج لـ "${query ?? ""}"`
-        : `No results for "${query ?? ""}"`)
+      (language === "ar" ? `لا توجد نتائج لـ "${query ?? ""}"` : `No results for "${query ?? ""}"`)
     const hint =
       resultsHint ||
-      (language === "ar"
-        ? "تحقق من التهجئة أو وسّع نطاق البحث"
-        : "Try adjusting your search or filters")
+      (language === "ar" ? "تحقق من التهجئة أو وسّع نطاق البحث" : "Try adjusting your search or filters")
     return (
       <div
         role="status"
