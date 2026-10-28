@@ -1,9 +1,5 @@
 /**
  * Print rules of the quotations workspace.
- *
- * The offer document is printed on its own: it lives in a portal outside of
- * the application, so the whole workspace is hidden and only the document
- * reaches the printer. The table headers repeat on every page.
  */
 
 #print-root {
@@ -18,15 +14,10 @@
 
 @page {
   size: A4 portrait;
-  margin: 15mm;
+  margin: 12mm 15mm;
 }
 
 @media print {
-  @page {
-    size: A4 portrait;
-    margin: 15mm;
-  }
-
   html,
   body {
     margin: 0;
@@ -34,7 +25,6 @@
     background: #fff;
   }
 
-  /* Only the document reaches the printer. */
   #root {
     display: none !important;
   }
@@ -44,22 +34,26 @@
   }
 
   .offer-document {
-    width: 100%;
-    max-width: var(--content-w, 180mm);
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
   }
 
-  .offer-document thead {
-    display: table-header-group;
+  /* Force title and sections to render cleanly */
+  .offer-document .doc-title {
+    display: block !important;
+    visibility: visible !important;
   }
 
-  .offer-document tfoot {
-    display: table-footer-group;
-  }
-
+  /* Prevent awkward page splits inside blocks */
   .offer-document tr,
   .offer-document .keep-together,
   .offer-document .doc-section,
-  .offer-document .doc-totals {
+  .offer-document .doc-totals,
+  .offer-document .doc-table {
     break-inside: avoid;
+    page-break-inside: avoid;
   }
 }
