@@ -115,6 +115,16 @@ export function useOfferBuilder({
           }
         }
 
+        if (patch.issueDate && patch.issueDate !== current.issueDate) {
+          // Option: if reference follows the standard format, update its month automatically
+          const parts = current.reference.split("/")
+          if (parts.length === 4) {
+            const newMonth = referenceNumber(1, patch.issueDate).split("/")[1]
+            parts[1] = newMonth
+            next.reference = parts.join("/")
+          }
+        }
+
         return next
       })
     },

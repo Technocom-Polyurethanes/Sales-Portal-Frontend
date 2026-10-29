@@ -4,6 +4,13 @@ import type { Offer, OfferStatus, OfferListItem, OfferListPage, OfferListParams 
 /** Shape exactly as the backend sends it (status is "Draft", "Issued", ...). */
 type RawOfferListItem = Omit<OfferListItem, "status"> & { status: string }
 type RawOfferListPage = Omit<OfferListPage, "items"> & { items: RawOfferListItem[] }
+type RawNextSequenceResponse =
+  | number
+  | {
+      sequence?: number
+      nextSequence?: number
+      serialNumber?: number
+    }
 
 function mapListItem(raw: RawOfferListItem): OfferListItem {
   return { ...raw, status: raw.status.toLowerCase() as OfferStatus }
@@ -31,6 +38,21 @@ export const offersApi = {
   },
   setStatus(id: string, status: OfferStatus): Promise<Offer> {
     return api.patch<Offer>(`/offers/${id}/status`, { status })
+  },
+
+  async nextSequence(params?: { year?: number; month?: number }): Promise<number> {
+    try {
+      const res = await api.get<RawNextSequenceResponse>("/offers/next-sequence", params)
+      if (typeof res === "number") {
+        return res
+      }
+      if (res && typeof res === "object") {
+        return res.sequence ?? res.nextSequence ?? res.serialNumber ?? 1
+      }
+      return 1
+    } catch {
+      return 1
+    }
   },
 
   /** The offer and every version created from it, newest first. */
