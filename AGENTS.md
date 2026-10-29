@@ -142,3 +142,17 @@ Tailwind emits utility classes in `@layer utilities`, and CSS outside any cascad
 - Use double quotes for strings containing apostrophes (`"We're here to help"`), or escape them in single-quoted strings. An unescaped apostrophe in a single-quoted string breaks the build.
 - Ensure JSX tags are closed and braces are balanced.
 - Export components as default exports.
+
+# Agent rules (read first, every session)
+
+## Shell
+- This machine's bash has NO Unix utilities: `tail`, `head`, `tr`, `wc`, `sed`, `awk`, `cut` are unavailable.
+- Never pipe git or dotnet output into those. Use flags instead (`git log -n 10`, `git diff --stat`, `git diff --name-only`), the file-read tool with offset/limit, and the grep/glob tools.
+- Do not use `cmd.exe /c` or PowerShell wrappers to work around missing tools.
+- If a command fails twice for the same reason, STOP retrying. Report the failure and continue with the next step.
+- Do not run commands whose only purpose is measuring or counting output. Never spend more than 5 minutes on any single step.
+
+## Workflow
+- One step at a time: `dotnet build`, then commit, then next step.
+- Never run migrations or tests against a shared or remote database. Use the local dev database.
+- Never commit `.env`. Do not push to master; open a PR.
