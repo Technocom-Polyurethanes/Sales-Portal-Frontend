@@ -33,9 +33,6 @@ export default function BankAccountsTable({
       <table className="doc-table doc-banks">
         <thead>
           <tr>
-            <th scope="col" className="doc-index">
-              #
-            </th>
             <th scope="col">{headings.bank}</th>
             <th scope="col">{headings.branch}</th>
             <th scope="col">{headings.accountNumber}</th>
@@ -45,11 +42,8 @@ export default function BankAccountsTable({
           </tr>
         </thead>
         <tbody>
-          {banks.map((account, index) => (
+          {banks.map((account) => (
             <tr key={`${account.bank}-${account.accountNumber}`}>
-              <td className="doc-num doc-index">
-                <span className="doc-ltr">{index + 1}</span>
-              </td>
               <td>
                 <span className="doc-ltr">{account.bank}</span>
               </td>

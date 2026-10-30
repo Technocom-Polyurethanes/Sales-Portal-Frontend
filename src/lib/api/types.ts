@@ -28,10 +28,19 @@ export interface ApiClient {
 /** Error thrown when the API layer rejects a request. */
 export class ApiError extends Error {
   status: number
+  title?: string
+  detail?: string
+  errors?: Record<string, string[]>
 
-  constructor(message: string, status = 404) {
+  constructor(message: string, status = 404, extra?: Partial<ApiError>) {
     super(message)
     this.name = "ApiError"
     this.status = status
+    if (extra) {
+      this.title = extra.title
+      this.detail = extra.detail
+      this.errors = extra.errors
+    }
   }
 }
+

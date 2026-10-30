@@ -2,7 +2,7 @@ import type { OfferTemplate } from "./types"
 
 export const englishTemplate: OfferTemplate = {
   language: "en",
-  title: "Offer",
+  title: "Quotation",
   billTo: "Bill To / Ship To",
   attention: "Attention",
   taxId: "Tax ID",

@@ -1,18 +1,28 @@
 import { api } from "../../lib/api/client"
-import type { Offer, OfferStatus } from "./types"
+import type { Offer, OfferStatus, OfferListItem, OfferListPage, OfferListParams } from "./types"
 
-export type OfferListParams = {
-  status?: OfferStatus | "all"
-  search?: string
+/** Shape exactly as the backend sends it (status is "Draft", "Issued", ...). */
+type RawOfferListItem = Omit<OfferListItem, "status"> & { status: string }
+type RawOfferListPage = Omit<OfferListPage, "items"> & { items: RawOfferListItem[] }
+
+function mapListItem(raw: RawOfferListItem): OfferListItem {
+  return { ...raw, status: raw.status.toLowerCase() as OfferStatus }
 }
 
 export const offersApi = {
-  list(params: OfferListParams = {}): Promise<Offer[]> {
-    return api.get<Offer[]>("/offers", {
-      status: params.status,
-      search: params.search,
+  async list(params: OfferListParams = {}): Promise<OfferListPage> {
+    const raw = await api.get<RawOfferListPage>("/offers", {
+      // "all" is a UI-only value: the backend enum has no "all", so omit it
+      status:
+        params.status && params.status !== "all" ? params.status : undefined,
+      search: params.search?.trim() || undefined,
+      page: params.page ?? 1,
+      pageSize: params.pageSize ?? 20,
     })
+
+    return { ...raw, items: raw.items.map(mapListItem) }
   },
+
   get(id: string): Promise<Offer> {
     return api.get<Offer>(`/offers/${id}`)
   },
@@ -22,16 +32,17 @@ export const offersApi = {
   setStatus(id: string, status: OfferStatus): Promise<Offer> {
     return api.patch<Offer>(`/offers/${id}/status`, { status })
   },
+
   /** The sequence number the next issued offer will use. */
-  nextSequence(): Promise<number> {
-    return api
-      .get<number>("/offers/next-sequence")
-      .catch(() => api.get<number>("/offers/next/sequence"))
-      .catch(() => 1)
+  async nextSequence(): Promise<number> {
+    const raw = await api.get<number | { sequence: number }>("/offers/next-sequence")
+    return typeof raw === "number" ? raw : Number(raw?.sequence) || 1
   },
 
-  /** The offer and every version created from it, oldest first. */
-  versions(id: string): Promise<Offer[]> {
-    return api.get<Offer[]>(`/offers/${id}/versions`)
+  /** The offer and every version created from it, newest first. */
+  versions(id: string): Promise<OfferListItem[]> {
+    return api.get<RawOfferListItem[]>(`/offers/${id}/versions`).then((rows) =>
+      rows.map(mapListItem),
+    )
   },
 }

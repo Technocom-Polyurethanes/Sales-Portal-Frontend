@@ -11,5 +11,6 @@ logs/
 *.log
 .claude-replay.*
 .tmp-*
-PHASES.md
-srs.md
+*.md
+.vercel
+.env*

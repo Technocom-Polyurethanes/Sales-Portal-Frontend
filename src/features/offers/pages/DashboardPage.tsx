@@ -7,6 +7,7 @@ import DataTable, { type Column } from "../../../components/ui/DataTable"
 import Icon from "../../../components/ui/Icon"
 import Spinner from "../../../components/ui/Spinner"
 import PageHeader from "../../../app/layout/PageHeader"
+import TableState from "../../../components/TableState"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import {
   formatCompactNumber,
@@ -17,7 +18,7 @@ import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatIsoDay } from "../../../lib/formatters/date"
 import { useSession } from "../../account/SessionProvider"
 import { useOffers } from "../hooks/useOffers"
-import type { Offer } from "../types"
+import type { OfferListItem } from "../types"
 
 type StatCard = {
   label: string
@@ -48,7 +49,7 @@ export default function DashboardPage() {
     const safeList: any[] = Array.isArray(offers) ? (offers as any[]) : ((offers as any)?.items ?? [])
     const monthKey = new Date().toISOString().slice(0, 7)
     const thisMonth = safeList.filter((offer: any) => offer?.issueDate?.startsWith(monthKey)).length
-    const totalValue = safeList.reduce((sum: number, offer: any) => sum + (offer?.totals?.total || 0), 0)
+    const totalValue = safeList.reduce((sum: number, offer: any) => sum + (offer?.total || 0), 0)
     const closed = safeList.filter((offer: any) => offer?.status === "accepted" || offer?.status === "rejected")
     const accepted = safeList.filter((offer: any) => offer?.status === "accepted")
     const awaiting = safeList.filter((offer: any) => offer?.status === "issued")
@@ -80,7 +81,7 @@ export default function DashboardPage() {
     ]
   }, [offers, t, locale])
 
-  const columns = useMemo<Column<Offer>[]>(
+  const columns = useMemo<Column<OfferListItem>[]>(
     () => [
       {
         key: "reference",
@@ -116,7 +117,7 @@ export default function DashboardPage() {
         align: "end",
         render: (offer) => (
           <span className="font-medium text-ink">
-            {formatCurrency(offer.totals.total, offer.currency, locale)}
+            {formatCurrency(offer.total, offer.currency, locale)}
           </span>
         ),
       },
@@ -174,18 +175,26 @@ export default function DashboardPage() {
           </Button>
         </header>
 
-        {loading ? (
-          <div className="flex justify-center py-16">
-            <Spinner size={26} />
-          </div>
-        ) : (
+        <TableState
+          state={
+            loading
+              ? "loading"
+              : ((Array.isArray(offers) ? (offers as any[]) : ((offers as any)?.items ?? [])).length === 0)
+                ? "empty-data"
+                : "data"
+          }
+          createLabel={t("offers.list.create")}
+          onCreate={() => navigate("/offers/new")}
+          emptyTitle={t("offers.list.empty")}
+          emptyDescription={t("dashboard.subtitle")}
+        >
           <DataTable
             columns={columns}
             rows={(Array.isArray(offers) ? (offers as any[]) : ((offers as any)?.items ?? [])).slice(0, 5)}
             rowKey={(offer: any) => offer.id}
             onRowClick={(offer: any) => navigate(`/offers/${offer.id}`)}
           />
-        )}
+        </TableState>
       </section>
     </>
   )

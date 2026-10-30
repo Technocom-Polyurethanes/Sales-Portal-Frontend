@@ -158,63 +158,82 @@ export default function OfferDocument({ data, language }: OfferDocumentProps) {
         <ReferenceTable rows={referenceRows} />
       </div>
 
-      <ItemsTable
-        headings={{
-          item: template.item,
-          quantity: template.quantity,
-          rate: template.rate,
-          amount: template.amount,
-          packaging: template.packaging,
-        }}
-        lines={data.lines}
-        currency={currency}
-        weightUnit={weightUnit}
-        formatNumber={(value) =>
-          value.toLocaleString("en-US", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })
-        }
-      />
+              <ItemsTable
+                headings={{
+                  item: template.item,
+                  quantity: template.quantity,
+                  rate: template.rate,
+                  amount: template.amount,
+                  packaging: template.packaging,
+                }}
+                lines={data.lines}
+                currency={currency}
+                weightUnit={weightUnit}
+                formatNumber={(value) =>
+                  value.toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })
+                }
+              />
 
-      <TotalsBlock rows={totalsRows} />
+              <TotalsBlock rows={totalsRows} />
 
-      <DeliveryScheduleTable
-        heading={template.schedule}
-        headings={{
-          batch: template.batch,
-          deliveryDate: template.deliveryDate,
-          packages: template.packages,
-          totalWeight: template.totalWeight,
-          total: template.total,
-        }}
-        batches={batches}
-        columns={columns}
-        weightUnit={weightUnit}
-        formatDate={formatDocumentDate}
-        formatNumber={formatDocumentNumber}
-        language={language}
-        source={data}
-      />
+              <DeliveryScheduleTable
+                heading={template.schedule}
+                headings={{
+                  batch: template.batch,
+                  deliveryDate: template.deliveryDate,
+                  packages: template.packages,
+                  totalWeight: template.totalWeight,
+                  total: template.total,
+                }}
+                batches={batches}
+                columns={columns}
+                weightUnit={weightUnit}
+                formatDate={formatDocumentDate}
+                formatNumber={formatDocumentNumber}
+                language={language}
+                source={data}
+              />
 
-      <BankAccountsTable
-        heading={template.bankDetails}
-        headings={{
-          bank: template.bank,
-          branch: template.branch,
-          accountNumber: template.accountNumber,
-          swift: template.swift,
-          iban: template.iban,
-          currency: template.currency,
-        }}
-        banks={data.banks}
-        formatCurrency={(value) => formatDocumentCurrency(value, language)}
-      />
+              <BankAccountsTable
+                heading={template.bankDetails}
+                headings={{
+                  bank: template.bank,
+                  branch: template.branch,
+                  accountNumber: template.accountNumber,
+                  swift: template.swift,
+                  iban: template.iban,
+                  currency: template.currency,
+                }}
+                banks={data.banks}
+                formatCurrency={(value) => formatDocumentCurrency(value, language)}
+              />
 
-      <NotesBlock heading={template.notes} notes={data.notes} />
+              <NotesBlock heading={template.notes} notes={data.notes} />
+            <footer className="doc-footer" dir="ltr">
+        <div className="doc-footer__letterhead">
+          <div className="doc-footer__col doc-footer__col--en">
+            <p className="doc-footer__address">
+              5 Nahda St -Dokki - Giza - Egypt.
+            </p>
+            <p><span className="doc-footer__label">Mob</span> : (+2) 0100 5411 078</p>
+            <p><span className="doc-footer__label">Tel</span> : (+202 ) 37615321 - 37602735 - 37602927</p>
+            <p><span className="doc-footer__label">Fax</span> : (+202 ) 37609292 - 37602934</p>
+          </div>
 
-      <footer className="doc-footer">
-        {arabic ? data.companyNameAr : data.companyName}
+          <div className="doc-footer__col doc-footer__col--center">
+            <p className="doc-footer__email">E-mail : sales@technocom.org</p>
+          </div>
+
+          <div className="doc-footer__col doc-footer__col--ar" dir="rtl">
+            <p className="doc-footer__address">٥ شارع النهضة - الدقي - الجيزة</p>
+            <p>موبايل : ٥٤١١٠٧٨ (٠١٠٠)</p>
+            <p>تليفون : ٣٧٦٠٢٩٢٧ - ٣٧٦٠٢٧٣٥ - ٣٧٦١٥٣٢١ (٠٢)</p>
+            <p>فاكس : ٣٧٦٠٢٩٣٤ - ٣٧٦٠٩٢٩٢ (٠٢)</p>
+          </div>
+        </div>
       </footer>
     </article>
   )

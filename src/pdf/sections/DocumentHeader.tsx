@@ -8,28 +8,30 @@ export type DocumentHeaderProps = {
   language: DocumentLanguage
 }
 
-/** Logo, form code and document title of the offer. */
+/**
+ * Official bilingual Technocom letterhead header + document title.
+ * Locked to LTR so English branding is always left and Arabic branding is always right,
+ * matching the physical pre-printed letterhead.
+ */
 export default function DocumentHeader({
-  companyName,
-  tagline,
-  formCode,
   title,
-  language,
 }: DocumentHeaderProps) {
-  const arabic = language === "ar"
-
   return (
     <>
-      <header className="doc-header">
-        <div className="doc-logo">
-          <span className={`doc-wordmark${arabic ? " doc-wordmark-ar" : ""}`}>
-            {companyName}
-            <span />
-          </span>
-          <span className="doc-tagline">{tagline}</span>
+      <header className="doc-header" dir="ltr">
+        {/* Left: English Branding */}
+        <div className="doc-brand doc-brand--en">
+          <span className="doc-wordmark-en">TECHNOCOM</span>
+          <span className="doc-tagline-en">For Commercial Agencies</span>
         </div>
-        <div className="doc-form-code doc-ltr">{formCode}</div>
+
+        {/* Right: Arabic Branding with Kashida */}
+        <div className="doc-brand doc-brand--ar" dir="rtl">
+          <span className="doc-wordmark-ar">تـكـنـوكـوم</span>
+          <span className="doc-tagline-ar">للتوكيلات التجارية</span>
+        </div>
       </header>
+
       <h1 className="doc-title">{title}</h1>
     </>
   )
