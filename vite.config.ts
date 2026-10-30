@@ -24,6 +24,8 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    // The app talks to the real API by default; tests run against the mock transport.
+    env: { VITE_USE_MOCK: "true" },
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
   },
 })

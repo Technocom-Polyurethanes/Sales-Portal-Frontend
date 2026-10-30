@@ -18,7 +18,7 @@ import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatIsoDay } from "../../../lib/formatters/date"
 import { useSession } from "../../account/SessionProvider"
 import { useOffers } from "../hooks/useOffers"
-import type { Offer } from "../types"
+import type { OfferListItem } from "../types"
 
 type StatCard = {
   label: string
@@ -49,7 +49,7 @@ export default function DashboardPage() {
     const safeList: any[] = Array.isArray(offers) ? (offers as any[]) : ((offers as any)?.items ?? [])
     const monthKey = new Date().toISOString().slice(0, 7)
     const thisMonth = safeList.filter((offer: any) => offer?.issueDate?.startsWith(monthKey)).length
-    const totalValue = safeList.reduce((sum: number, offer: any) => sum + (offer?.totals?.total || 0), 0)
+    const totalValue = safeList.reduce((sum: number, offer: any) => sum + (offer?.total || 0), 0)
     const closed = safeList.filter((offer: any) => offer?.status === "accepted" || offer?.status === "rejected")
     const accepted = safeList.filter((offer: any) => offer?.status === "accepted")
     const awaiting = safeList.filter((offer: any) => offer?.status === "issued")
@@ -81,7 +81,7 @@ export default function DashboardPage() {
     ]
   }, [offers, t, locale])
 
-  const columns = useMemo<Column<Offer>[]>(
+  const columns = useMemo<Column<OfferListItem>[]>(
     () => [
       {
         key: "reference",
@@ -117,7 +117,7 @@ export default function DashboardPage() {
         align: "end",
         render: (offer) => (
           <span className="font-medium text-ink">
-            {formatCurrency(offer.totals.total, offer.currency, locale)}
+            {formatCurrency(offer.total, offer.currency, locale)}
           </span>
         ),
       },

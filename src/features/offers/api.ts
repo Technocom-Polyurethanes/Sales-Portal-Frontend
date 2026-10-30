@@ -33,6 +33,12 @@ export const offersApi = {
     return api.patch<Offer>(`/offers/${id}/status`, { status })
   },
 
+  /** The sequence number the next issued offer will use. */
+  async nextSequence(): Promise<number> {
+    const raw = await api.get<number | { sequence: number }>("/offers/next-sequence")
+    return typeof raw === "number" ? raw : Number(raw?.sequence) || 1
+  },
+
   /** The offer and every version created from it, newest first. */
   versions(id: string): Promise<OfferListItem[]> {
     return api.get<RawOfferListItem[]>(`/offers/${id}/versions`).then((rows) =>

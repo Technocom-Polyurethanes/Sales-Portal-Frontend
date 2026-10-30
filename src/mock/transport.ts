@@ -1,6 +1,10 @@
 import type { ApiRequestOptions, Query, Transport } from "../lib/api/types"
 import { ApiError } from "../lib/api/types"
-import type { Offer, OfferStatus } from "../features/offers/types"
+import type {
+  Offer,
+  OfferListItem,
+  OfferStatus,
+} from "../features/offers/types"
 import {
   db,
   findCustomer,
@@ -9,6 +13,28 @@ import {
   offerVersions,
   updateOfferStatus,
 } from "./db"
+
+
+/** Offer to the list-row shape the real API returns. */
+function toListItem(offer: Offer): OfferListItem {
+  return {
+    id: offer.id,
+    reference: offer.reference,
+    serialNumber: Number.parseInt(offer.reference, 10) || 0,
+    version: offer.version,
+    customerId: offer.customerId,
+    customerName: offer.customerName,
+    customerNameAr: null,
+    issueDate: offer.issueDate,
+    dueDate: offer.dueDate,
+    currency: offer.currency,
+    status: offer.status,
+    total: offer.totals.total,
+    createdByName: null,
+    createdAt: offer.createdAt,
+    updatedAt: offer.createdAt,
+  }
+}
 
 const LATENCY_MS = 120
 
@@ -70,8 +96,10 @@ const routes: Route[] = [
     handle: ({ query }) => {
       const status = query.status ? String(query.status) : undefined
       const search = String(query.search ?? "").toLowerCase()
+      const page = Math.max(1, Number(query.page ?? 1))
+      const pageSize = Math.max(1, Number(query.pageSize ?? 20))
 
-      return db.offers.filter((offer) => {
+      const matches = db.offers.filter((offer) => {
         const matchesStatus =
           !status || status === "all" || offer.status === status
         const matchesSearch =
@@ -81,6 +109,17 @@ const routes: Route[] = [
             .includes(search)
         return matchesStatus && matchesSearch
       })
+
+      // Same envelope the real API sends.
+      return {
+        items: matches
+          .slice((page - 1) * pageSize, page * pageSize)
+          .map(toListItem),
+        page,
+        pageSize,
+        totalCount: matches.length,
+        totalPages: Math.max(1, Math.ceil(matches.length / pageSize)),
+      }
     },
   },
   {
@@ -94,7 +133,7 @@ const routes: Route[] = [
     handle: ({ params }) => {
       const offer = findOffer(params[0])
       if (!offer) throw new ApiError("Offer not found")
-      return offerVersions(offer.id)
+      return offerVersions(offer.id).map(toListItem)
     },
   },
   {
