@@ -54,18 +54,11 @@ export default function DashboardPage() {
   const stats = useMemo<StatCard[]>(() => {
     const safeList = offersList
     const monthKey = new Date().toISOString().slice(0, 7)
-    const thisMonth = safeList.filter((offer) =>
-      (offer.issueDate || "").startsWith(monthKey),
-    ).length
-    const totalValue = safeList.reduce(
-      (sum: number, offer) => sum + (offer.total || 0),
-      0,
-    )
-    const closed = safeList.filter(
-      (offer) => offer.status === "accepted" || offer.status === "rejected",
-    )
-    const accepted = safeList.filter((offer) => offer.status === "accepted")
-    const awaiting = safeList.filter((offer) => offer.status === "issued")
+    const thisMonth = safeList.filter((offer: any) => offer?.issueDate?.startsWith(monthKey)).length
+    const totalValue = safeList.reduce((sum: number, offer: any) => sum + (offer?.total || 0), 0)
+    const closed = safeList.filter((offer: any) => offer?.status === "accepted" || offer?.status === "rejected")
+    const accepted = safeList.filter((offer: any) => offer?.status === "accepted")
+    const awaiting = safeList.filter((offer: any) => offer?.status === "issued")
 
     return [
       {
