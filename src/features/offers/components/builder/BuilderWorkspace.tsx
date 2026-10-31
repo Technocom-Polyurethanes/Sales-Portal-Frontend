@@ -55,7 +55,7 @@ export default function BuilderWorkspace({
       createEmptyDraft({ documentLanguage: defaultDocumentLanguage }),
   })
 
-  const { draft, calculations } = controller
+  const { draft, calculations, serverCalculations } = controller
 
   const customer = catalog.customers.find(
     (item) => item.id === draft.customerId,
@@ -64,14 +64,14 @@ export default function BuilderWorkspace({
   const documentData = useMemo(
     () => {
       // Use server document if available, otherwise build from draft + calculations
-      if (calculations?.document) {
-        return calculations.document
+      if (serverCalculations?.document) {
+        return serverCalculations.document
       }
       return buildDocumentData(
         {
-          reference: calculations?.reference || draft.reference,
+          reference: serverCalculations?.reference || calculations.reference,
           issueDate: draft.issueDate,
-          dueDate: calculations?.dueDate || draft.issueDate,
+          dueDate: serverCalculations?.dueDate || calculations.dueDate,
           currency: draft.currency,
           paymentTermId: draft.paymentTermId,
           customerId: draft.customerId,
@@ -83,19 +83,19 @@ export default function BuilderWorkspace({
             materialCode: line.materialCode || "",
             category: line.category,
             packaging: line.packaging,
-            quantityKg: calculations?.lines[index]?.quantityKg ?? 0,
+            quantityKg: calculations.lines[index]?.quantityKg ?? 0,
             ratePerKg: line.ratePerKg,
-            amount: calculations?.lines[index]?.amount ?? 0,
+            amount: calculations.lines[index]?.amount ?? 0,
           })),
-          subtotal: calculations?.subtotal ?? 0,
+          subtotal: calculations.subtotal,
           orderDiscountPercent: draft.orderDiscountPercent,
-          orderDiscount: calculations?.orderDiscount ?? 0,
+          orderDiscount: calculations.totals.orderDiscount,
           taxPercent: draft.taxPercent,
-          taxAmount: calculations?.taxAmount ?? 0,
+          taxAmount: calculations.totals.taxAmount,
           otherTaxEnabled: draft.otherTaxEnabled,
-          otherTaxPercent: calculations?.otherTaxPercent ?? 0,
-          otherTaxAmount: calculations?.otherTaxAmount ?? 0,
-          total: calculations?.total ?? 0,
+          otherTaxPercent: calculations.totals.otherTaxPercent,
+          otherTaxAmount: calculations.totals.otherTaxAmount,
+          total: calculations.totals.total,
           delivery: draft.delivery,
           notes: draft.notes,
         },
@@ -112,7 +112,7 @@ export default function BuilderWorkspace({
         },
       )
     },
-    [calculations, draft, customer, catalog],
+    [calculations, serverCalculations, draft, customer, catalog],
   )
 
   const steps = [
@@ -182,7 +182,7 @@ export default function BuilderWorkspace({
               draft={draft}
               customers={catalog.customers}
               paymentTerms={catalog.paymentTerms}
-              dueDate={(calculations as any)?.dueDate || ""}
+              dueDate={serverCalculations?.dueDate || calculations.dueDate}
               onChange={controller.setDraft}
             />
           )}
@@ -283,10 +283,10 @@ export default function BuilderWorkspace({
 
       <ReviewDialog
         open={reviewOpen}
-        reference={calculations.reference}
+        reference={serverCalculations?.reference || calculations.reference}
         customerName={customer?.name ?? ""}
         issueDate={draft.issueDate}
-        dueDate={calculations.dueDate}
+        dueDate={serverCalculations?.dueDate || calculations.dueDate}
         totals={calculations.totals}
         otherTaxEnabled={draft.otherTaxEnabled}
         currency={draft.currency}

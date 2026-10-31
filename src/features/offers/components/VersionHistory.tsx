@@ -29,7 +29,7 @@ export default function VersionHistory({
 
   return (
     <ol className="space-y-2">
-      {versions.map((version: any) => {
+      {versions.map((version) => {
         const current = version.id === currentId
 
         return (

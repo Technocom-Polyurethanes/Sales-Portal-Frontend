@@ -13,6 +13,7 @@ import {
   reconcileDelivery,
 } from "../draft"
 import { offersApi } from "../api"
+import { calculateDraft, type DraftCalculations } from "../calculations"
 import type { DeliveryBatch, OfferDraft, OfferDraftLine } from "../types"
 
 export type ServerCalculations = {
@@ -47,7 +48,10 @@ export type ServerCalculations = {
 
 export type OfferBuilderController = {
   draft: OfferDraft
-  calculations: ServerCalculations | null
+  /** Instant, locally computed numbers. Always available, drives the UI. */
+  calculations: DraftCalculations
+  /** Latest response of the backend calculate endpoint, if any. */
+  serverCalculations: ServerCalculations | null
   setDraft: (patch: Partial<OfferDraft>) => void
   setStep: (step: number) => void
   step: number
@@ -64,7 +68,12 @@ export type OfferBuilderController = {
   addBatch: () => void
   removeBatch: (batchId: string) => void
   updateBatch: (batchId: string, patch: Partial<DeliveryBatch>) => void
-  setAllocation: (batchId: string, productId: string, packages: number) => void
+  setAllocation: (
+    batchId: string,
+    productId: string,
+    packages: number,
+    packagingRowId?: string,
+  ) => void
   recalculating: boolean
   calculateError: string | null
 }
@@ -96,9 +105,12 @@ export function useOfferBuilder({
     }
   })
   const [step, setStep] = useState(0)
-  const [calculations, setCalculations] = useState<ServerCalculations | null>(null)
+  const [serverCalculations, setServerCalculations] =
+    useState<ServerCalculations | null>(null)
   const [recalculating, setRecalculating] = useState(false)
   const [calculateError, setCalculateError] = useState<string | null>(null)
+
+  const calculations = useMemo(() => calculateDraft(draft), [draft])
 
   const abortControllerRef = useRef<AbortController | null>(null)
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -108,7 +120,8 @@ export function useOfferBuilder({
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
     }
-    abortControllerRef.current = new AbortController()
+    const requestController = new AbortController()
+    abortControllerRef.current = requestController
 
     // Clear debounce timer
     if (debounceTimerRef.current) {
@@ -122,7 +135,7 @@ export function useOfferBuilder({
 
       try {
         // Prepare draft for server calculate
-        const calculateDraft = {
+        const payload = {
           reference: draft.reference,
           customerId: draft.customerId,
           attention: draft.attention,
@@ -149,15 +162,15 @@ export function useOfferBuilder({
           documentLanguage: draft.documentLanguage,
         }
 
-        const response = await offersApi.calculate(calculateDraft)
+        const response = await offersApi.calculate(payload)
 
         // Ignore stale responses
-        if (abortControllerRef.current.signal.aborted) {
+        if (requestController.signal.aborted) {
           return
         }
 
         // Map server response to our calculations type
-        setCalculations({
+        setServerCalculations({
           lines: (response.lines || []).map((l: any, idx: number) => ({
             lineId: draft.lines[idx]?.id || l.productId || `line-${idx}`,
             productId: l.productId || l.materialId || "",
@@ -190,7 +203,7 @@ export function useOfferBuilder({
         if (error?.name === "AbortError") return
         setCalculateError(error?.message || "Failed to calculate offer")
       } finally {
-        if (!abortControllerRef.current?.signal.aborted) {
+        if (!requestController.signal.aborted) {
           setRecalculating(false)
         }
       }
@@ -506,6 +519,9 @@ export function useOfferBuilder({
   return {
     draft,
     calculations,
+    serverCalculations,
+    recalculating,
+    calculateError,
     setDraft,
     step,
     setStep,

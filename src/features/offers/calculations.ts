@@ -91,8 +91,10 @@ export function calculateDraft(draft: OfferDraft): DraftCalculations {
   const scheduledByRow: Record<string, number> = {}
   for (const batch of draft.delivery) {
     for (const allocation of batch.allocations) {
-      scheduled[allocation.productId] =
-        (scheduled[allocation.productId] ?? 0) + allocation.packages
+      const allocationProductId =
+        allocation.productId ?? allocation.materialId ?? ""
+      scheduled[allocationProductId] =
+        (scheduled[allocationProductId] ?? 0) + allocation.packages
       if (allocation.packagingRowId) {
         scheduledByRow[allocation.packagingRowId] =
           (scheduledByRow[allocation.packagingRowId] ?? 0) + allocation.packages
