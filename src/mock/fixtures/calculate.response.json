@@ -1,0 +1,89 @@
+{
+  "lines": [
+    {
+      "productId": "mat-1",
+      "materialName": "Polyurethane Foam",
+      "materialCode": "PU-001",
+      "category": "Raw Materials",
+      "packaging": [
+        {
+          "id": "pack-1",
+          "packageTypeId": "drum",
+          "packageTypeName": "Drum",
+          "weightPerPackageKg": 250,
+          "packages": 14
+        }
+      ],
+      "quantityKg": 3500,
+      "ratePerKg": 227.2,
+      "discountPercent": 0,
+      "amount": 795200
+    }
+  ],
+  "subtotal": 795200.00,
+  "orderDiscountPercent": 0,
+  "orderDiscount": 0.00,
+  "taxPercent": 14,
+  "taxAmount": 111328.00,
+  "otherTaxEnabled": true,
+  "otherTaxPercent": 1,
+  "otherTaxAmount": 7952.00,
+  "total": 898576.00,
+  "deliveryCaps": {
+    "mat-1": {
+      "pack-1": 14
+    }
+  },
+  "warnings": [],
+  "validationErrors": [],
+  "document": {
+    "reference": "3090/OCT./YL/AA",
+    "issueDate": "2026-10-15",
+    "dueDate": "2026-11-14",
+    "currency": "EGP",
+    "customerName": "Test Customer",
+    "attention": "John Doe",
+    "taxId": "123456789",
+    "paymentTermLabel": "Net 30",
+    "lines": [
+      {
+        "productId": "mat-1",
+        "materialName": "Polyurethane Foam",
+        "materialCode": "PU-001",
+        "category": "Raw Materials",
+        "packaging": [
+          {
+            "id": "pack-1",
+            "packageTypeId": "drum",
+            "packageTypeName": "Drum",
+            "weightPerPackageKg": 250,
+            "packages": 14
+          }
+        ],
+        "quantityKg": 3500,
+        "ratePerKg": 227.2,
+        "amount": 795200
+      }
+    ],
+    "delivery": [],
+    "totals": {
+      "subtotal": 795200.00,
+      "orderDiscountPercent": 0,
+      "orderDiscount": 0.00,
+      "taxPercent": 14,
+      "taxAmount": 111328.00,
+      "otherTaxEnabled": true,
+      "otherTaxPercent": 1,
+      "otherTaxAmount": 7952.00,
+      "total": 898576.00
+    },
+    "taxPercent": 14,
+    "otherTaxEnabled": true,
+    "otherTaxName": "Other Tax",
+    "otherTaxPercent": 1,
+    "orderDiscount": 0.00,
+    "orderDiscountPercent": 0,
+    "notes": "",
+    "attention": "John Doe"
+  }
+}

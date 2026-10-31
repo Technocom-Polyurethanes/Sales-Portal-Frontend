@@ -62,12 +62,16 @@ export default function BuilderWorkspace({
   )
 
   const documentData = useMemo(
-    () =>
-      buildDocumentData(
+    () => {
+      // Use server document if available, otherwise build from draft + calculations
+      if (calculations?.document) {
+        return calculations.document
+      }
+      return buildDocumentData(
         {
-          reference: calculations.reference,
+          reference: calculations?.reference || draft.reference,
           issueDate: draft.issueDate,
-          dueDate: calculations.dueDate,
+          dueDate: calculations?.dueDate || draft.issueDate,
           currency: draft.currency,
           paymentTermId: draft.paymentTermId,
           customerId: draft.customerId,
@@ -79,19 +83,19 @@ export default function BuilderWorkspace({
             materialCode: line.materialCode || "",
             category: line.category,
             packaging: line.packaging,
-            quantityKg: calculations.lines[index]?.quantityKg ?? 0,
+            quantityKg: calculations?.lines[index]?.quantityKg ?? 0,
             ratePerKg: line.ratePerKg,
-            amount: calculations.lines[index]?.amount ?? 0,
+            amount: calculations?.lines[index]?.amount ?? 0,
           })),
-          subtotal: calculations.subtotal,
+          subtotal: calculations?.subtotal ?? 0,
           orderDiscountPercent: draft.orderDiscountPercent,
-          orderDiscount: calculations.totals.orderDiscount,
+          orderDiscount: calculations?.orderDiscount ?? 0,
           taxPercent: draft.taxPercent,
-          taxAmount: calculations.totals.taxAmount,
+          taxAmount: calculations?.taxAmount ?? 0,
           otherTaxEnabled: draft.otherTaxEnabled,
-          otherTaxPercent: calculations.totals.otherTaxPercent,
-          otherTaxAmount: calculations.totals.otherTaxAmount,
-          total: calculations.totals.total,
+          otherTaxPercent: calculations?.otherTaxPercent ?? 0,
+          otherTaxAmount: calculations?.otherTaxAmount ?? 0,
+          total: calculations?.total ?? 0,
           delivery: draft.delivery,
           notes: draft.notes,
         },
@@ -106,7 +110,8 @@ export default function BuilderWorkspace({
             draft.documentLanguage,
           ),
         },
-      ),
+      )
+    },
     [calculations, draft, customer, catalog],
   )
 
