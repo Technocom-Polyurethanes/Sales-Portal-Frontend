@@ -5,7 +5,7 @@ import Select from "../../../../components/ui/Select"
 import Button from "../../../../components/ui/Button"
 import Icon from "../../../../components/ui/Icon"
 import { useTranslation } from "../../../../i18n/I18nProvider"
-import { PAYMENT_TERMS } from "../../../../lib/calculations/dueDate"
+// Payment terms now come from catalog.bootstrap
 import { formatIsoDay } from "../../../../lib/formatters/date"
 import { formatCurrencyLabel } from "../../../../lib/formatters/currency"
 import { localeForLanguage } from "../../../../lib/formatters/locale"
@@ -16,6 +16,7 @@ import type { OfferDraft } from "../../types"
 export type StepBasicsProps = {
   draft: OfferDraft
   customers: Customer[]
+  paymentTerms?: any[]
   dueDate: string
   onChange: (patch: Partial<OfferDraft>) => void
 }
@@ -26,6 +27,7 @@ const CURRENCIES = ["EGP", "USD", "EUR"]
 export default function StepBasics({
   draft,
   customers,
+  paymentTerms = [],
   dueDate,
   onChange,
 }: StepBasicsProps) {
@@ -134,9 +136,9 @@ export default function StepBasics({
           value={draft.paymentTermId}
           onChange={(event) => onChange({ paymentTermId: event.target.value })}
         >
-          {PAYMENT_TERMS.map((term) => (
+          {paymentTerms.map((term: any) => (
             <option key={term.id} value={term.id}>
-              {language === "ar" ? term.labelAr : term.label}
+              {language === "ar" ? term.labelAr || term.label : term.label}
             </option>
           ))}
         </Select>

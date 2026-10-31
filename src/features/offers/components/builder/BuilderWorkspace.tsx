@@ -181,7 +181,8 @@ export default function BuilderWorkspace({
             <StepBasics
               draft={draft}
               customers={catalog.customers}
-              dueDate={calculations.dueDate}
+              paymentTerms={catalog.paymentTerms}
+              dueDate={(calculations as any)?.dueDate || ""}
               onChange={controller.setDraft}
             />
           )}
