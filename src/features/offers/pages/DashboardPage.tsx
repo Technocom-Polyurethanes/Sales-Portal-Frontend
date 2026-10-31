@@ -5,7 +5,6 @@ import Badge from "../../../components/ui/Badge"
 import Button from "../../../components/ui/Button"
 import DataTable, { type Column } from "../../../components/ui/DataTable"
 import Icon from "../../../components/ui/Icon"
-import Spinner from "../../../components/ui/Spinner"
 import PageHeader from "../../../app/layout/PageHeader"
 import TableState from "../../../components/TableState"
 import { useTranslation } from "../../../i18n/I18nProvider"
@@ -18,7 +17,7 @@ import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatIsoDay } from "../../../lib/formatters/date"
 import { useSession } from "../../account/SessionProvider"
 import { useOffers } from "../hooks/useOffers"
-import type { Offer } from "../types"
+import type { OfferListItem } from "../types"
 
 type StatCard = {
   label: string
@@ -29,7 +28,12 @@ type StatCard = {
 export default function DashboardPage() {
   const { t, language } = useTranslation()
   const navigate = useNavigate()
-  const { data: offers, loading } = useOffers()
+  const { data: offersPage, loading, error } = useOffers({
+    pageSize: 200,
+    latestOnly: true,
+    sortBy: "updatedAt",
+    sortDir: "desc",
+  } as any)
   const { user } = useSession()
   const locale = localeForLanguage(language)
 
@@ -45,14 +49,23 @@ export default function DashboardPage() {
     return t("dashboard.greetingEvening", { name })
   }
 
+  const offersList = offersPage?.items ?? []
+
   const stats = useMemo<StatCard[]>(() => {
-    const safeList: any[] = Array.isArray(offers) ? (offers as any[]) : ((offers as any)?.items ?? [])
+    const safeList = offersList
     const monthKey = new Date().toISOString().slice(0, 7)
-    const thisMonth = safeList.filter((offer: any) => offer?.issueDate?.startsWith(monthKey)).length
-    const totalValue = safeList.reduce((sum: number, offer: any) => sum + (offer?.totals?.total || 0), 0)
-    const closed = safeList.filter((offer: any) => offer?.status === "accepted" || offer?.status === "rejected")
-    const accepted = safeList.filter((offer: any) => offer?.status === "accepted")
-    const awaiting = safeList.filter((offer: any) => offer?.status === "issued")
+    const thisMonth = safeList.filter((offer) =>
+      (offer.issueDate || "").startsWith(monthKey),
+    ).length
+    const totalValue = safeList.reduce(
+      (sum: number, offer) => sum + (offer.total || 0),
+      0,
+    )
+    const closed = safeList.filter(
+      (offer) => offer.status === "accepted" || offer.status === "rejected",
+    )
+    const accepted = safeList.filter((offer) => offer.status === "accepted")
+    const awaiting = safeList.filter((offer) => offer.status === "issued")
 
     return [
       {
@@ -79,9 +92,9 @@ export default function DashboardPage() {
         note: t("offers.status.issued"),
       },
     ]
-  }, [offers, t, locale])
+  }, [offersList, t, locale])
 
-  const columns = useMemo<Column<Offer>[]>(
+  const columns = useMemo<Column<OfferListItem>[]>(
     () => [
       {
         key: "reference",
@@ -117,7 +130,7 @@ export default function DashboardPage() {
         align: "end",
         render: (offer) => (
           <span className="font-medium text-ink">
-            {formatCurrency(offer.totals.total, offer.currency, locale)}
+            {formatCurrency(offer.total, offer.currency, locale)}
           </span>
         ),
       },
@@ -125,9 +138,16 @@ export default function DashboardPage() {
         key: "status",
         header: t("common.status"),
         render: (offer) => (
-          <Badge variant={offer.status}>
-            {t(`offers.status.${offer.status}`)}
-          </Badge>
+          <span className="flex items-center gap-2">
+            <Badge variant={offer.status}>
+              {t(`offers.status.${offer.status}`)}
+            </Badge>
+            {offer.version && offer.version > 1 && (
+              <span className="rounded bg-page px-1.5 py-0.5 text-[11px] text-muted">
+                v{offer.version}
+              </span>
+            )}
+          </span>
         ),
       },
     ],
@@ -177,12 +197,15 @@ export default function DashboardPage() {
 
         <TableState
           state={
-            loading
-              ? "loading"
-              : ((Array.isArray(offers) ? (offers as any[]) : ((offers as any)?.items ?? [])).length === 0)
-                ? "empty-data"
-                : "data"
+            error
+              ? "error"
+              : loading
+                ? "loading"
+                : offersList.length === 0
+                  ? "empty-data"
+                  : "data"
           }
+          errorMessage={(error as any)?.message}
           createLabel={t("offers.list.create")}
           onCreate={() => navigate("/offers/new")}
           emptyTitle={t("offers.list.empty")}
@@ -190,9 +213,9 @@ export default function DashboardPage() {
         >
           <DataTable
             columns={columns}
-            rows={(Array.isArray(offers) ? (offers as any[]) : ((offers as any)?.items ?? [])).slice(0, 5)}
-            rowKey={(offer: any) => offer.id}
-            onRowClick={(offer: any) => navigate(`/offers/${offer.id}`)}
+            rows={offersList.slice(0, 5)}
+            rowKey={(offer) => offer.id}
+            onRowClick={(offer) => navigate(`/offers/${offer.id}`)}
           />
         </TableState>
       </section>

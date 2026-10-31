@@ -84,6 +84,7 @@ export default function OfferDetailsPage() {
   }
 
   const { offer, versions, customer } = data
+  const versionCount = versions?.length ?? (offer.version > 0 ? 1 : 0)
 
   return (
     <>
@@ -98,6 +99,11 @@ export default function OfferDetailsPage() {
             {offer.version > 1 && (
               <span className="rounded bg-page px-2 py-1 text-xs text-muted">
                 v{offer.version}
+              </span>
+            )}
+            {versionCount > 1 && (
+              <span className="rounded bg-page px-2 py-1 text-xs text-muted">
+                {t("offers.details.versionCount", { count: versionCount })}
               </span>
             )}
 

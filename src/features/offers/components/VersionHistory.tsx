@@ -21,7 +21,7 @@ export default function VersionHistory({
   const locale = localeForLanguage(language)
   const navigate = useNavigate()
 
-  if (versions.length <= 1) {
+  if (!versions || versions.length <= 1) {
     return (
       <p className="text-sm text-muted">{t("offers.details.noVersions")}</p>
     )
@@ -29,7 +29,7 @@ export default function VersionHistory({
 
   return (
     <ol className="space-y-2">
-      {versions.map((version) => {
+      {versions.map((version: any) => {
         const current = version.id === currentId
 
         return (
@@ -54,10 +54,10 @@ export default function VersionHistory({
 
               <span className="flex items-center gap-3">
                 <span className="text-xs text-muted">
-                  {formatIsoDay((version as any).issueDate || (version as any).createdAt)} ·{" "}
+                  {formatIsoDay(version.issueDate || version.createdAt)} ·{" "}
                   {formatCurrency(
-                    (version as any).totals?.total ?? (version as any).total ?? 0,
-                    (version as any).currency ?? "EGP",
+                    version.totals?.total ?? version.total ?? 0,
+                    version.currency ?? "EGP",
                     locale,
                   )}
                 </span>
