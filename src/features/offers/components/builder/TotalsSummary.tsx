@@ -1,12 +1,12 @@
 import { useTranslation } from "../../../../i18n/I18nProvider"
-import type { Totals } from "../../../../lib/calculations/tax"
 import { localeForLanguage } from "../../../../lib/formatters/locale"
 import { formatCurrency, formatNumber } from "../../../../lib/formatters/number"
 import type { DocumentLanguage } from "../../../../pdf/PdfLanguageProvider"
 import { getTemplate } from "../../../../pdf/templates"
+import type { ServerCalculations } from "../../hooks/useOfferBuilder"
 
 export type TotalsSummaryProps = {
-  totals: Totals
+  totals: ServerCalculations | any
   otherTaxEnabled: boolean
   currency: string
   documentLanguage: DocumentLanguage
@@ -21,33 +21,34 @@ export default function TotalsSummary({
 }: TotalsSummaryProps) {
   const { t, language } = useTranslation()
   const locale = localeForLanguage(language)
+  const safeTotals = totals || {}
 
   return (
     <div className="rounded-md border border-line bg-surface p-4">
       <dl className="space-y-2 text-sm">
         <Row
           label={t("offers.builder.taxes.subtotal")}
-          value={formatNumber(totals.subtotal)}
+          value={formatNumber(safeTotals.subtotal ?? 0)}
         />
 
-        {totals.orderDiscount > 0 && (
+        {(safeTotals.orderDiscount ?? 0) > 0 && (
           <Row
-            label={`${t("offers.builder.taxes.orderDiscount")} (${totals.orderDiscountPercent}%)`}
-            value={formatNumber(-totals.orderDiscount)}
+            label={`${t("offers.builder.taxes.orderDiscount")} (${safeTotals.orderDiscountPercent ?? 0}%)`}
+            value={formatNumber(-(safeTotals.orderDiscount ?? 0))}
           />
         )}
 
-        {totals.taxPercent > 0 && (
+        {(safeTotals.taxPercent ?? 0) > 0 && (
           <Row
-            label={`${t("offers.builder.taxes.tax")} ${totals.taxPercent}%`}
-            value={formatNumber(totals.taxAmount)}
+            label={`${t("offers.builder.taxes.tax")} ${safeTotals.taxPercent ?? 0}%`}
+            value={formatNumber(safeTotals.taxAmount ?? 0)}
           />
         )}
 
-        {otherTaxEnabled && totals.otherTaxPercent > 0 && (
+        {otherTaxEnabled && (safeTotals.otherTaxPercent ?? 0) > 0 && (
           <Row
             label={getTemplate(documentLanguage).otherTax}
-            value={formatNumber(-totals.otherTaxAmount)}
+            value={formatNumber(-(safeTotals.otherTaxAmount ?? 0))}
             emphasis="deduction"
           />
         )}
@@ -55,7 +56,7 @@ export default function TotalsSummary({
         <div className="flex items-center justify-between border-t border-line pt-2 text-base font-semibold text-primary">
           <dt>{t("offers.builder.taxes.total")}</dt>
           <dd className="tabular-nums">
-            {formatCurrency(totals.total, currency, locale)}
+            {formatCurrency(safeTotals.total ?? 0, currency, locale)}
           </dd>
         </div>
       </dl>

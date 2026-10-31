@@ -12,7 +12,7 @@ export type VersionHistoryProps = {
   currentId: string
 }
 
-/** Every version created from the same offer, oldest first. */
+/** Every version created from the same offer, newest first. */
 export default function VersionHistory({
   versions,
   currentId,
@@ -21,7 +21,7 @@ export default function VersionHistory({
   const locale = localeForLanguage(language)
   const navigate = useNavigate()
 
-  if (versions.length <= 1) {
+  if (!versions || versions.length <= 1) {
     return (
       <p className="text-sm text-muted">{t("offers.details.noVersions")}</p>
     )
@@ -54,7 +54,7 @@ export default function VersionHistory({
 
               <span className="flex items-center gap-3">
                 <span className="text-xs text-muted">
-                  {formatIsoDay(version.issueDate)} ·{" "}
+                  {formatIsoDay(version.issueDate || version.createdAt)} ·{" "}
                   {formatCurrency(
                     version.total,
                     version.currency,

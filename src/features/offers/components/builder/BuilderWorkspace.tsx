@@ -55,28 +55,32 @@ export default function BuilderWorkspace({
       createEmptyDraft({ documentLanguage: defaultDocumentLanguage }),
   })
 
-  const { draft, calculations } = controller
+  const { draft, calculations, serverCalculations } = controller
 
   const customer = catalog.customers.find(
     (item) => item.id === draft.customerId,
   )
 
   const documentData = useMemo(
-    () =>
-      buildDocumentData(
+    () => {
+      // Use server document if available, otherwise build from draft + calculations
+      if (serverCalculations?.document) {
+        return serverCalculations.document
+      }
+      return buildDocumentData(
         {
-          reference: calculations.reference,
+          reference: serverCalculations?.reference || calculations.reference,
           issueDate: draft.issueDate,
-          dueDate: calculations.dueDate,
+          dueDate: serverCalculations?.dueDate || calculations.dueDate,
           currency: draft.currency,
           paymentTermId: draft.paymentTermId,
           customerId: draft.customerId,
           attention: draft.attention,
           taxId: draft.taxId ?? "",
-          lines: draft.lines.map((line, index) => ({
-            productId: line.productId,
+          lines: draft.lines.map((line: any, index) => ({
+            productId: line.productId || line.materialId || "",
             materialName: line.materialName,
-            materialCode: line.materialCode,
+            materialCode: line.materialCode || "",
             category: line.category,
             packaging: line.packaging,
             quantityKg: calculations.lines[index]?.quantityKg ?? 0,
@@ -106,8 +110,9 @@ export default function BuilderWorkspace({
             draft.documentLanguage,
           ),
         },
-      ),
-    [calculations, draft, customer, catalog],
+      )
+    },
+    [calculations, serverCalculations, draft, customer, catalog],
   )
 
   const steps = [
@@ -176,7 +181,8 @@ export default function BuilderWorkspace({
             <StepBasics
               draft={draft}
               customers={catalog.customers}
-              dueDate={calculations.dueDate}
+              paymentTerms={catalog.paymentTerms}
+              dueDate={serverCalculations?.dueDate || calculations.dueDate}
               onChange={controller.setDraft}
             />
           )}
@@ -277,10 +283,10 @@ export default function BuilderWorkspace({
 
       <ReviewDialog
         open={reviewOpen}
-        reference={calculations.reference}
+        reference={serverCalculations?.reference || calculations.reference}
         customerName={customer?.name ?? ""}
         issueDate={draft.issueDate}
-        dueDate={calculations.dueDate}
+        dueDate={serverCalculations?.dueDate || calculations.dueDate}
         totals={calculations.totals}
         otherTaxEnabled={draft.otherTaxEnabled}
         currency={draft.currency}

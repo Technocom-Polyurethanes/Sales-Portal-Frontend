@@ -149,8 +149,9 @@ export function reconcileDelivery(
 ): DeliveryBatch[] {
   const rows = new Map<string, { productId: string; row: PackagingLine }>()
   for (const line of lines) {
+    const pid = (line.productId || (line as any).materialId || "") as string
     for (const row of line.packaging) {
-      rows.set(row.id, { productId: line.productId, row })
+      rows.set(row.id, { productId: pid, row })
     }
   }
 
@@ -159,9 +160,10 @@ export function reconcileDelivery(
   return delivery.map((batch) => ({
     ...batch,
     allocations: batch.allocations.flatMap((allocation) => {
+      const allocProductId = allocation.productId || (allocation as any).materialId
       if (!allocation.packagingRowId) {
         // legacy allocation: keep while the material exists
-        return lines.some((l) => l.productId === allocation.productId) ? [allocation] : []
+        return lines.some((l) => (l.productId || (l as any).materialId) === allocProductId) ? [allocation as any] : []
       }
       const hit = rows.get(allocation.packagingRowId)
       if (!hit) return []
@@ -169,15 +171,17 @@ export function reconcileDelivery(
       const packages = Math.max(0, Math.min(allocation.packages, left))
       if (packages === 0) return []
       used.set(hit.row.id, (used.get(hit.row.id) ?? 0) + packages)
+      const pid = hit.productId
       return [
         {
-          ...allocation,
-          productId: hit.productId,
+          ...(allocation as any),
+          productId: pid,
+          materialId: pid,
           packageTypeId: hit.row.packageTypeId,
           packageTypeName: hit.row.packageTypeName,
           weightPerPackageKg: hit.row.weightPerPackageKg,
           packages,
-        },
+        } as any,
       ]
     }),
   }))

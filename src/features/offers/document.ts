@@ -53,8 +53,7 @@ export type DocumentSource = {
 }
 
 /** Builds the payload of the printed document. */
-export function buildDocumentData(
-  source: DocumentSource,
+export function buildDocumentData(source: DocumentSource,
   options: {
     customer: Customer | undefined
     company: CompanySettings
@@ -66,11 +65,11 @@ export function buildDocumentData(
 ): OfferDocumentData {
   const arabic = options.language === "ar"
   const names = new Map(
-    options.packageTypes.map((type) => [type.id, type.nameAr]),
+    (options.packageTypes ?? []).map((type) => [type.id, type.nameAr]),
   )
 
-  const lines: OfferDocumentLine[] = source.lines.map((line) => {
-    const packaging: PackagingLine[] = line.packaging.map((row) => ({
+  const lines: OfferDocumentLine[] = (source.lines ?? []).map((line) => {
+    const packaging: PackagingLine[] = (line.packaging ?? []).map((row) => ({
       ...row,
       packageTypeName: arabic
         ? (names.get(row.packageTypeId) ?? row.packageTypeName)
@@ -93,17 +92,18 @@ export function buildDocumentData(
   })
 
   const categories = new Map<string, string>()
-  for (const line of source.lines) {
+  for (const line of (source.lines ?? [])) {
     categories.set(line.productId, line.category)
   }
 
-  const delivery: OfferDocumentBatch[] = source.delivery.map((batch) => {
-    const allocations = batch.allocations
-      .filter((allocation) => categories.has(allocation.productId))
-      .map((allocation) => {
-        const line = source.lines.find((l) => l.productId === allocation.productId)
+  const delivery: OfferDocumentBatch[] = (source.delivery ?? []).map((batch) => {
+    const allocations = (batch.allocations ?? [])
+      .filter((allocation: any) => categories.has(allocation.productId || allocation.materialId))
+      .map((allocation: any) => {
+        const allocPid = allocation.productId || allocation.materialId
+        const line = (source.lines ?? []).find((l: any) => l.productId === allocPid || l.materialId === allocPid)
         const row = allocation.packagingRowId
-          ? line?.packaging.find((r) => r.id === allocation.packagingRowId)
+          ? (line?.packaging ?? []).find((r: any) => r.id === allocation.packagingRowId)
           : undefined
         if (!row) return null
         const baseName = row.packageTypeName ?? allocation.packageTypeName ?? ""
@@ -112,10 +112,10 @@ export function buildDocumentData(
         const weightPerPkg = row.weightPerPackageKg ?? allocation.weightPerPackageKg ?? 0
         return {
           label: translateCategory(
-            categories.get(allocation.productId) ?? allocation.productId,
+            (categories.get(allocPid) ?? allocPid) as string,
             options.language,
           ),
-          productId: allocation.productId,
+          productId: allocPid,
           materialName: line?.materialName ?? "",
           packages: allocation.packages,
           weightKg: roundMoney(allocation.packages * weightPerPkg),
@@ -169,7 +169,7 @@ export function buildDocumentData(
     otherTaxAmount: source.otherTaxAmount,
     total: source.total,
     delivery,
-    banks: options.banks.map((bank) => ({
+    banks: (options.banks ?? []).map((bank) => ({
       bank: bank.bank,
       branch: bank.branch,
       accountNumber: bank.accountNumber,
@@ -183,6 +183,8 @@ export function buildDocumentData(
 
 
 
+// Inside src/features/offers/document.ts
+
 /** The document source of an offer that is already stored. */
 export function offerToDocumentSource(offer: Offer): DocumentSource {
   return {
@@ -193,27 +195,64 @@ export function offerToDocumentSource(offer: Offer): DocumentSource {
     paymentTermId: offer.paymentTermId,
     customerId: offer.customerId,
     taxId: offer.taxId ?? "",
-    lines: offer.lines.map((line) => ({
-      productId: line.productId,
-      materialName: line.materialName,
-      materialCode: line.materialCode,
-      category: line.category,
-      packaging: line.packaging,
-      quantityKg: line.quantityKg,
-      ratePerKg: line.ratePerKg,
-      amount: line.amount,
+    lines: (offer.lines ?? []).map((line: any) => {
+      // Find matching item from the document preview payload if present
+      const doc = (offer as any).document || (offer as any).documentDto
+      const docItem = (doc?.items ?? []).find(
+        (di: any) => di.offerLineId === line.id || di.materialId === (line.materialId || line.productId) || di.materialId === line.productId
+      )
+
+      // Calculate total quantity Kg from packaging rows if not explicitly provided
+      const calculatedQtyKg = (line.packaging ?? []).reduce(
+        (sum: number, pkg: any) => sum + (pkg.packages ?? 0) * (pkg.weightPerPackageKg ?? 0),
+        0
+      )
+
+      const qtyKg = docItem?.quantityKg ?? line.quantityKg ?? calculatedQtyKg ?? 0
+      const rate = line.ratePerKg ?? 0
+      const lineAmount = docItem?.amount ?? line.amount ?? (qtyKg * rate)
+
+      return {
+        productId: (line.materialId ?? line.productId ?? "") as string,
+        materialName: docItem?.materialName ?? line.materialName ?? "Material",
+        materialCode: docItem?.materialCode ?? line.materialCode ?? "",
+        category: docItem?.category ?? line.category ?? "",
+        packaging: (line.packaging ?? []).map((pkg: any) => ({
+          id: pkg.id ?? "",
+          packageTypeId: pkg.packageTypeId ?? "",
+          packageTypeName: pkg.packageTypeName ?? "Drum",
+          weightPerPackageKg: pkg.weightPerPackageKg ?? 0,
+          packages: pkg.packages ?? 0,
+        })),
+        quantityKg: qtyKg,
+        ratePerKg: rate,
+        amount: lineAmount,
+      }
+    }),
+    // Pull financial fields directly from root level (with fallback to totals object if present)
+    subtotal: (offer as any).subtotal ?? (offer as any).totals?.subtotal ?? 0,
+    orderDiscountPercent: (offer as any).orderDiscountPercent ?? (offer as any).totals?.orderDiscountPercent ?? 0,
+    orderDiscount: (offer as any).orderDiscount ?? (offer as any).totals?.orderDiscount ?? 0,
+    taxPercent: (offer as any).taxPercent ?? (offer as any).totals?.taxPercent ?? 0,
+    taxAmount: (offer as any).taxAmount ?? (offer as any).totals?.taxAmount ?? 0,
+    otherTaxEnabled: (offer as any).otherTaxEnabled ?? false,
+    otherTaxPercent: (offer as any).otherTaxPercent ?? (offer as any).totals?.otherTaxPercent ?? 1,
+    otherTaxAmount: (offer as any).otherTaxAmount ?? (offer as any).totals?.otherTaxAmount ?? 0,
+    total: (offer as any).total ?? (offer as any).totals?.total ?? 0,
+    delivery: ((offer as any).deliveryBatches ?? (offer as any).delivery ?? []).map((batch: any) => ({
+      id: batch.id ?? "",
+      batchNumber: batch.batchNumber ?? 1,
+      date: batch.date ?? batch.deliveryDate ?? "",
+      allocations: (batch.allocations ?? []).map((alloc: any) => ({
+        productId: alloc.productId ?? alloc.materialId ?? "",
+        packagingRowId: alloc.packagingRowId ?? alloc.offerLinePackagingId ?? "",
+        packageTypeId: alloc.packageTypeId ?? "",
+        packageTypeName: alloc.packageTypeName ?? "",
+        weightPerPackageKg: alloc.weightPerPackageKg ?? 0,
+        packages: alloc.packages ?? 0,
+      })),
     })),
-    subtotal: offer.totals.subtotal,
-    orderDiscountPercent: offer.orderDiscountPercent ?? offer.totals.orderDiscountPercent ?? 0,
-    orderDiscount: offer.totals.orderDiscount,
-    taxPercent: offer.totals.taxPercent,
-    taxAmount: offer.totals.taxAmount,
-    otherTaxEnabled: offer.otherTaxEnabled,
-    otherTaxPercent: offer.otherTaxEnabled ? 1 : 0,
-    otherTaxAmount: offer.totals.otherTaxAmount,
-    total: offer.totals.total,
-    delivery: offer.delivery,
-    notes: offer.notes,
-    attention: offer.attention,
+    notes: offer.notes ?? "",
+    attention: offer.attention ?? "",
   }
 }

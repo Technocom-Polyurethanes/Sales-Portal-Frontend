@@ -169,8 +169,8 @@ export default function OfferDocument({ data, language }: OfferDocumentProps) {
                 lines={data.lines}
                 currency={currency}
                 weightUnit={weightUnit}
-                formatNumber={(value) =>
-                  value.toLocaleString("en-US", {
+                formatNumber={(value) => 
+                  (value ?? 0).toLocaleString("en-US", {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                   })

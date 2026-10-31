@@ -1,16 +1,10 @@
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { referenceNumber } from "../../../lib/calculations/reference"
-import { OTHER_TAX_PERCENT } from "../../../lib/calculations/tax"
 import type { PackagingLine } from "../../../lib/calculations/packaging"
 import type { Product } from "../../products/types"
 import type { Customer } from "../../customers/types"
 import type { PackageType } from "../../settings/types"
-import {
-  calculateDraft,
-  orderedPackages,
-  type DraftCalculations,
-} from "../calculations"
 import {
   createDraftLine,
   createEmptyDraft,
@@ -18,11 +12,46 @@ import {
   draftId,
   reconcileDelivery,
 } from "../draft"
+import { offersApi } from "../api"
+import { calculateDraft, type DraftCalculations } from "../calculations"
 import type { DeliveryBatch, OfferDraft, OfferDraftLine } from "../types"
+
+export type ServerCalculations = {
+  lines: Array<{
+    lineId: string
+    productId: string
+    materialName: string
+    materialCode: string
+    category: string
+    packaging: PackagingLine[]
+    quantityKg: number
+    ratePerKg: number
+    discountPercent: number
+    amount: number
+  }>
+  subtotal: number
+  orderDiscountPercent: number
+  orderDiscount: number
+  taxPercent: number
+  taxAmount: number
+  otherTaxEnabled: boolean
+  otherTaxPercent: number
+  otherTaxAmount: number
+  total: number
+  deliveryCaps: Record<string, Record<string, number>>
+  warnings: string[]
+  validationErrors: string[]
+  reference: string
+  dueDate: string
+  document: any
+}
 
 export type OfferBuilderController = {
   draft: OfferDraft
+  /** Instant, locally computed numbers. Always available, drives the UI. */
   calculations: DraftCalculations
+  /** Latest response of the backend calculate endpoint, if any. */
+  serverCalculations: ServerCalculations | null
   setDraft: (patch: Partial<OfferDraft>) => void
   setStep: (step: number) => void
   step: number
@@ -39,7 +68,14 @@ export type OfferBuilderController = {
   addBatch: () => void
   removeBatch: (batchId: string) => void
   updateBatch: (batchId: string, patch: Partial<DeliveryBatch>) => void
-  setAllocation: (batchId: string, productId: string, packages: number) => void
+  setAllocation: (
+    batchId: string,
+    productId: string,
+    packages: number,
+    packagingRowId?: string,
+  ) => void
+  recalculating: boolean
+  calculateError: string | null
 }
 
 export type UseOfferBuilderOptions = {
@@ -65,10 +101,127 @@ export function useOfferBuilder({
       reference: base.reference.trim()
         ? base.reference
         : referenceNumber(sequence, base.issueDate),
-      otherTaxPercent: base.otherTaxEnabled ? OTHER_TAX_PERCENT : 0,
+      otherTaxPercent: base.otherTaxEnabled ? 1 : 0,
     }
   })
   const [step, setStep] = useState(0)
+  const [serverCalculations, setServerCalculations] =
+    useState<ServerCalculations | null>(null)
+  const [recalculating, setRecalculating] = useState(false)
+  const [calculateError, setCalculateError] = useState<string | null>(null)
+
+  const calculations = useMemo(() => calculateDraft(draft), [draft])
+
+  const abortControllerRef = useRef<AbortController | null>(null)
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const triggerCalculate = useCallback(() => {
+    // Cancel previous in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    const requestController = new AbortController()
+    abortControllerRef.current = requestController
+
+    // Clear debounce timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+    }
+
+    // Debounce 250ms
+    debounceTimerRef.current = setTimeout(async () => {
+      setRecalculating(true)
+      setCalculateError(null)
+
+      try {
+        // Prepare draft for server calculate
+        const payload = {
+          reference: draft.reference,
+          customerId: draft.customerId,
+          attention: draft.attention,
+          attentionAr: (draft as any).attentionAr,
+          taxId: draft.taxId,
+          issueDate: draft.issueDate,
+          currency: draft.currency,
+          paymentTermId: draft.paymentTermId,
+          lines: draft.lines.map((line: any) => ({
+            productId: line.productId || line.materialId,
+            materialName: line.materialName,
+            materialCode: line.materialCode,
+            category: line.category,
+            ratePerKg: line.ratePerKg,
+            discountPercent: line.discountPercent,
+            packaging: line.packaging,
+          })),
+          taxPercent: draft.taxPercent,
+          otherTaxEnabled: draft.otherTaxEnabled,
+          otherTaxPercent: draft.otherTaxPercent,
+          orderDiscountPercent: draft.orderDiscountPercent,
+          delivery: draft.delivery,
+          notes: draft.notes,
+          documentLanguage: draft.documentLanguage,
+        }
+
+        const response = await offersApi.calculate(payload)
+
+        // Ignore stale responses
+        if (requestController.signal.aborted) {
+          return
+        }
+
+        // Map server response to our calculations type
+        setServerCalculations({
+          lines: (response.lines || []).map((l: any, idx: number) => ({
+            lineId: draft.lines[idx]?.id || l.productId || `line-${idx}`,
+            productId: l.productId || l.materialId || "",
+            materialName: l.materialName || "",
+            materialCode: l.materialCode || "",
+            category: l.category || "",
+            packaging: l.packaging || [],
+            quantityKg: l.quantityKg || 0,
+            ratePerKg: l.ratePerKg || 0,
+            discountPercent: l.discountPercent || 0,
+            amount: l.amount || 0,
+          })),
+          subtotal: response.subtotal || 0,
+          orderDiscountPercent: response.orderDiscountPercent || 0,
+          orderDiscount: response.orderDiscount || 0,
+          taxPercent: response.taxPercent || 0,
+          taxAmount: response.taxAmount || 0,
+          otherTaxEnabled: response.otherTaxEnabled || false,
+          otherTaxPercent: response.otherTaxPercent || 0,
+          otherTaxAmount: response.otherTaxAmount || 0,
+          total: response.total || 0,
+          deliveryCaps: response.deliveryCaps || {},
+          warnings: response.warnings || [],
+          validationErrors: response.validationErrors || [],
+          reference: response.reference || draft.reference,
+          dueDate: response.dueDate || "",
+          document: response.document,
+        })
+      } catch (error: any) {
+        if (error?.name === "AbortError") return
+        setCalculateError(error?.message || "Failed to calculate offer")
+      } finally {
+        if (!requestController.signal.aborted) {
+          setRecalculating(false)
+        }
+      }
+    }, 250)
+  }, [draft])
+
+  // Trigger calculation when draft changes
+  useEffect(() => {
+    triggerCalculate()
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [triggerCalculate])
 
   const setDraft = useCallback(
     (patch: Partial<OfferDraft>) => {
@@ -94,6 +247,10 @@ export function useOfferBuilder({
               (item) => item.id === patch.customerId,
             )
             next.attention = selected?.contactPerson ?? ""
+            // Also prefill attentionAr if available
+            if (selected?.contactPersonAr && !(next as any).attentionAr) {
+              (next as any).attentionAr = selected.contactPersonAr
+            }
           }
         }
 
@@ -115,13 +272,21 @@ export function useOfferBuilder({
           }
         }
 
+        if (patch.issueDate && patch.issueDate !== current.issueDate) {
+          // Option: if reference follows the standard format, update its month automatically
+          const parts = current.reference.split("/")
+          if (parts.length === 4) {
+            const newMonth = referenceNumber(1, patch.issueDate).split("/")[1]
+            parts[1] = newMonth
+            next.reference = parts.join("/")
+          }
+        }
+
         return next
       })
     },
     [customers],
   )
-
-  const calculations = useMemo(() => calculateDraft(draft), [draft])
 
   const addLine = useCallback(
     (product: Product) => {
@@ -354,6 +519,9 @@ export function useOfferBuilder({
   return {
     draft,
     calculations,
+    serverCalculations,
+    recalculating,
+    calculateError,
     setDraft,
     step,
     setStep,

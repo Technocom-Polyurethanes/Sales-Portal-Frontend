@@ -6,10 +6,13 @@ export type Customer = {
   name: string
   nameAr?: string
   contactPerson: string
+  contactPersonAr?: string
   email: string
   phone: string
   city: string
+  cityAr?: string
   address: string
+  addressAr?: string
   taxId?: string
   paymentTermId: string
   offersCount: number

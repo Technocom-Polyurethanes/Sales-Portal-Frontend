@@ -14,24 +14,26 @@ export const OFFER_STATUSES: OfferStatus[] = [
 /** One priced material line of an offer. */
 export type OfferLine = {
   id: string
-  productId: string
+  productId?: string
+  materialId?: string
   materialName: string
-  materialCode: string
+  materialCode?: string
   category: string
   packaging: PackagingLine[]
   quantityKg: number
   ratePerKg: number
   discountPercent: number
   amount: number
-  showSpecifications: boolean
+  showSpecifications?: boolean
 }
 
 /** A material line while it is being edited in the builder. */
 export type OfferDraftLine = {
   id: string
-  productId: string
+  productId?: string
+  materialId?: string
   materialName: string
-  materialCode: string
+  materialCode?: string
   category: string
   ratePerKg: number
   discountPercent: number
@@ -45,6 +47,7 @@ export type OfferDraft = {
   customerId: string
   /** Contact person printed in the "Attention" line, editable per offer. */
   attention: string
+  attentionAr?: string
   /** Customer tax ID, editable per offer. */
   taxId?: string
   issueDate: string
@@ -64,7 +67,8 @@ export type OfferDraft = {
 
 /** Packages of one material scheduled in a delivery batch. */
 export type DeliveryAllocation = {
-  productId: string
+  productId?: string
+  materialId?: string
   packagingRowId?: string
   packageTypeId?: string
   packageTypeName?: string

@@ -91,8 +91,10 @@ export function calculateDraft(draft: OfferDraft): DraftCalculations {
   const scheduledByRow: Record<string, number> = {}
   for (const batch of draft.delivery) {
     for (const allocation of batch.allocations) {
-      scheduled[allocation.productId] =
-        (scheduled[allocation.productId] ?? 0) + allocation.packages
+      const allocationProductId =
+        allocation.productId ?? allocation.materialId ?? ""
+      scheduled[allocationProductId] =
+        (scheduled[allocationProductId] ?? 0) + allocation.packages
       if (allocation.packagingRowId) {
         scheduledByRow[allocation.packagingRowId] =
           (scheduledByRow[allocation.packagingRowId] ?? 0) + allocation.packages
@@ -104,10 +106,11 @@ export function calculateDraft(draft: OfferDraft): DraftCalculations {
   const orderedByRow: Record<string, number> = {}
   const quantity: Record<string, number> = {}
   for (const line of draft.lines) {
-    ordered[line.productId] =
-      (ordered[line.productId] ?? 0) + totalPackages(line.packaging)
-    quantity[line.productId] =
-      (quantity[line.productId] ?? 0) + totalQuantityKg(line.packaging)
+    const pid = (line as any).productId || (line as any).materialId || ""
+    ordered[pid] =
+      (ordered[pid] ?? 0) + totalPackages(line.packaging)
+    quantity[pid] =
+      (quantity[pid] ?? 0) + totalQuantityKg(line.packaging)
     for (const row of line.packaging) {
       orderedByRow[row.id] = row.packages
     }

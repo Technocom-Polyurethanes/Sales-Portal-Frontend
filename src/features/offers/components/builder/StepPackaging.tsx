@@ -24,7 +24,9 @@ export default function StepPackaging({
     <div className="space-y-4">
       <MaterialPicker
         products={products}
-        existingProductIds={controller.draft.lines.map((line) => line.productId)}
+        existingProductIds={controller.draft.lines
+          .map((line: any) => line.productId || line.materialId)
+          .filter((v): v is string => Boolean(v))}
         onAdd={controller.addLine}
       />
 

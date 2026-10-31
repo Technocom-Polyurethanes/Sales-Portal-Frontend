@@ -1,11 +1,15 @@
 export type BankAccount = {
   id: string
   bank: string
+  bankAr?: string
   branch: string
+  branchAr?: string
   accountNumber: string
   swift: string
   iban: string
   currency: string
+  accountHolderName?: string
+  accountHolderNameAr?: string
 }
 
 export type PackageType = {

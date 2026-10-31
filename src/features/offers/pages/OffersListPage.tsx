@@ -1,12 +1,10 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 
 import Badge from "../../../components/ui/Badge"
 import Button from "../../../components/ui/Button"
 import DataTable, { type Column } from "../../../components/ui/DataTable"
-import EmptyState from "../../../components/ui/EmptyState"
 import Icon from "../../../components/ui/Icon"
-import Spinner from "../../../components/ui/Spinner"
 import PageHeader from "../../../app/layout/PageHeader"
 import TableState from "../../../components/TableState"
 import { useTranslation } from "../../../i18n/I18nProvider"
@@ -28,7 +26,27 @@ export default function OffersListPage() {
   const { t, language } = useTranslation()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [status, setStatus] = useState<OfferStatus | "all">("all")
+  const statusParam = searchParams.get("status") as OfferStatus | null
+  const initialStatus =
+    statusParam && STATUS_FILTERS.includes(statusParam) ? statusParam : "all"
+  const [status, setStatus] = useState<OfferStatus | "all">(initialStatus)
+
+  useEffect(() => {
+    const sp = searchParams.get("status") as OfferStatus | null
+    if (sp && STATUS_FILTERS.includes(sp)) {
+      if (sp !== status) setStatus(sp)
+    } else if (!sp && status !== "all") {
+      setStatus("all")
+    }
+  }, [searchParams, status])
+
+  const handleStatusChange = (value: OfferStatus | "all") => {
+    setStatus(value)
+    const next = new URLSearchParams(searchParams)
+    if (value === "all") next.delete("status")
+    else next.set("status", value)
+    setSearchParams(next, { replace: true })
+  }
 
   const search = searchParams.get("search") ?? ""
   const { data, loading, error } = useOffers({ status, search })
@@ -118,13 +136,15 @@ export default function OffersListPage() {
 
   const offersList = data?.items ?? []
   const hasActiveFilters = search.trim() !== "" || status !== "all"
-  const tableState = loading
-    ? "loading"
-    : offersList.length === 0 && hasActiveFilters
-      ? "empty-results"
-      : offersList.length === 0
-        ? "empty-data"
-        : "data"
+  const tableState = error
+    ? "error"
+    : loading
+      ? "loading"
+      : offersList.length === 0 && hasActiveFilters
+        ? "empty-results"
+        : offersList.length === 0
+          ? "empty-data"
+          : "data"
 
   return (
     <>
@@ -147,7 +167,7 @@ export default function OffersListPage() {
           <button
             key={option}
             type="button"
-            onClick={() => setStatus(option)}
+            onClick={() => handleStatusChange(option)}
             className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
               status === option
                 ? "border-primary bg-primary-soft text-primary"
@@ -163,8 +183,9 @@ export default function OffersListPage() {
         <TableState
           state={tableState}
           query={search}
+          errorMessage={(error as any)?.message}
           onClearSearch={() => setSearch("")}
-          onClearFilters={() => setStatus("all")}
+          onClearFilters={() => handleStatusChange("all")}
           createLabel={t("offers.list.create")}
           onCreate={() => navigate("/offers/new")}
           emptyTitle={t("offers.list.empty")}
