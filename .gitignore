@@ -15,3 +15,7 @@ logs/
 .vercel
 .env*
 *.development
+
+# env files
+.env*
+!.env.example
