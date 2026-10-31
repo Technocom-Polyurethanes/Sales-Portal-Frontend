@@ -55,5 +55,13 @@ export function mapOfferDetail(raw: any): Offer {
       materialId: l.materialId || l.productId,
     }))
   }
+  // Normalize delivery
+  if (Array.isArray(mapped.delivery)) {
+    mapped.delivery = mapped.delivery.map((d: any) => ({
+      ...d,
+      date: d.date || d.deliveryDate,
+      allocations: d.allocations || d.items || [],
+    }))
+  }
   return mapped as Offer
 }
