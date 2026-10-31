@@ -44,10 +44,15 @@ export default function OfferSummary({ offer }: { offer: Offer }) {
                 >
                   <td className="px-3 py-2">
                     <span className="block font-medium text-ink">
-                      {line.materialName}
+                      {
+                        // Look up material name safely across available properties/document payload
+                        line.materialName ?? 
+                        ((offer as any).document?.items ?? (offer as any).documentDto?.items ?? []).find((di: any) => di.offerLineId === line.id || di.materialId === (line as any).materialId || di.materialId === (line as any).productId)?.materialName ?? 
+                        "Material"
+                      }
                     </span>
                     <span className="text-[11px] text-muted">
-                      {line.materialCode} · {line.category}
+                      {(line as any).category ?? ((offer as any).document?.items ?? (offer as any).documentDto?.items ?? []).find((di: any) => di.offerLineId === line.id || di.materialId === (line as any).materialId || di.materialId === (line as any).productId)?.category ?? "Category"}
                     </span>
                   </td>
                   <td className="px-3 py-2 text-muted">
@@ -69,14 +74,14 @@ export default function OfferSummary({ offer }: { offer: Offer }) {
         </div>
       </section>
 
-      {offer.delivery.length > 0 && (
+      {(offer.delivery ?? (offer as any).deliveryBatches ?? []).length > 0 && (
         <section>
           <h3 className="mb-2 text-sm font-semibold text-ink">
             {t("offers.builder.steps.delivery")}
           </h3>
 
           <ul className="space-y-2">
-            {offer.delivery.map((batch) => (
+            {(offer.delivery ?? (offer as any).deliveryBatches ?? []).map((batch: any) => (
               <li
                 key={batch.id}
                 className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-line-soft bg-page/50 px-3 py-2 text-sm"
@@ -86,22 +91,21 @@ export default function OfferSummary({ offer }: { offer: Offer }) {
                     number: batch.batchNumber,
                   })}
                   <span className="ms-2 font-normal text-muted">
-                    {formatIsoDay(batch.date)}
+                    {formatIsoDay(batch.date ?? batch.deliveryDate)}
                   </span>
                 </span>
 
                 <span className="text-muted">
-                  {batch.allocations
-                    .filter((allocation) => allocation.packages > 0)
-                    .map(
-                      (allocation) =>
-                        `${
-                          offer.lines.find(
-                            (line) => line.productId === allocation.productId,
-                          )?.materialName ?? allocation.productId
-                        }: ${allocation.packages}`,
-                    )
-                    .join(" · ")}
+                  {(batch.allocations ?? [])
+                    .filter((allocation: any) => allocation.packages > 0)
+                    .map((allocation: any) => {
+                      const matchedLine = (offer.lines ?? []).find(
+                        (line: any) => line.productId === allocation.productId || line.materialId === allocation.materialId
+                      )
+                      const name = matchedLine?.materialName ?? allocation.materialName ?? "Material"
+                      return `${name}: ${allocation.packages}`
+                    })
+                  .join(" · ")}
                 </span>
               </li>
             ))}

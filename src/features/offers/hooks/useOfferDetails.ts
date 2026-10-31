@@ -8,11 +8,11 @@ import type {
   PackageType,
 } from "../../settings/types"
 import { offersApi } from "../api"
-import type { Offer } from "../types"
+import type { Offer, OfferListItem } from "../types"
 
 export type OfferDetailsData = {
   offer: Offer
-  versions: Offer[]
+  versions: OfferListItem[]
   customer: Customer | undefined
   company: CompanySettings
   banks: BankAccount[]

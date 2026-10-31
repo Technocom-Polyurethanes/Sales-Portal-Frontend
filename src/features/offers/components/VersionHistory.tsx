@@ -5,14 +5,14 @@ import { useTranslation } from "../../../i18n/I18nProvider"
 import { formatIsoDay } from "../../../lib/formatters/date"
 import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatCurrency } from "../../../lib/formatters/number"
-import type { Offer } from "../types"
+import type { Offer, OfferListItem } from "../types"
 
 export type VersionHistoryProps = {
-  versions: Offer[]
+  versions: OfferListItem[] | Offer[]
   currentId: string
 }
 
-/** Every version created from the same offer, oldest first. */
+/** Every version created from the same offer, newest first. */
 export default function VersionHistory({
   versions,
   currentId,
@@ -54,10 +54,10 @@ export default function VersionHistory({
 
               <span className="flex items-center gap-3">
                 <span className="text-xs text-muted">
-                  {formatIsoDay(version.issueDate)} ·{" "}
+                  {formatIsoDay((version as any).issueDate || (version as any).createdAt)} ·{" "}
                   {formatCurrency(
-                    version.totals.total,
-                    version.currency,
+                    (version as any).totals?.total ?? (version as any).total ?? 0,
+                    (version as any).currency ?? "EGP",
                     locale,
                   )}
                 </span>

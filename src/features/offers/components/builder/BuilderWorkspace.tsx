@@ -73,10 +73,10 @@ export default function BuilderWorkspace({
           customerId: draft.customerId,
           attention: draft.attention,
           taxId: draft.taxId ?? "",
-          lines: draft.lines.map((line, index) => ({
-            productId: line.productId,
+          lines: draft.lines.map((line: any, index) => ({
+            productId: line.productId || line.materialId || "",
             materialName: line.materialName,
-            materialCode: line.materialCode,
+            materialCode: line.materialCode || "",
             category: line.category,
             packaging: line.packaging,
             quantityKg: calculations.lines[index]?.quantityKg ?? 0,

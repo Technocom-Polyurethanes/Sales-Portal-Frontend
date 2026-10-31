@@ -65,13 +65,14 @@ export default function DeliveryScheduleEditor({
             )
             const batchWeight = batch.allocations.reduce(
               (sum, allocation) => {
+                const allocPid = (allocation as any).productId || (allocation as any).materialId || ""
                 const line = draft.lines.find(
-                  (item) => item.productId === allocation.productId,
+                  (item: any) => (item.productId || item.materialId) === allocPid,
                 )
                 const row = allocation.packagingRowId
                   ? line?.packaging.find((item) => item.id === allocation.packagingRowId)
                   : line?.packaging[0]
-                const weight = allocation.weightPerPackageKg ?? row?.weightPerPackageKg ?? calculations.weightPerPackage[allocation.productId] ?? 0
+                const weight = allocation.weightPerPackageKg ?? row?.weightPerPackageKg ?? (calculations.weightPerPackage as any)[allocPid] ?? 0
                 return sum + allocation.packages * weight
               },
               0,
@@ -127,10 +128,10 @@ export default function DeliveryScheduleEditor({
 
                 <div className="grid gap-3 pt-3 sm:grid-cols-2">
                   {materials.map((line) => {
-                    const productId = line.productId
-                    const ordered = calculations.ordered[productId] ?? 0
-                    const scheduled = calculations.scheduled[productId] ?? 0
-                    const remaining = calculations.remaining[productId] ?? 0
+                    const productId = (line as any).productId || (line as any).materialId || ""
+                    const ordered = (calculations.ordered as any)[productId] ?? 0
+                    const scheduled = (calculations.scheduled as any)[productId] ?? 0
+                    const remaining = (calculations.remaining as any)[productId] ?? 0
                     const complete = remaining === 0 && ordered > 0
 
                     return (
@@ -174,7 +175,7 @@ export default function DeliveryScheduleEditor({
                                   : sum +
                                     (b.allocations.find(
                                       (item) =>
-                                        item.productId === productId &&
+                                        ((item as any).productId === productId || (item as any).materialId === productId) &&
                                         (item.packagingRowId === row.id ||
                                           (!item.packagingRowId && line.packaging[0]?.id === row.id)),
                                     )?.packages ?? 0),
@@ -207,7 +208,7 @@ export default function DeliveryScheduleEditor({
                                     type="button"
                                     className="flex h-9 w-9 items-center justify-center hover:bg-page disabled:opacity-40 disabled:cursor-not-allowed"
                                     disabled={current <= 0}
-                                    onClick={() => onSetAllocation(batch.id, productId, Math.max(0, current - 1), row.id)}
+                                    onClick={() => onSetAllocation(batch.id, productId || "", Math.max(0, current - 1), row.id)}
                                   >
                                     -
                                   </button>
@@ -220,7 +221,7 @@ export default function DeliveryScheduleEditor({
                                     type="button"
                                     className="flex h-9 w-9 items-center justify-center hover:bg-page disabled:opacity-40 disabled:cursor-not-allowed"
                                     disabled={current >= maxForBatch}
-                                    onClick={() => onSetAllocation(batch.id, productId, Math.min(maxForBatch, current + 1), row.id)}
+                                    onClick={() => onSetAllocation(batch.id, productId || "", Math.min(maxForBatch, current + 1), row.id)}
                                   >
                                     +
                                   </button>
@@ -254,9 +255,11 @@ export default function DeliveryScheduleEditor({
 function uniqueMaterials(lines: OfferDraftLine[]): OfferDraftLine[] {
   const seen = new Set<string>()
 
-  return lines.filter((line) => {
-    if (seen.has(line.productId)) return false
-    seen.add(line.productId)
+  return lines.filter((line: any) => {
+    const pid = line.productId || line.materialId
+    if (!pid) return true
+    if (seen.has(pid)) return false
+    seen.add(pid)
     return true
   })
 }

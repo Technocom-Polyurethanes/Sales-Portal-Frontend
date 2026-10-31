@@ -172,7 +172,7 @@ export default function OfferDetailsPage() {
               <div>
                 <dt className="text-xs text-muted">{t("common.total")}</dt>
                 <dd className="font-semibold text-primary tabular-nums">
-                  {formatCurrency(offer.totals.total, offer.currency, locale)}
+                  {formatCurrency(offer.totals?.total ?? (offer as any).total ?? 0, offer.currency, locale)}
                 </dd>
               </div>
             </dl>
