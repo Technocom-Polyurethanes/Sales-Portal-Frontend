@@ -58,48 +58,70 @@ export default function OfferSummary({ offer }: { offer: Offer }) {
               </tr>
             </thead>
             <tbody>
-              {(offer.lines || []).map((line: any) => (
-                <tr
-                  key={line.id || line.productId}
-                  className="border-b border-line-soft last:border-0"
-                >
-                  <td className="px-3 py-2">
-                    <span className="block font-medium text-ink">
-                      {line.materialName ||
-                        line.productName ||
-                        ((offer as any).document?.lines || [])
-                          .find(
-                            (di: any) =>
-                              di.offerLineId === line.id ||
-                              di.productId === (line.productId || line.materialId),
-                          )?.materialName ||
-                        "Material"}
-                    </span>
-                    <span className="text-[11px] text-muted">
-                      {line.category ||
-                        ((offer as any).document?.lines || [])
-                          .find(
-                            (di: any) =>
-                              di.offerLineId === line.id ||
-                              di.productId === (line.productId || line.materialId),
-                          )?.category ||
-                        ""}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2 text-muted">
-                    {formatPackagingSummary(line.packaging)}
-                  </td>
-                  <td className="px-3 py-2 text-end tabular-nums">
-                    {formatNumber(line.quantityKg)} kg
-                  </td>
-                  <td className="px-3 py-2 text-end tabular-nums">
-                    {formatNumber(line.ratePerKg)}
-                  </td>
-                  <td className="px-3 py-2 text-end font-medium tabular-nums">
-                    {formatNumber(line.amount)}
-                  </td>
-                </tr>
-              ))}
+              {(offer.lines || []).map((line: any) => {
+                const doc = (offer as any).document || (offer as any).documentDto
+                const docLine =
+                  (doc?.lines || doc?.items || []).find(
+                    (di: any) =>
+                      di.offerLineId === line.id ||
+                      di.id === line.id ||
+                      di.productId === (line.materialId || line.productId) ||
+                      di.materialId === (line.materialId || line.productId),
+                  ) || {}
+                const materialName =
+                  line.materialName ||
+                  line.productName ||
+                  docLine.materialName ||
+                  docLine.name ||
+                  "Material"
+                const category = line.category || docLine.category || ""
+                const packaging = line.packaging || docLine.packaging || []
+                const packagingSummary =
+                  line.packagingSummary ||
+                  docLine.packagingSummary ||
+                  formatPackagingSummary(packaging)
+                const calculatedQtyKg = Array.isArray(packaging)
+                  ? packaging.reduce(
+                      (sum: number, pkg: any) =>
+                        sum + (pkg.packages ?? 0) * (pkg.weightPerPackageKg ?? 0),
+                      0,
+                    )
+                  : 0
+                const quantityKg =
+                  line.quantityKg ?? docLine.quantityKg ?? calculatedQtyKg ?? 0
+                const ratePerKg = line.ratePerKg ?? docLine.ratePerKg ?? 0
+                const amount =
+                  line.amount ??
+                  docLine.amount ??
+                  (quantityKg && ratePerKg ? quantityKg * ratePerKg : 0)
+                return (
+                  <tr
+                    key={line.id || line.productId || materialName}
+                    className="border-b border-line-soft last:border-0"
+                  >
+                    <td className="px-3 py-2">
+                      <span className="block font-medium text-ink">
+                        {materialName}
+                      </span>
+                      {category && (
+                        <span className="text-[11px] text-muted">{category}</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-muted">
+                      {packagingSummary}
+                    </td>
+                    <td className="px-3 py-2 text-end tabular-nums">
+                      {formatNumber(quantityKg)} kg
+                    </td>
+                    <td className="px-3 py-2 text-end tabular-nums">
+                      {formatNumber(ratePerKg)}
+                    </td>
+                    <td className="px-3 py-2 text-end font-medium tabular-nums">
+                      {formatNumber(amount)}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
