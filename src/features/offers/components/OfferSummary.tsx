@@ -18,9 +18,12 @@ function formatPackagingSummary(packaging: any[] = []) {
         return `${packages} × ${weight} kg ${name}`
       }
       if (name) {
-        return `${packages} ${name}`
+        return `${packages} × ${weight || ""} kg ${name}`.replace("×  kg", "× kg").trim()
       }
-      return `${packages} pkg`
+      if (weight) {
+        return `${packages} × ${weight} kg`
+      }
+      return `${packages}`
     })
     .join(", ")
 }
@@ -153,17 +156,42 @@ export default function OfferSummary({ offer }: { offer: Offer }) {
                     {(batch.allocations ?? [])
                       .filter((allocation: any) => allocation.packages > 0)
                       .map((allocation: any) => {
+                        const allocPid = allocation.productId || allocation.materialId
                         const matchedLine = (offer.lines ?? []).find(
                           (line: any) =>
-                            line.productId ===
-                              (allocation.productId || allocation.materialId) ||
-                            line.materialId ===
-                              (allocation.productId || allocation.materialId),
+                            line.productId === allocPid ||
+                            line.materialId === allocPid ||
+                            line.id === allocation.offerLineId,
+                        )
+                        const doc = (offer as any).document || (offer as any).documentDto
+                        const docLine = (doc?.lines || doc?.items || []).find(
+                          (di: any) =>
+                            di.offerLineId === matchedLine?.id ||
+                            di.productId === allocPid ||
+                            di.materialId === allocPid,
                         )
                         const name =
                           matchedLine?.materialName ||
+                          matchedLine?.productName ||
+                          docLine?.materialName ||
                           allocation.materialName ||
-                          "Material"
+                          allocation.label ||
+                          ((offer.lines || []).findIndex(
+                            (l: any) => (l.productId || l.materialId) === allocPid,
+                          ) >= 0
+                            ? (offer.lines || [])[
+                                (offer.lines || []).findIndex(
+                                  (l: any) =>
+                                    (l.productId || l.materialId) === allocPid,
+                                )
+                              ]?.materialName ||
+                              `Material ${
+                                (offer.lines || []).findIndex(
+                                  (l: any) =>
+                                    (l.productId || l.materialId) === allocPid,
+                                ) + 1
+                              }`
+                            : "Material")
                         return `${name}: ${allocation.packages}`
                       })
                       .join(" · ")}
