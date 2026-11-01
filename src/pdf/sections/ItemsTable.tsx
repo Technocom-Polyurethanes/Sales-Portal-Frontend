@@ -31,12 +31,12 @@ export default function ItemsTable({
           <th scope="col" className="doc-index">
             #
           </th>
-          <th scope="col">{headings.item}</th>
+          <th scope="col">Items</th>
           <th scope="col" className="doc-num">
             {headings.quantity}
           </th>
           <th scope="col" className="doc-num">
-            {headings.rate} ({currency}/{weightUnit})
+            Unit Price ({currency}/{weightUnit})
           </th>
           <th scope="col" className="doc-num">
             {headings.amount} ({currency})
