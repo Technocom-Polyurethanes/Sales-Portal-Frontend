@@ -31,15 +31,15 @@ export default function ItemsTable({
           <th scope="col" className="doc-index">
             #
           </th>
-          <th scope="col">{headings.item}</th>
+          <th scope="col">Items</th>
           <th scope="col" className="doc-num">
             {headings.quantity}
           </th>
           <th scope="col" className="doc-num">
-            {headings.rate}
+            Unit Price ({currency}/{weightUnit})
           </th>
           <th scope="col" className="doc-num">
-            {headings.amount}
+            {headings.amount} ({currency})
           </th>
         </tr>
       </thead>
@@ -57,12 +57,10 @@ export default function ItemsTable({
                 <span className="doc-ltr">{Math.round(line.quantityKg).toLocaleString("en-US")}</span>
               </td>
               <td className="doc-num">
-                <span className="doc-ltr">{formatNumber(line.ratePerKg)}</span>{" "}
-                {currency}
+                <span className="doc-ltr">{formatNumber(line.ratePerKg)}</span>
               </td>
               <td className="doc-num">
-                <span className="doc-ltr">{formatNumber(line.amount)}</span>{" "}
-                {currency}
+                <span className="doc-ltr">{formatNumber(line.amount)}</span>
               </td>
             </tr>
             {line.packagingSummary && (

@@ -84,7 +84,7 @@
 .offer-document .doc-tagline-en {
   margin-top: 1mm;
   font-family: "Times New Roman", Georgia, serif;
-  font-size: 9.5pt;
+  font-size: 10.5pt;
   font-style: italic;
   font-weight: 600;
   letter-spacing: 0.15pt;
@@ -137,7 +137,10 @@
   align-items: center;
   gap: 1.2mm;
   font-size: 6.5pt;
-  color: #64748b;
+  font-weight: 600;
+  color: var(--doc-primary);
+  border: solid 0.5pt var(--doc-primary);
+  padding: 5px 8px;
 }
 
 /* Split-Rule Contact Grid (Left Rule, Open Center Gap, Right Rule) */
@@ -150,14 +153,13 @@
 }
 
 .offer-document .doc-footer__col p {
-  margin: 0;
   line-height: 1.38;
 }
 
 .offer-document .doc-footer__col--en {
   text-align: left;
   font-family: "Times New Roman", Georgia, serif;
-  font-size: 7.5pt;
+  font-size: 8.5pt;
   font-weight: 600;
   color: var(--doc-primary);
 }
@@ -259,7 +261,6 @@
 
 .offer-document .doc-table th {
   padding: 6px 8px;
-  border: 1px solid #1e293b;
   background: #1e293b;
   font-size: 7.5pt;
   font-weight: 700;
@@ -342,41 +343,70 @@
   margin-block: 17px 22px;
   margin-inline-start: auto;
   margin-inline-end: 0;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   border: 1px solid var(--doc-border);
-  border-radius: 4px;
   font-size: 8.5pt;
+  color: #1e293b;
+}
+
+.offer-document .doc-totals th,
+.offer-document .doc-totals td {
+  position: relative;
+  padding: 6px 10px;
+  vertical-align: middle;
 }
 
 .offer-document .doc-totals th {
-  padding: 6px 10px;
-  border: 1px solid var(--doc-border);
-  background: #f1f5f9;
   text-align: start;
-  font-weight: 600;
-  color: #1e293b;
+  font-weight: 400;
 }
 
 .offer-document .doc-totals td {
-  padding: 6px 10px;
-  border: 1px solid var(--doc-border);
-  background: #fff;
   text-align: end;
+  font-weight: 600;
   white-space: nowrap;
-  color: #1e293b;
+  font-variant-numeric: tabular-nums;
 }
 
+/* Inner row dividers (skips the first row to prevent a double top border) */
+.offer-document .doc-totals tr + tr th::before,
+.offer-document .doc-totals tr + tr td::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  height: 1px;
+  background-color: var(--doc-border);
+}
+
+.offer-document .doc-totals tr + tr th::before {
+  inset-inline-start: 10px;
+  inset-inline-end: 0;
+}
+
+.offer-document .doc-totals tr + tr td::before {
+  inset-inline-start: 0;
+  inset-inline-end: 10px;
+}
+
+/* Deduction row text color */
 .offer-document .doc-totals .doc-deduction th,
 .offer-document .doc-totals .doc-deduction td {
   color: var(--doc-deduction);
 }
 
+/* Grand total row with thick dark top divider */
 .offer-document .doc-totals .doc-grand th,
 .offer-document .doc-totals .doc-grand td {
-  background: #f1f5f9;
-  color: #1e293b;
+  padding-block: 9px 8px;
   font-size: 10pt;
   font-weight: 700;
+}
+
+.offer-document .doc-totals .doc-grand th::before,
+.offer-document .doc-totals .doc-grand td::before {
+  height: 1;
+  background-color: #1e293b;
 }
 
 /* Sections ---------------------------------------------------------------- */

@@ -4,7 +4,7 @@ import type { PackagingLine } from "../lib/calculations/packaging"
 import type { DocumentLanguage } from "./PdfLanguageProvider"
 
 const NUMBER_FORMATTER = new Intl.NumberFormat("en-US", {
-  minimumFractionDigits: 2,
+  minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 })
 

@@ -28,15 +28,9 @@ export default function DeliveryScheduleTable({
   weightUnit,
   formatDate,
   formatNumber,
-  language,
-  source,
 }: DeliveryScheduleTableProps) {
   if (batches.length === 0) return null
-
-  const totalWeightKg = batches.reduce(
-    (sum, batch) => sum + batch.totalWeightKg,
-    0,
-  )
+  const categoryOnly = (label: string) => label.split(" ")[0].trim()
 
   return (
     <section className="doc-section">
@@ -50,16 +44,10 @@ export default function DeliveryScheduleTable({
               const key = typeof column === "string" ? column : column.key
               return (
                 <th scope="col" key={key} className="doc-num">
-                  {label}
+                  {categoryOnly(label)}
                 </th>
               )
             })}
-            <th scope="col" className="doc-num">
-              {headings.packages}
-            </th>
-            <th scope="col" className="doc-num">
-              {headings.totalWeight}
-            </th>
           </tr>
         </thead>
         <tbody>
@@ -113,18 +101,6 @@ export default function DeliveryScheduleTable({
                   </td>
                 )
               })}
-              <td className="doc-num">
-                {Array.from(batchTotalsByType.entries()).map(([type, count]) => (
-                  <div key={type}>
-                    {count} {type}
-                  </div>
-                ))}
-              </td>
-              <td className="doc-num">
-                <span className="doc-ltr">
-                  {formatNumber(batch.totalWeightKg)}
-                </span>
-              </td>
             </tr>
             )
           })}
@@ -166,28 +142,6 @@ export default function DeliveryScheduleTable({
                 </td>
               )
             })}
-            <td className="doc-num">
-              {(() => {
-                const grandTotals = new Map<string, number>()
-                for (const batch of batches) {
-                  for (const allocation of batch.allocations) {
-                    if (allocation.packages > 0) {
-                      const key = allocation.packageTypeName || ""
-                      grandTotals.set(key, (grandTotals.get(key) ?? 0) + allocation.packages)
-                    }
-                  }
-                }
-                return Array.from(grandTotals.entries()).map(([type, count]) => (
-                  <div key={type}>
-                    {count} {type}
-                  </div>
-                ))
-              })()}
-            </td>
-            <td className="doc-num">
-              <span className="doc-ltr">{formatNumber(totalWeightKg)}</span>{" "}
-              {weightUnit}
-            </td>
           </tr>
         </tbody>
       </table>

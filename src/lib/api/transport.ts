@@ -2,7 +2,7 @@ import type { Transport } from "./types"
 import { ApiError } from "./types"
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5000/api"
+  import.meta.env.VITE_API_BASE_URL
 const TOKEN_KEY = "sales_portal_jwt"
 const SESSION_KEY = "technocom.session"
 

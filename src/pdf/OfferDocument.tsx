@@ -151,7 +151,7 @@ export default function OfferDocument({ data, language }: OfferDocumentProps) {
           customerName={data.customerName}
           address={data.customerAddress}
           taxId={data.taxId}
-          taxIdLabel={template.taxId ?? "Tax ID"}
+          taxIdLabel={"Tax Registration Number"}
           attention={data.attention}
           attentionLabel={template.attention}
         />
@@ -192,7 +192,12 @@ export default function OfferDocument({ data, language }: OfferDocumentProps) {
                 columns={columns}
                 weightUnit={weightUnit}
                 formatDate={formatDocumentDate}
-                formatNumber={formatDocumentNumber}
+                formatNumber={(value) => 
+                  (value ?? 0).toLocaleString("en-US", {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2,
+                  })
+                }
                 language={language}
                 source={data}
               />
@@ -212,7 +217,9 @@ export default function OfferDocument({ data, language }: OfferDocumentProps) {
               />
 
               <NotesBlock heading={template.notes} notes={data.notes} />
-            <footer className="doc-footer" dir="ltr">
+
+
+      <footer className="doc-footer" dir="ltr">
         <div className="doc-footer__letterhead">
           <div className="doc-footer__col doc-footer__col--en">
             <p className="doc-footer__address">
@@ -224,6 +231,7 @@ export default function OfferDocument({ data, language }: OfferDocumentProps) {
           </div>
 
           <div className="doc-footer__col doc-footer__col--center">
+            <p className="doc-footer__form-meta mb-3">TF-06-01</p>
             <p className="doc-footer__email">E-mail : sales@technocom.org</p>
           </div>
 
