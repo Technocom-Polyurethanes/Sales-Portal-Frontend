@@ -39,11 +39,6 @@ function buildReferenceRows(
       ltr: true,
     },
     { label: template.terms, value: data.paymentTerm },
-    {
-      label: template.dueDate,
-      value: formatDocumentDate(data.dueDate),
-      ltr: true,
-    },
   ]
 }
 
