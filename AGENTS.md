@@ -86,8 +86,8 @@ path is missing, or when the repository contradicts this guide.
   `src/lib/calculations/tax.ts`.
 - **Due date**: the issue date shifted by the payment term. See
   `src/lib/calculations/dueDate.ts`.
-- **Page size**: the printed area of an A4 page with 15mm margins, so the
-  document is 180mm wide. The preview shows a real 210 × 297mm sheet with the
+- **Page size**: the printed area of an A4 page with 12.7mm (narrow) margins, so
+  the document is 184.6mm wide. The preview shows a real 210 × 297mm sheet with the
   same margins, and scales the whole sheet to fit the panel. Never scale the
   document on its own, the white sheet and the document have to stay together.
 - **Languages**: the application language and the PDF language are two separate

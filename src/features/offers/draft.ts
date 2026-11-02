@@ -1,18 +1,14 @@
 import { todayIso } from "../../lib/calculations/date"
 import type { PackagingLine } from "../../lib/calculations/packaging"
 import { OTHER_TAX_PERCENT } from "../../lib/calculations/tax"
-import type { Customer } from "../customers/types"
 import type { Product } from "../products/types"
 import type { PackageType } from "../settings/types"
 import { calculateDraft, type DraftCalculations } from "./calculations"
-import type { DeliveryBatch, Offer, OfferDraft, OfferDraftLine, OfferLine } from "./types"
+import type { DeliveryBatch, Offer, OfferDraft, OfferDraftLine } from "./types"
 
-let counter = 0
-
-/** Short unique id used while the offer is still being built. */
-export function draftId(prefix: string): string {
-  counter += 1
-  return `${prefix}-${Date.now().toString(36)}-${counter}`
+/** Unique id used while the offer is built. A real GUID, because the API binds these ids as GUIDs and links delivery allocations to rows by them. */
+export function draftId(_kind: string): string {
+  return crypto.randomUUID()
 }
 
 /** A packaging row for one package type and weight. */
@@ -75,62 +71,63 @@ export function createEmptyDraft(
   } as OfferDraft
 }
 
-/** Options used when an offer is created from a draft. */
-export type DraftToOfferOptions = {
-  status: Offer["status"]
-  version: number
-  parentOfferId?: string
-}
-
-/** Builds the offer payload sent to the API. */
-export function draftToOffer(
+/**
+ * Builds the request body of POST /api/offers (OfferDraftDto).
+ * No status is sent: the API always creates a draft and the status is changed
+ * afterwards with PATCH /api/offers/{id}/status.
+ */
+export function draftToPayload(
   draft: OfferDraft,
-  calculations: DraftCalculations,
-  customer: Customer | undefined,
-  options: DraftToOfferOptions,
-): Offer {
-  const lines: OfferLine[] = draft.lines.map((line, index) => ({
-    id: line.id,
-    productId: line.productId,
-    materialName: line.materialName,
-    materialCode: line.materialCode,
-    category: line.category,
-    packaging: line.packaging,
-    quantityKg: calculations.lines[index]?.quantityKg ?? 0,
-    ratePerKg: line.ratePerKg,
-    discountPercent: line.discountPercent,
-    amount: calculations.lines[index]?.amount ?? 0,
-    showSpecifications: false,
-  }))
-
+  options: { version: number; parentOfferId?: string },
+) {
   return {
-    id: "",
-    reference: calculations.reference,
-    customerId: draft.customerId,
-    customerName: customer?.name ?? "",
-    attention: draft.attention.trim(),
-    taxId: draft.taxId ?? customer?.taxId ?? "",
-    issueDate: draft.issueDate,
-    dueDate: calculations.dueDate,
-    currency: draft.currency,
-    paymentTermId: draft.paymentTermId,
-    lines,
-    delivery: draft.delivery,
-    taxPercent: draft.taxPercent,
-    otherTaxEnabled: draft.otherTaxEnabled,
-    otherTaxName: "",
-    otherTaxPercent: draft.otherTaxPercent,
-    orderDiscount: calculations.totals.orderDiscount,
-    orderDiscountPercent: draft.orderDiscountPercent,
-    extraExpenses: 0,
-    advancePayment: 0,
-    notes: draft.notes,
-    status: options.status,
+    reference: draft.reference.trim(),
     version: options.version,
     parentOfferId: options.parentOfferId,
-    totals: calculations.totals,
-    documentLanguage: draft.documentLanguage,
-    createdAt: new Date().toISOString(),
+    // Empty GUIDs are omitted: "" fails model binding (400), a missing one gets a validation message.
+    customerId: draft.customerId || undefined,
+    attention: draft.attention.trim(),
+    attentionAr: (draft.attentionAr ?? "").trim(),
+    taxId: draft.taxId ?? "",
+    issueDate: draft.issueDate,
+    paymentTermId: draft.paymentTermId || undefined,
+    currency: draft.currency,
+    documentLanguage: draft.documentLanguage === "ar" ? "Ar" : "En",
+    notes: draft.notes,
+    orderDiscountPercent: draft.orderDiscountPercent,
+    taxPercent: draft.taxPercent,
+    otherTaxEnabled: draft.otherTaxEnabled,
+    otherTaxPercent: draft.otherTaxEnabled ? draft.otherTaxPercent : 0,
+    lines: draft.lines.map((line, lineIndex) => ({
+      id: line.id,
+      sortOrder: lineIndex,
+      materialId: line.productId ?? line.materialId,
+      ratePerKg: line.ratePerKg,
+      discountPercent: line.discountPercent,
+      packaging: line.packaging.map((row, rowIndex) => ({
+        id: row.id,
+        sortOrder: rowIndex,
+        packageTypeId: row.packageTypeId,
+        weightPerPackageKg: row.weightPerPackageKg,
+        packages: row.packages,
+      })),
+    })),
+    deliveryBatches: draft.delivery.map((batch) => ({
+      id: batch.id,
+      batchNumber: batch.batchNumber,
+      deliveryDate: batch.date,
+      allocations: batch.allocations
+        .filter((allocation) => allocation.packages > 0)
+        .map((allocation) => ({
+          offerLineId: draft.lines.find((line) =>
+            line.packaging.some((row) => row.id === allocation.packagingRowId),
+          )?.id,
+          offerLinePackagingId: allocation.packagingRowId,
+          materialId: allocation.productId ?? allocation.materialId,
+          packageTypeId: allocation.packageTypeId,
+          packages: allocation.packages,
+        })),
+    })),
   }
 }
 

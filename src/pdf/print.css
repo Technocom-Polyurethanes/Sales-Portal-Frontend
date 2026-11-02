@@ -2,7 +2,7 @@
  * Print rules of the quotations workspace.
  *
  * The document is already split into A4 sheets (see paginate.ts), each sheet
- * carries its own 15mm margin, so the printer page has no margin of its own.
+ * carries its own 12.7mm margin, so the printer page has no margin of its own.
  */
 
 /*
