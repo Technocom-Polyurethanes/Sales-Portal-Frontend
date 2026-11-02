@@ -14,6 +14,7 @@ import { offersApi } from "../../api"
 import { buildDocumentData } from "../../document"
 import { createEmptyDraft, draftToPayload } from "../../draft"
 import { useOfferBuilder } from "../../hooks/useOfferBuilder"
+import type { PaymentTerm } from "../../../settings/types"
 import type { BuilderCatalog } from "../../hooks/useBuilderCatalog"
 import type { OfferStatus } from "../../types"
 import type { OfferDraft } from "../../types"
@@ -69,10 +70,6 @@ export default function BuilderWorkspace({
 
   const documentData = useMemo(
     () => {
-      // Use server document if available, otherwise build from draft + calculations
-      if (serverCalculations?.document) {
-        return serverCalculations.document
-      }
       return buildDocumentData(
         {
           reference: serverCalculations?.reference || calculations.reference,
@@ -112,6 +109,7 @@ export default function BuilderWorkspace({
           packageTypes: catalog.packageTypes,
           language: draft.documentLanguage,
           paymentTermLabel: paymentTermLabel(
+            catalog.paymentTerms,
             draft.paymentTermId,
             draft.documentLanguage,
           ),
@@ -317,9 +315,14 @@ export default function BuilderWorkspace({
   )
 }
 
-function paymentTermLabel(termId: string, language: "en" | "ar"): string {
-  const term = getPaymentTerm(termId)
-  return language === "ar" ? term.labelAr : term.label
+// The backend term ids are GUIDs, so look the term up in the catalog first.
+function paymentTermLabel(
+  terms: PaymentTerm[],
+  termId: string,
+  language: "en" | "ar",
+): string {
+  const term = terms.find((item) => item.id === termId) ?? getPaymentTerm(termId)
+  return language === "ar" ? term.labelAr || term.label : term.label
 }
 
 function apiMessage(e: unknown, fallback: string): string {
