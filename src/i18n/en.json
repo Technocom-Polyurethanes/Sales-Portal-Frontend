@@ -134,6 +134,8 @@
       "saveDraft": "Save as draft",
       "printExport": "Print / Export PDF",
       "saveIssue": "Save & issue offer",
+      "issued": "Offer issued",
+      "issueFailed": "Saved as a draft, but it could not be issued. Open the offer and change its status.",
       "pdfLanguage": "PDF language:",
       "draftSaved": "Draft saved",
       "chooseCustomer": "Please choose a customer",

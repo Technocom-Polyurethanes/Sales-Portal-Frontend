@@ -4,13 +4,15 @@ import { useNavigate } from "react-router-dom"
 import Button from "../../../../components/ui/Button"
 import Card from "../../../../components/ui/Card"
 import Icon from "../../../../components/ui/Icon"
+import { useToast } from "../../../../components/ui/ToastProvider"
 import { useTranslation } from "../../../../i18n/I18nProvider"
+import { ApiError } from "../../../../lib/api/types"
 import { getPaymentTerm } from "../../../../lib/calculations/dueDate"
 import { usePdfLanguage } from "../../../../pdf/PdfLanguageProvider"
 import { usePrintOffer } from "../../../../pdf/PrintProvider"
 import { offersApi } from "../../api"
 import { buildDocumentData } from "../../document"
-import { createEmptyDraft, draftToOffer } from "../../draft"
+import { createEmptyDraft, draftToPayload } from "../../draft"
 import { useOfferBuilder } from "../../hooks/useOfferBuilder"
 import type { BuilderCatalog } from "../../hooks/useBuilderCatalog"
 import type { OfferStatus } from "../../types"
@@ -39,10 +41,11 @@ export default function BuilderWorkspace({
   parentOfferId,
 }: BuilderWorkspaceProps) {
   const { t } = useTranslation()
+  const { notify } = useToast()
   const navigate = useNavigate()
   const { language: defaultDocumentLanguage } = usePdfLanguage()
   const { print } = usePrintOffer()
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving] = useState<OfferStatus | null>(null)
   const [reviewOpen, setReviewOpen] = useState(false)
   const [error, setError] = useState<string | undefined>(undefined)
 
@@ -52,7 +55,10 @@ export default function BuilderWorkspace({
     customers: catalog.customers,
     initialDraft:
       initialDraft ??
-      createEmptyDraft({ documentLanguage: defaultDocumentLanguage }),
+      createEmptyDraft({
+        documentLanguage: defaultDocumentLanguage,
+        paymentTermId: catalog.paymentTerms[0]?.id ?? "",
+      }),
   })
 
   const { draft, calculations, serverCalculations } = controller
@@ -140,22 +146,33 @@ export default function BuilderWorkspace({
     return true
   }
 
+  // The API always creates a draft, so issuing is a second call on the saved offer.
   const save = async (status: OfferStatus) => {
-    if (!validate()) return
+    if (saving || !validate()) return
 
-    setSaving(true)
+    setSaving(status)
+    let saved
     try {
-      const offer = draftToOffer(draft, calculations, customer, {
-        status,
-        version,
-        parentOfferId,
-      })
-      const saved = await offersApi.create(offer)
-      navigate(`/offers/${saved.id}`)
-    } catch {
-      setError(t("common.somethingWrong"))
-      setSaving(false)
+      saved = await offersApi.create(
+        draftToPayload(draft, { version, parentOfferId }),
+      )
+    } catch (e) {
+      setError(apiMessage(e, t("common.somethingWrong")))
+      setSaving(null)
+      return
     }
+
+    if (status === "issued") {
+      try {
+        await offersApi.setStatus(saved.id, "issued")
+        notify(t("offers.builder.issued"))
+      } catch {
+        notify(t("offers.builder.issueFailed"), "warning")
+      }
+    } else {
+      notify(t("offers.builder.draftSaved"))
+    }
+    navigate(`/offers/${saved.id}`)
   }
 
   return (
@@ -246,7 +263,8 @@ export default function BuilderWorkspace({
             <Button
               variant="secondary"
               onClick={() => void save("draft")}
-              loading={saving}
+              loading={saving === "draft"}
+              disabled={saving !== null}
             >
               {t("offers.builder.saveDraft")}
             </Button>
@@ -291,7 +309,7 @@ export default function BuilderWorkspace({
         otherTaxEnabled={draft.otherTaxEnabled}
         currency={draft.currency}
         documentLanguage={draft.documentLanguage}
-        saving={saving}
+        saving={saving === "issued"}
         onClose={() => setReviewOpen(false)}
         onConfirm={() => void save("issued")}
       />
@@ -302,4 +320,10 @@ export default function BuilderWorkspace({
 function paymentTermLabel(termId: string, language: "en" | "ar"): string {
   const term = getPaymentTerm(termId)
   return language === "ar" ? term.labelAr : term.label
+}
+
+function apiMessage(e: unknown, fallback: string): string {
+  if (!(e instanceof ApiError)) return fallback
+  const list = Array.isArray(e.errors) ? e.errors.join(" ") : ""
+  return [e.message, list].filter(Boolean).join(" ")
 }
