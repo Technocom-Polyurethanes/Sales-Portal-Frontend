@@ -18,7 +18,8 @@ export type OfferTemplate = {
   discount: string
   tax: string
   otherTax: string
-  total: string
+  itemsTotalLabel: string
+  deliveryTotalLabel: string
   schedule: string
   batch: string
   deliveryDate: string

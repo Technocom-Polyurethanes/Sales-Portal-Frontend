@@ -84,7 +84,7 @@ function buildTotalsRows(
   }
 
   rows.push({
-    label: template.total,
+    label: template.itemsTotalLabel,
     value: formatDocumentNumber(data.total),
     currency,
     variant: "grand",
@@ -238,7 +238,7 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
                 deliveryDate: template.deliveryDate,
                 packages: template.packages,
                 totalWeight: template.totalWeight,
-                total: template.total,
+                total: template.deliveryTotalLabel,
               }}
               batches={batches}
               columns={columns}
