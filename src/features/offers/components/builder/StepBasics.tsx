@@ -2,11 +2,7 @@ import { useState } from "react"
 import Field from "../../../../components/ui/Field"
 import Input from "../../../../components/ui/Input"
 import Select from "../../../../components/ui/Select"
-import Button from "../../../../components/ui/Button"
-import Icon from "../../../../components/ui/Icon"
 import { useTranslation } from "../../../../i18n/I18nProvider"
-// Payment terms now come from catalog.bootstrap
-import { formatIsoDay } from "../../../../lib/formatters/date"
 import { formatCurrencyLabel } from "../../../../lib/formatters/currency"
 import { localeForLanguage } from "../../../../lib/formatters/locale"
 import CustomerPickerModal from "../../../../components/pickers/CustomerPickerModal"
@@ -21,14 +17,13 @@ export type StepBasicsProps = {
   onChange: (patch: Partial<OfferDraft>) => void
 }
 
-const CURRENCIES = ["EGP", "USD", "EUR"]
+const CURRENCIES = ["EGP", "USD", "EUR", "SAR", "AED"]
 
 /** Step 1: customer, reference, dates, currency and payment terms. */
 export default function StepBasics({
   draft,
   customers,
   paymentTerms = [],
-  dueDate,
   onChange,
 }: StepBasicsProps) {
   const { t, language } = useTranslation()
@@ -117,7 +112,7 @@ export default function StepBasics({
             onChange={(event) => onChange({ attention: event.target.value })}
           />
         </Field>
-        <Field label={language === "ar" ? "رقم التسجيل الضريبي" : "Tax ID"} htmlFor="offer-tax-id">
+        <Field label={language === "ar" ? "رقم التسجيل الضريبي" : "Tax Registration Number"} htmlFor="offer-tax-id">
           <Input
             id="offer-tax-id"
             value={draft.taxId ?? ""}
@@ -158,19 +153,6 @@ export default function StepBasics({
           className="font-medium text-primary"
         />
       </Field>
-
-      <div className="sm:col-span-2">
-        <p className="rounded-md border-s-[3px] border-primary/40 bg-primary-soft/60 px-3.5 py-2.5 text-xs leading-relaxed text-muted">
-          <strong className="block text-ink">
-            {t("offers.builder.basics.referenceHint")}
-          </strong>
-          {t("offers.builder.basics.referencePreview", {
-            date: formatIsoDay(draft.issueDate),
-            reference: draft.reference,
-            dueDate: formatIsoDay(dueDate),
-          })}
-        </p>
-      </div>
     </div>
   )
 }
