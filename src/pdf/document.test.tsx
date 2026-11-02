@@ -180,13 +180,15 @@ describe("offer document", () => {
     expect(container.textContent).toContain("Attention: Mostafa Fouad")
   })
 
-  it("prints the tax as the VAT, in Arabic, in both languages", () => {
+  it("prints the tax as the VAT in the language of the document", () => {
+    const expected = { en: "VAT 14%", ar: "ضريبة القيمة المضافة 14%" }
+
     for (const language of ["en", "ar"] as const) {
       render(language)
       const labels = Array.from(container.querySelectorAll(".doc-totals th")).map(
         (cell) => cell.textContent,
       )
-      expect(labels).toContain("ضريبة القيمة المضافة 14%")
+      expect(labels).toContain(expected[language])
     }
   })
 

@@ -196,7 +196,7 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
                   customerName={data.customerName}
                   address={data.customerAddress}
                   taxId={data.taxId}
-                  taxIdLabel={"Tax Registration Number"}
+                  taxIdLabel={template.taxId}
                   attention={data.attention}
                   attentionLabel={template.attention}
                 />
