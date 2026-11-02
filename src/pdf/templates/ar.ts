@@ -17,7 +17,7 @@ export const arabicTemplate: OfferTemplate = {
   packaging: "التعبئة",
   subtotal: "الإجمالي",
   discount: "الخصم",
-  tax: "ضريبة القيمة المضافة",
+  tax: "ضريبة القيمه المضافة",
   otherTax: "ضريبة أرباح تجارية و صناعية (1%)",
   total: "صافي القيمة",
   schedule: "مواعيد التسليم",

@@ -181,7 +181,7 @@ describe("offer document", () => {
   })
 
   it("prints the tax as the VAT in the language of the document", () => {
-    const expected = { en: "VAT 14%", ar: "ضريبة القيمة المضافة 14%" }
+    const expected = { en: "(VAT) 14%", ar: "ضريبة القيمه المضافة 14%" }
 
     for (const language of ["en", "ar"] as const) {
       render(language)

@@ -17,7 +17,7 @@ export const englishTemplate: OfferTemplate = {
   packaging: "Packaging",
   subtotal: "Subtotal",
   discount: "Discount",
-  tax: "VAT",
+  tax: "(VAT)",
   otherTax: "Commercial and industrial profit tax (1%)",
   total: "Total",
   schedule: "Delivery Schedule",
