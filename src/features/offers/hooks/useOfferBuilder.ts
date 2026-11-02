@@ -231,26 +231,17 @@ export function useOfferBuilder({
         // Selecting a customer prefills the attention with the contact person
         // of the customer record, unless the user already typed their own.
         if (
-          patch.attention === undefined &&
           patch.customerId &&
           patch.customerId !== current.customerId
         ) {
-          const previous = customers.find(
-            (item) => item.id === current.customerId,
+          const selected = customers.find(
+            (item) => item.id === patch.customerId,
           )
-          const untouched =
-            current.attention.trim() === "" ||
-            current.attention.trim() === previous?.contactPerson.trim()
-
-          if (untouched) {
-            const selected = customers.find(
-              (item) => item.id === patch.customerId,
-            )
+          if (patch.attention === undefined && !(next as any).attention) {
             next.attention = selected?.contactPerson ?? ""
-            // Also prefill attentionAr if available
-            if (selected?.contactPersonAr && !(next as any).attentionAr) {
-              (next as any).attentionAr = selected.contactPersonAr
-            }
+          }
+          if ((patch as any).attentionAr === undefined && !(next as any).attentionAr) {
+            (next as any).attentionAr = (selected as any)?.contactPersonAr ?? ""
           }
         }
 

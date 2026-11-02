@@ -148,15 +148,13 @@ export function buildDocumentData(source: DocumentSource,
     customerAddress: options.customer?.address ?? "",
     customerAddressAr: options.customer?.addressAr ?? "",
     attention:
-      source.attention === undefined
-        ? (options.customer?.contactPerson ?? "").trim()
-        : source.attention.trim() === ""
-          ? ""
-          : source.attention.trim(),
+      source.attention !== undefined && String(source.attention).trim() !== ""
+        ? String(source.attention).trim()
+        : (options.customer?.contactPerson ?? "").trim(),
     attentionAr:
-      (source as any).attentionAr !== undefined
+      (source as any).attentionAr !== undefined && String((source as any).attentionAr).trim() !== ""
         ? String((source as any).attentionAr).trim()
-        : (options.customer?.contactPersonAr ?? "").trim(),
+        : (options.customer?.contactPersonAr ?? options.customer?.contactPerson ?? "").trim(),
     reference: source.reference,
     issueDate: source.issueDate,
     dueDate: source.dueDate,
