@@ -25,10 +25,16 @@ const TOLERANCE_PX = 0.5
 /** Fewest row groups a table keeps on each side of a page break. */
 const MIN_SPLIT_ROWS = 2
 
+type Unit = {
+  element: HTMLElement
+  /** Kept in one piece when it can fit on a page of its own. */
+  keep: boolean
+}
+
 type Parts = {
   header: HTMLElement | null
   footer: HTMLElement | null
-  units: HTMLElement[]
+  units: Unit[]
 }
 
 function readParts(source: HTMLElement): Parts {
@@ -40,8 +46,11 @@ function readParts(source: HTMLElement): Parts {
 
   const units = wrappers
     .filter((child) => child.hasAttribute("data-doc-unit"))
-    .map((child) => rootOf(child))
-    .filter((unit): unit is HTMLElement => unit !== null)
+    .map((child) => ({
+      element: rootOf(child),
+      keep: child.hasAttribute("data-doc-keep"),
+    }))
+    .filter((unit): unit is Unit => unit.element !== null)
 
   return { header: part("header"), footer: part("footer"), units }
 }
@@ -133,6 +142,29 @@ export function paginate(source: HTMLElement, target: HTMLElement): number {
     body.append(unit.cloneNode(true))
   }
 
+  /**
+   * Places a block in one piece: on the current page when it fits, otherwise
+   * on the next one. Returns false, and places nothing, when the block is
+   * taller than a page of its own, so the caller can split it.
+   */
+  const placeWhole = (unit: HTMLElement): boolean => {
+    const copy = unit.cloneNode(true) as HTMLElement
+    body.append(copy)
+    if (fits(body)) return true
+
+    copy.remove()
+    const wasEmpty = body.childElementCount === 0
+
+    if (!wasEmpty) nextPage()
+    const fresh = unit.cloneNode(true) as HTMLElement
+    body.append(fresh)
+    if (fits(body)) return true
+
+    // Too tall for a page: undo, and leave the empty page for the split.
+    fresh.remove()
+    return false
+  }
+
   const placeTable = (unit: HTMLElement, groups: HTMLTableRowElement[][]) => {
     let start = 0
 
@@ -188,15 +220,20 @@ export function paginate(source: HTMLElement, target: HTMLElement): number {
     }
   }
 
-  for (const unit of parts.units) {
+  for (const { element: unit, keep } of parts.units) {
     const table = (
       unit.matches("table") ? unit : unit.querySelector("table")
     ) as HTMLTableElement | null
     const tbody = table?.tBodies[0]
     const groups = tbody ? groupRows(tbody) : []
 
-    if (groups.length > 1) placeTable(unit, groups)
-    else placeBlock(unit)
+    if (groups.length <= 1) {
+      placeBlock(unit)
+    } else if (keep && placeWhole(unit)) {
+      continue
+    } else {
+      placeTable(unit, groups)
+    }
   }
 
   return target.childElementCount
