@@ -193,11 +193,11 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
               <div className="doc-top">
                 <BillToBlock
                   heading={template.billTo}
-                  customerName={data.customerName}
-                  address={data.customerAddress}
+                  customerName={arabic ? (data.customerNameAr ?? data.customerName) : data.customerName}
+                  address={arabic ? (data.customerAddressAr ?? data.customerAddress) : data.customerAddress}
                   taxId={data.taxId}
                   taxIdLabel={template.taxId}
-                  attention={data.attention}
+                  attention={arabic ? (data.attentionAr ?? data.attention) : data.attention}
                   attentionLabel={template.attention}
                 />
                 <ReferenceTable rows={referenceRows} />

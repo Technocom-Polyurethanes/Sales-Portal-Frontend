@@ -58,6 +58,7 @@ export function createEmptyDraft(
     reference: "",
     customerId: "",
     attention: "",
+    attentionAr: "",
     taxId: "",
     issueDate: todayIso(),
     currency: "EGP",
@@ -71,7 +72,7 @@ export function createEmptyDraft(
     notes: "",
     documentLanguage: "en",
     ...overrides,
-  }
+  } as OfferDraft
 }
 
 /** Options used when an offer is created from a draft. */

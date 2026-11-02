@@ -27,6 +27,7 @@ export type DocumentSource = {
   customerId: string
   /** Contact person printed in the "Attention" line, empty hides it. */
   attention?: string
+  attentionAr?: string
   taxId?: string
   lines: {
     productId: string
@@ -142,16 +143,20 @@ export function buildDocumentData(source: DocumentSource,
     tagline: options.company.tagline,
     taglineAr: options.company.taglineAr,
     formCode: options.company.formCode,
-    customerName: arabic
-      ? (options.customer?.nameAr ?? options.customer?.name ?? "")
-      : (options.customer?.name ?? ""),
+    customerName: options.customer?.name ?? "",
+    customerNameAr: options.customer?.nameAr ?? "",
     customerAddress: options.customer?.address ?? "",
+    customerAddressAr: options.customer?.addressAr ?? "",
     attention:
       source.attention === undefined
         ? (options.customer?.contactPerson ?? "").trim()
         : source.attention.trim() === ""
           ? ""
           : source.attention.trim(),
+    attentionAr:
+      (source as any).attentionAr !== undefined
+        ? String((source as any).attentionAr).trim()
+        : (options.customer?.contactPersonAr ?? "").trim(),
     reference: source.reference,
     issueDate: source.issueDate,
     dueDate: source.dueDate,
@@ -170,8 +175,8 @@ export function buildDocumentData(source: DocumentSource,
     total: source.total,
     delivery,
     banks: (options.banks ?? []).map((bank) => ({
-      bank: bank.bank,
-      branch: bank.branch,
+      bank: arabic ? (bank.bankAr ?? bank.bank) : bank.bank,
+      branch: arabic ? (bank.branchAr ?? bank.branch) : bank.branch,
       accountNumber: bank.accountNumber,
       swift: bank.swift,
       iban: bank.iban,
