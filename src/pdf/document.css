@@ -15,12 +15,10 @@
   --doc-primary: #1b365d;
   --doc-deduction: #984c3f;
 
-  width: var(--content-w, 180mm);
-  min-height: var(--content-h, 267mm);
+  width: var(--page-w, 210mm);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  background: #fff;
   color: var(--doc-ink, #1f2933);
   font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   font-size: 9pt;
@@ -37,26 +35,61 @@
   unicode-bidi: isolate;
 }
 
-/* Print Layout Table Wrapper ---------------------------------------------- */
+/* Pages ------------------------------------------------------------------- */
 
-.offer-document .doc-print-layout {
-  width: 100%;
-  border-collapse: collapse;
+/*
+ * The document is a stack of A4 sheets built by paginate.ts. Every sheet holds
+ * the letterhead header, the part of the body that fits, and the footer pinned
+ * to the bottom of the sheet.
+ */
+
+.offer-document .doc-pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--page-gap, 0);
 }
 
-.offer-document .doc-print-layout__body {
-  padding: 0;
-  vertical-align: top;
+.offer-document .doc-page {
+  position: relative;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  width: var(--page-w, 210mm);
+  height: var(--page-h, 297mm);
+  padding: var(--page-margin, 15mm);
+  box-sizing: border-box;
+  overflow: hidden;
+  background: #fff;
 }
 
-.offer-document .doc-print-layout__spacer-head,
-.offer-document .doc-print-layout__spacer-foot {
-  display: none;
+.offer-document .doc-page__body {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.offer-document .doc-page__body > * {
+  flex: none;
+}
+
+/* A block that starts a page does not need the space that separated it from
+   the previous block. */
+.offer-document .doc-page__body > :first-child {
+  margin-top: 0;
+}
+
+/* Pages after the first have no title, leave some air under the letterhead. */
+.offer-document .doc-page--continued .doc-page__body {
+  padding-top: 6mm;
 }
 
 /* Official Bilingual Letterhead Header ------------------------------------ */
 
 .offer-document .doc-header {
+  flex: none;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -121,6 +154,7 @@
 /* Official Split-Rule Letterhead Footer + ISO Bar ------------------------- */
 
 .offer-document .doc-footer {
+  flex: none;
   margin-top: auto;
   padding-top: 2mm;
   width: 100%;
@@ -442,32 +476,19 @@
   position: relative;
   overflow: hidden;
   margin-inline: auto;
-  background: #fff;
-  box-shadow: 0 2px 14px rgb(31 41 51 / 18%);
 }
 
+/* The sheets of the document sit on the grey panel, one under the other. */
 .offer-preview__page {
+  --page-gap: 8mm;
+
   position: absolute;
   top: 0;
   left: 0;
-  width: 210mm;
-  min-height: 297mm;
-  padding: 15mm;
-  box-sizing: border-box;
-  background: #fff;
+  width: var(--page-w, 210mm);
   transform-origin: top left;
 }
 
-/* Multi-Page Print Pinning ------------------------------------------------ */
-
-@page {
-  size: A4 portrait;
-  margin: 12mm 14mm;
-}
-
-@media print {
-  .offer-document .doc-title {
-    display: block !important;
-    visibility: visible !important;
-  }
+.offer-preview .offer-document .doc-page {
+  box-shadow: 0 2px 14px rgb(31 41 51 / 18%);
 }

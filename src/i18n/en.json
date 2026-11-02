@@ -180,7 +180,7 @@
       "taxes": {
         "subtotal": "Subtotal",
         "orderDiscount": "Order discount",
-        "tax": "Tax",
+        "tax": "VAT",
         "taxHint": "Percentage added on top of the subtotal.",
         "otherTax": "Other tax (deduction)",
         "otherTaxHint": "Applies a fixed 1% of the subtotal as a deduction.",
@@ -294,7 +294,7 @@
     "remindBeforeExpiry": "Remind me before an offer expires",
     "remindDays": "Remind me this many days before expiry",
     "defaultCurrency": "Default currency",
-    "defaultTax": "Default tax percentage",
+    "defaultTax": "Default VAT percentage",
     "defaultPaymentTerms": "Default payment terms",
     "appLanguage": "Application language",
     "pdfLanguage": "PDF / document language",

@@ -1,9 +1,23 @@
 /**
  * Print rules of the quotations workspace.
+ *
+ * The document is already split into A4 sheets (see paginate.ts), each sheet
+ * carries its own 15mm margin, so the printer page has no margin of its own.
  */
 
+/*
+ * The document is rendered here for printing. On screen it stays laid out but
+ * invisible, because the pages can only be measured while they have a layout.
+ */
 #print-root {
-  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--page-w, 210mm);
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .offer-document,
@@ -14,7 +28,7 @@
 
 @page {
   size: A4 portrait;
-  margin: 12mm 15mm;
+  margin: 0;
 }
 
 @media print {
@@ -30,30 +44,37 @@
   }
 
   #print-root {
-    display: block !important;
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    visibility: visible;
+    pointer-events: auto;
   }
 
   .offer-document {
-    width: 100% !important;
-    max-width: none !important;
+    width: var(--page-w, 210mm) !important;
     margin: 0 !important;
-    padding: 0 !important;
     box-shadow: none !important;
   }
 
-  /* Force title and sections to render cleanly */
-  .offer-document .doc-title {
-    display: block !important;
-    visibility: visible !important;
+  .offer-document .doc-pages {
+    display: block;
   }
 
-  /* Prevent awkward page splits inside blocks */
-  .offer-document tr,
-  .offer-document .keep-together,
-  .offer-document .doc-section,
-  .offer-document .doc-totals,
-  .offer-document .doc-table {
+  /* One sheet per printed page. The sheet is a hair shorter than the page so
+     that rounding never pushes an empty page after the last one. */
+  .offer-document .doc-page {
+    height: calc(var(--page-h, 297mm) - 1mm);
+    break-after: page;
+    page-break-after: always;
     break-inside: avoid;
     page-break-inside: avoid;
+    box-shadow: none !important;
+  }
+
+  .offer-document .doc-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
   }
 }

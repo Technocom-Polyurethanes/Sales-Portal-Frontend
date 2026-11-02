@@ -19,9 +19,9 @@ export type OfferDocumentPreviewProps = {
 /**
  * Scaled preview of the printed offer.
  *
- * The preview shows a real A4 sheet, 210mm wide with 15mm margins, and the
- * whole sheet is scaled down to fit the panel. The document itself is never
- * modified.
+ * The preview shows the real A4 sheets of the document, one under the other,
+ * each 210mm wide with 15mm margins, and the whole stack is scaled down to fit
+ * the panel. The document itself is never modified.
  */
 export default function OfferDocumentPreview({
   data,
@@ -61,8 +61,14 @@ export default function OfferDocumentPreview({
     const page = pageRef.current
     if (!page) return
 
+    // The height follows the number of pages, the scale never changes it.
     const updateSize = () =>
-      setPageSize({ width: page.offsetWidth, height: page.offsetHeight })
+      setPageSize((current) =>
+        current.width === page.offsetWidth &&
+        current.height === page.offsetHeight
+          ? current
+          : { width: page.offsetWidth, height: page.offsetHeight },
+      )
 
     updateSize()
     const observer = new ResizeObserver(updateSize)
