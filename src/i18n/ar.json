@@ -155,7 +155,6 @@
         "reference": "مرجع عرض السعر",
         "referenceHint": "المرجع يُكتب يدوياً",
         "referenceInputHint": "اكتب رقم العرض كما سيظهر في المستند تماماً.",
-        "referencePreview": "{date} ← {reference} · الاستحقاق {dueDate}",
         "attention": "عناية (اسم المسؤول)",
         "attentionHint": "يظهر هذا الاسم في المستند ويمكن تعديله لكل عرض على حدة.",
         "attentionPlaceholder": "أدخل اسم الشخص المسؤول...",
@@ -180,7 +179,7 @@
       "taxes": {
         "subtotal": "الإجمالي",
         "orderDiscount": "خصم الطلب",
-        "tax": "الضريبة",
+        "tax": "َريبة القيمة المضافة",
         "taxHint": "نسبة تضاف إلى الإجمالي الفرعي.",
         "otherTax": "ضريبة أخرى (خصم)",
         "otherTaxHint": "تُطبّق خصماً ثابتاً بنسبة ١٪ من الإجمالي الفرعي.",

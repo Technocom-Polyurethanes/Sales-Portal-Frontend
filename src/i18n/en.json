@@ -155,7 +155,6 @@
         "reference": "Offer reference",
         "referenceHint": "The reference is entered by hand",
         "referenceInputHint": "Type the offer number exactly as it should be printed.",
-        "referencePreview": "{date} → {reference} · due {dueDate}",
         "attention": "Attention (Contact Person)",
         "attentionHint": "This name is printed on the offer and can be edited per offer.",
         "attentionPlaceholder": "Enter contact person name...",
@@ -180,7 +179,7 @@
       "taxes": {
         "subtotal": "Subtotal",
         "orderDiscount": "Order discount",
-        "tax": "Tax",
+        "tax": "(VAT)",
         "taxHint": "Percentage added on top of the subtotal.",
         "otherTax": "Other tax (deduction)",
         "otherTaxHint": "Applies a fixed 1% of the subtotal as a deduction.",

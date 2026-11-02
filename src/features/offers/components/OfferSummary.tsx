@@ -172,7 +172,6 @@ export default function OfferSummary({ offer }: { offer: Offer }) {
                         )
                         const name =
                           matchedLine?.materialName ||
-                          matchedLine?.productName ||
                           docLine?.materialName ||
                           allocation.materialName ||
                           allocation.label ||
