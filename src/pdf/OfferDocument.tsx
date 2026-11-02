@@ -1,6 +1,9 @@
 import "./document.css"
 import "./print.css"
 
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
+
 import {
   formatDocumentCurrency,
   formatDocumentDate,
@@ -12,11 +15,13 @@ import type { DocumentLanguage } from "./PdfLanguageProvider"
 import BankAccountsTable from "./sections/BankAccountsTable"
 import BillToBlock from "./sections/BillToBlock"
 import DeliveryScheduleTable from "./sections/DeliveryScheduleTable"
+import DocumentFooter from "./sections/DocumentFooter"
 import DocumentHeader from "./sections/DocumentHeader"
 import ItemsTable from "./sections/ItemsTable"
 import NotesBlock from "./sections/NotesBlock"
 import ReferenceTable from "./sections/ReferenceTable"
 import TotalsBlock from "./sections/TotalsBlock"
+import { paginate } from "./paginate"
 import { getTemplate } from "./templates"
 import type { OfferDocumentData } from "./templates/types"
 import type { TotalsRow } from "./sections/TotalsBlock"
@@ -111,8 +116,13 @@ function deliveryColumns(data: OfferDocumentData, language: DocumentLanguage): A
 /**
  * The printed offer. The English document is left to right, the Arabic one is
  * a full mirror of it: only the reference number keeps its own direction.
+ *
+ * The document is a stack of real A4 sheets. The blocks are rendered once into
+ * a detached element and `paginate` copies them page by page, so the letterhead
+ * and the footer are repeated on every sheet and the preview shows exactly the
+ * pages the printer receives.
  */
-export default function OfferDocument({ data, language }: OfferDocumentProps) {
+function OfferDocument({ data, language }: OfferDocumentProps) {
   const template = getTemplate(language)
   const arabic = language === "ar"
   const referenceRows = buildReferenceRows(data, template)
@@ -126,118 +136,149 @@ export default function OfferDocument({ data, language }: OfferDocumentProps) {
     weekday: formatDocumentWeekday(batch.date, language),
   }))
 
+  const [source] = useState(() => document.createElement("div"))
+  const pagesRef = useRef<HTMLDivElement>(null)
+
+  const layoutPages = useCallback(() => {
+    if (pagesRef.current) paginate(source, pagesRef.current)
+  }, [source])
+
+  // The source has just been updated by React: lay the pages out again.
+  useLayoutEffect(layoutPages)
+
+  // Fonts change the height of every row, so the pages are laid out again
+  // once they are loaded.
+  useEffect(() => {
+    if (!("fonts" in document)) return
+
+    let active = true
+    void document.fonts.ready.then(() => {
+      if (active) layoutPages()
+    })
+    document.fonts.addEventListener("loadingdone", layoutPages)
+
+    return () => {
+      active = false
+      document.fonts.removeEventListener("loadingdone", layoutPages)
+    }
+  }, [layoutPages])
+
   return (
     <article
       className="offer-document"
       dir={arabic ? "rtl" : "ltr"}
       lang={language}
     >
-      <DocumentHeader
-        companyName={arabic ? data.companyNameAr : data.companyName}
-        tagline={arabic ? data.taglineAr : data.tagline}
-        formCode={data.formCode}
-        title={template.title}
-        language={language}
-      />
+      <div className="doc-pages" ref={pagesRef} />
 
-      <div className="doc-top">
-        <BillToBlock
-          heading={template.billTo}
-          customerName={data.customerName}
-          address={data.customerAddress}
-          taxId={data.taxId}
-          taxIdLabel={template.taxId}
-          attention={data.attention}
-          attentionLabel={template.attention}
-        />
-        <ReferenceTable rows={referenceRows} />
-      </div>
-
-              <ItemsTable
-                headings={{
-                  item: template.item,
-                  quantity: template.quantity,
-                  rate: template.rate,
-                  amount: template.amount,
-                  packaging: template.packaging,
-                }}
-                lines={data.lines}
-                currency={currency}
-                weightUnit={weightUnit}
-                formatNumber={(value) => 
-                  (value ?? 0).toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })
-                }
-              />
-
-              <TotalsBlock rows={totalsRows} />
-
-              <DeliveryScheduleTable
-                heading={template.schedule}
-                headings={{
-                  batch: template.batch,
-                  deliveryDate: template.deliveryDate,
-                  packages: template.packages,
-                  totalWeight: template.totalWeight,
-                  total: template.total,
-                }}
-                batches={batches}
-                columns={columns}
-                weightUnit={weightUnit}
-                formatDate={formatDocumentDate}
-                formatNumber={(value) => 
-                  (value ?? 0).toLocaleString("en-US", {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 2,
-                  })
-                }
-                language={language}
-                source={data}
-              />
-
-              <BankAccountsTable
-                heading={template.bankDetails}
-                headings={{
-                  bank: template.bank,
-                  branch: template.branch,
-                  accountNumber: template.accountNumber,
-                  swift: template.swift,
-                  iban: template.iban,
-                  currency: template.currency,
-                }}
-                banks={data.banks}
-                formatCurrency={(value) => formatDocumentCurrency(value, language)}
-              />
-
-              <NotesBlock heading={template.notes} notes={data.notes} />
-
-
-      <footer className="doc-footer" dir="ltr">
-        <div className="doc-footer__letterhead">
-          <div className="doc-footer__col doc-footer__col--en">
-            <p className="doc-footer__address">
-              5 Nahda St -Dokki - Giza - Egypt.
-            </p>
-            <p><span className="doc-footer__label">Mob</span> : (+2) 0100 5411 078</p>
-            <p><span className="doc-footer__label">Tel</span> : (+202 ) 37615321 - 37602735 - 37602927</p>
-            <p><span className="doc-footer__label">Fax</span> : (+202 ) 37609292 - 37602934</p>
+      {createPortal(
+        <>
+          <div data-doc-part="header">
+            <DocumentHeader
+              companyName={arabic ? data.companyNameAr : data.companyName}
+              tagline={arabic ? data.taglineAr : data.tagline}
+              formCode={data.formCode}
+              language={language}
+            />
           </div>
 
-          <div className="doc-footer__col doc-footer__col--center">
-            <p className="doc-footer__form-meta mb-3">TF-06-01</p>
-            <p className="doc-footer__email">E-mail : sales@technocom.org</p>
+          <div data-doc-part="footer">
+            <DocumentFooter />
           </div>
 
-          <div className="doc-footer__col doc-footer__col--ar" dir="rtl">
-            <p className="doc-footer__address">٥ شارع النهضة - الدقي - الجيزة</p>
-            <p>موبايل : ٥٤١١٠٧٨ (٠١٠٠)</p>
-            <p>تليفون : ٣٧٦٠٢٩٢٧ - ٣٧٦٠٢٧٣٥ - ٣٧٦١٥٣٢١ (٠٢)</p>
-            <p>فاكس : ٣٧٦٠٢٩٣٤ - ٣٧٦٠٩٢٩٢ (٠٢)</p>
+          <div data-doc-unit>
+            <div className="doc-intro">
+              <h1 className="doc-title">{template.title}</h1>
+
+              <div className="doc-top">
+                <BillToBlock
+                  heading={template.billTo}
+                  customerName={data.customerName}
+                  address={data.customerAddress}
+                  taxId={data.taxId}
+                  taxIdLabel={template.taxId}
+                  attention={data.attention}
+                  attentionLabel={template.attention}
+                />
+                <ReferenceTable rows={referenceRows} />
+              </div>
+            </div>
           </div>
-        </div>
-      </footer>
+
+          <div data-doc-unit>
+            <ItemsTable
+              headings={{
+                item: template.item,
+                quantity: template.quantity,
+                rate: template.rate,
+                amount: template.amount,
+                packaging: template.packaging,
+              }}
+              lines={data.lines}
+              currency={currency}
+              weightUnit={weightUnit}
+              formatNumber={(value) =>
+                (value ?? 0).toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })
+              }
+            />
+          </div>
+
+          <div data-doc-unit>
+            <TotalsBlock rows={totalsRows} />
+          </div>
+
+          <div data-doc-unit>
+            <DeliveryScheduleTable
+              heading={template.schedule}
+              headings={{
+                batch: template.batch,
+                deliveryDate: template.deliveryDate,
+                packages: template.packages,
+                totalWeight: template.totalWeight,
+                total: template.total,
+              }}
+              batches={batches}
+              columns={columns}
+              weightUnit={weightUnit}
+              formatDate={formatDocumentDate}
+              formatNumber={(value) =>
+                (value ?? 0).toLocaleString("en-US", {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 2,
+                })
+              }
+              language={language}
+              source={data}
+            />
+          </div>
+
+          <div data-doc-unit>
+            <BankAccountsTable
+              heading={template.bankDetails}
+              headings={{
+                bank: template.bank,
+                branch: template.branch,
+                accountNumber: template.accountNumber,
+                swift: template.swift,
+                iban: template.iban,
+                currency: template.currency,
+              }}
+              banks={data.banks}
+              formatCurrency={(value) => formatDocumentCurrency(value, language)}
+            />
+          </div>
+
+          <div data-doc-unit>
+            <NotesBlock heading={template.notes} notes={data.notes} />
+          </div>
+        </>,
+        source,
+      )}
     </article>
   )
 }
+
+export default memo(OfferDocument)

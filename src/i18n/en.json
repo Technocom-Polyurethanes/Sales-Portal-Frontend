@@ -293,7 +293,7 @@
     "remindBeforeExpiry": "Remind me before an offer expires",
     "remindDays": "Remind me this many days before expiry",
     "defaultCurrency": "Default currency",
-    "defaultTax": "Default tax percentage",
+    "defaultTax": "Default (VAT) percentage",
     "defaultPaymentTerms": "Default payment terms",
     "appLanguage": "Application language",
     "pdfLanguage": "PDF / document language",

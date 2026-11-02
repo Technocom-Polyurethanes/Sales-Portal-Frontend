@@ -179,4 +179,28 @@ describe("offer document", () => {
     })
     expect(container.textContent).toContain("Attention: Mostafa Fouad")
   })
+
+  it("prints the tax as the VAT in the language of the document", () => {
+    const expected = { en: "(VAT) 14%", ar: "ضريبة القيمه المضافة 14%" }
+
+    for (const language of ["en", "ar"] as const) {
+      render(language)
+      const labels = Array.from(container.querySelectorAll(".doc-totals th")).map(
+        (cell) => cell.textContent,
+      )
+      expect(labels).toContain(expected[language])
+    }
+  })
+
+  it("puts the letterhead and the footer on every page", () => {
+    render("en")
+
+    const pages = container.querySelectorAll(".doc-page")
+    expect(pages.length).toBeGreaterThan(0)
+    for (const page of Array.from(pages)) {
+      expect(page.querySelector(".doc-header")).not.toBeNull()
+      expect(page.querySelector(".doc-footer")).not.toBeNull()
+    }
+    expect(container.querySelectorAll(".doc-title")).toHaveLength(1)
+  })
 })
