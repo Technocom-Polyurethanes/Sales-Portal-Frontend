@@ -107,7 +107,7 @@ export default function StepBasics({
         >
           <Input
             id="offer-attention"
-            value={draft.attention}
+            value={draft.attention ?? ""}
             placeholder={t("offers.builder.basics.attentionPlaceholder")}
             onChange={(event) => onChange({ attention: event.target.value })}
           />
