@@ -17,7 +17,6 @@ export default function DocumentFooter() {
         </div>
 
         <div className="doc-footer__col doc-footer__col--center">
-          <p className="doc-footer__form-meta mb-3">TF-06-01</p>
           <p className="doc-footer__email">E-mail : sales@technocom.org</p>
         </div>
 

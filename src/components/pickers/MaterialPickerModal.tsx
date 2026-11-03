@@ -152,7 +152,7 @@ export default function MaterialPickerModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-[1px] p-4 sm:p-6" onKeyDown={handleKeyDown} tabIndex={-1} onClick={onClose}>
-      <div className="flex h-[78vh] min-h-[460px] max-h-[720px] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="flex h-[78vh] min-h-115 max-h-180 w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
           <h2 className="text-base font-semibold text-ink">
             {language === "ar" ? "اختر الخامة" : "Select material"}
@@ -163,17 +163,17 @@ export default function MaterialPickerModal({
         </div>
         <div className="border-b border-slate-200 px-4 py-2">
           <div className="relative">
-            <Icon name="search" size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted" />
+            <Icon name="search" size={16} className="absolute inset-s-3 top-1/2 -translate-y-1/2 text-muted" />
             <Input
               ref={inputRef}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder={language === "ar" ? "ابحث بكود الخامة أو اسم المنتج..." : "Search by ERP Item Code / ID or Material Name..."}
+              placeholder={language === "ar" ? "ابحث بكود الخامة أو اسم المنتج..." : "Search by Item Code or Material Name..."}
               className="ps-9 pe-8"
             />
             {search && (
               <button
-                className="absolute end-2 top-1/2 -translate-y-1/2 text-muted"
+                className="absolute inset-e-2 top-1/2 -translate-y-1/2 text-muted"
                 onClick={() => setSearch("")}
               >
                 <Icon name="close" size={14} />
@@ -186,7 +186,7 @@ export default function MaterialPickerModal({
             <thead>
               <tr className="h-11 bg-page">
                 <th className="w-56 border-b border-line px-4 text-start text-xs font-semibold uppercase tracking-wide text-muted">
-                  {language === "ar" ? "كود الخامة" : "ERP Item Code / ID"}
+                  {language === "ar" ? "كود الخامة" : "Item Code"}
                 </th>
                 <th className="border-b border-line px-4 text-start text-xs font-semibold uppercase tracking-wide text-muted">
                   {language === "ar" ? "اسم الخامة" : "Material Name"}
@@ -205,18 +205,25 @@ export default function MaterialPickerModal({
                     onMouseEnter={() => setHighlight(index)}
                   >
                     <td className="truncate whitespace-nowrap px-4 font-mono text-sm text-slate-700">{code}</td>
-                    <td className="truncate whitespace-nowrap px-4 text-sm text-ink">
-                      <span className="inline-flex items-center gap-2">
-                        <span className="truncate">{material.name}</span>
-                        {material.category && (
-                          <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">{material.category}</span>
-                        )}
+                    <td className="w-full">
+                      <div className="flex w-full items-center justify-between gap-2">
+                        {/* Left side: Material Name + Category */}
+                        <div className="flex items-center gap-2">
+                          <span>{material.name}</span>
+                          {material.category && (
+                            <span className="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">
+                              {material.category}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Far right: Already added */}
                         {exists && (
-                          <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs text-primary">
+                          <span className="shrink-0 rounded bg-danger/10 px-1.5 py-0.5 mr-4 text-xs text-danger">
                             {language === "ar" ? "مضاف بالفعل" : "Already added"}
                           </span>
                         )}
-                      </span>
+                      </div>
                     </td>
                   </tr>
                 )
