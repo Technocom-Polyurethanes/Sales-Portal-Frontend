@@ -272,7 +272,81 @@
     "dropFile": "اسحب ملف Excel أو CSV إلى هنا",
     "orBrowse": "أو تصفح من جهازك",
     "start": "بدء الاستيراد",
-    "cancel": "إلغاء الاستيراد"
+    "cancel": "إلغاء الاستيراد",
+    "steps": {
+      "source": "المصدر",
+      "preview": "المعاينة",
+      "confirm": "التأكيد"
+    },
+    "downloadTemplate": "تنزيل القالب",
+    "templateHint": "استخدم القالب ليطابق كل عمود.",
+    "fileTooLarge": "حجم الملف أكبر من ٥ ميجابايت.",
+    "fileWrongType": "اختر ملف .xlsx أو .csv.",
+    "fileEmpty": "الملف فارغ.",
+    "previewTitle": "راجع الملف",
+    "previewHint": "لا يتم حفظ أي شيء قبل التأكيد.",
+    "filterStatus": "تصفية حسب الحالة",
+    "allStatuses": "جميع الصفوف",
+    "row": "الصف",
+    "values": "القيم",
+    "details": "الأخطاء والتغييرات",
+    "downloadErrors": "تنزيل الأخطاء",
+    "confirmImport": "تأكيد الاستيراد",
+    "status": {
+      "new": "جديد",
+      "update": "سيتم تحديثه",
+      "unchanged": "دون تغيير",
+      "error": "خطأ"
+    },
+    "summary": {
+      "total": "الإجمالي",
+      "new": "جديد",
+      "update": "تحديثات",
+      "unchanged": "دون تغيير",
+      "error": "أخطاء"
+    },
+    "result": {
+      "title": "اكتمل الاستيراد",
+      "created": "تم إنشاؤه",
+      "updated": "تم تحديثه",
+      "skipped": "تم تخطيه",
+      "failed": "فشل",
+      "restart": "استيراد ملف آخر"
+    },
+    "history": {
+      "title": "سجل الاستيراد",
+      "subtitle": "عمليات الاستيراد المؤكدة، الأحدث أولاً.",
+      "empty": "لا توجد عمليات استيراد بعد.",
+      "date": "الوقت",
+      "type": "النوع",
+      "file": "الملف",
+      "user": "بواسطة",
+      "result": "النتيجة"
+    },
+    "fields": {
+      "customerCode": "كود العميل",
+      "erpNextId": "معرّف ERP Next",
+      "name": "الاسم",
+      "nameAr": "الاسم (بالعربية)",
+      "taxId": "الرقم الضريبي",
+      "contactPerson": "مسؤول التواصل",
+      "contactPersonAr": "مسؤول التواصل (بالعربية)",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "city": "المدينة",
+      "cityAr": "المدينة (بالعربية)",
+      "address": "العنوان",
+      "addressAr": "العنوان (بالعربية)",
+      "defaultPaymentTerm": "شرط الدفع",
+      "defaultCurrency": "العملة",
+      "itemCode": "كود الصنف",
+      "erpNextItemCode": "كود صنف ERP Next",
+      "category": "الفئة",
+      "referencePricePerKg": "السعر المرجعي للكيلو",
+      "uom": "الوحدة",
+      "isActive": "نشط",
+      "defaultWeightKg": "الوزن الافتراضي (كجم)"
+    }
   },
   "settings": {
     "title": "الإعدادات",
