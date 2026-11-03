@@ -163,7 +163,7 @@ export default function MaterialPickerModal({
         </div>
         <div className="border-b border-slate-200 px-4 py-2">
           <div className="relative">
-            <Icon name="search" size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-muted" />
+            <Icon name="search" size={16} className="absolute inset-s-3 top-1/2 -translate-y-1/2 text-muted" />
             <Input
               ref={inputRef}
               value={search}
@@ -173,7 +173,7 @@ export default function MaterialPickerModal({
             />
             {search && (
               <button
-                className="absolute end-2 top-1/2 -translate-y-1/2 text-muted"
+                className="absolute inset-e-2 top-1/2 -translate-y-1/2 text-muted"
                 onClick={() => setSearch("")}
               >
                 <Icon name="close" size={14} />
