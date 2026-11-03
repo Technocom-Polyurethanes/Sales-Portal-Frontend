@@ -15,7 +15,7 @@ export const arabicTemplate: OfferTemplate = {
   quantity: "الكمية (كجم)",
   rate: "السعر (للكجم)",
   amount: "المبلغ",
-  packaging: "التعبئة",
+  packaging: "العبوة",
   subtotal: "الإجمالي",
   discount: "الخصم",
   tax: "ضريبة القيمه المضافة",

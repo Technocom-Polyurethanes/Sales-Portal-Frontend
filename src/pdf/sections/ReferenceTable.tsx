@@ -14,9 +14,20 @@ export default function ReferenceTable({ rows }: ReferenceTableProps) {
   return (
     <table className="doc-reference">
       <tbody>
-        {rows.map((row) => (
+        {rows.map((row, index) => (
           <tr key={row.label}>
-            <th scope="row">{row.label}</th>
+            <th scope="row">
+              {index === 0 ? (
+                <div className="flex w-full items-center justify-between gap-2">
+                  <span>{row.label}</span>
+                  <span className="doc-ltr font-mono text-[10px] font-normal text-slate-500">
+                    TF-06-01
+                  </span>
+                </div>
+              ) : (
+                row.label
+              )}
+            </th>
             <td>
               {row.ltr ? (
                 <span className="doc-ltr">{row.value}</span>

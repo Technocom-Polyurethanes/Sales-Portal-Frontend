@@ -27,7 +27,7 @@
 }
 
 .offer-document[dir="rtl"] {
-  font-family: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Almarai", ui-sans-serif, system-ui, sans-serif;
 }
 
 .offer-document .doc-ltr {
@@ -159,8 +159,8 @@
   padding-top: 2mm;
   width: 100%;
   background: #fff;
-  color: #1b365d;
-  border-top: 0.5pt solid #cbd5e1;
+  color: var(--doc-primary);
+  border-top: 0.5pt solid var(--doc-primary);
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
@@ -181,7 +181,7 @@
 .offer-document .doc-footer__letterhead {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  align-items: end;
+  align-items: center;
   column-gap: 4mm;
   width: 100%;
 }
