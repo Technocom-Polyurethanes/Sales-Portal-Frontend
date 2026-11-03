@@ -26,6 +26,8 @@ export default function OfferBuilderPage() {
     [source],
   )
 
+  // The backend numbers a new version itself (highest version of the offer + 1) and keeps it in
+  // the chain of parentOfferId even when the reference is changed, this value is only a hint.
   const version = source ? (duplicate ? 1 : source.version + 1) : 1
   const parentOfferId = source && !duplicate ? source.id : undefined
 
