@@ -109,7 +109,7 @@ describe("offer document", () => {
   it("keeps the reference number left to right in both languages", () => {
     render("ar")
 
-    const reference = container.querySelector(".doc-reference .doc-ltr")
+    const reference = container.querySelector(".doc-reference td .doc-ltr")
     expect(reference?.textContent).toBe("3089/OCT./YL/AA")
   })
 
@@ -227,13 +227,17 @@ describe("offer document", () => {
       })
     }
 
+    // The first label shares its cell with the form code badge.
+    const labelOf = (cell: Element) =>
+      cell.querySelector("div > span")?.textContent ?? cell.textContent
     const referenceLabels = () =>
-      Array.from(container.querySelectorAll(".doc-reference th")).map(
-        (cell) => cell.textContent,
-      )
+      Array.from(container.querySelectorAll(".doc-reference th")).map(labelOf)
     const referenceValue = (label: string) =>
       Array.from(container.querySelectorAll(".doc-reference tr"))
-        .find((row) => row.querySelector("th")?.textContent === label)
+        .find((row) => {
+          const cell = row.querySelector("th")
+          return cell ? labelOf(cell) === label : false
+        })
         ?.querySelector("td")?.textContent
 
     it("labels the total of the delivery schedule in Arabic", () => {
