@@ -18,6 +18,32 @@ export function formatDocumentDate(value: string): string {
   return formatIsoDay(value)
 }
 
+/**
+ * Offer validity as printed under the payment terms: the number of days and
+ * the day the offer expires, for example `7 days — until 10/12/2026`.
+ */
+export function formatDocumentValidity(
+  days: number,
+  expiryDate: string,
+  language: DocumentLanguage,
+): string {
+  const until = formatDocumentDate(expiryDate)
+
+  if (language === "ar") {
+    const count =
+      days === 1
+        ? "يوم واحد"
+        : days === 2
+          ? "يومان"
+          : days <= 10
+            ? `${days} أيام`
+            : `${days} يومًا`
+    return `${count} — حتى ${until}`
+  }
+
+  return `${days} ${days === 1 ? "day" : "days"} — until ${until}`
+}
+
 /** Weekday name written in the language of the document. */
 export function formatDocumentWeekday(
   value: string,

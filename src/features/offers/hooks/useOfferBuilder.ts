@@ -139,11 +139,12 @@ export function useOfferBuilder({
           reference: draft.reference,
           customerId: draft.customerId,
           attention: draft.attention,
-          attentionAr: (draft as any).attentionAr,
+          attentionAr: draft.attentionAr,
           taxId: draft.taxId,
           issueDate: draft.issueDate,
           currency: draft.currency,
           paymentTermId: draft.paymentTermId,
+          validityDays: draft.validityDays,
           lines: draft.lines.map((line: any) => ({
             productId: line.productId || line.materialId,
             materialName: line.materialName,
@@ -237,11 +238,12 @@ export function useOfferBuilder({
           const selected = customers.find(
             (item) => item.id === patch.customerId,
           )
-          if (patch.attention === undefined && !(next as any).attention) {
+          if (patch.attention === undefined && !next.attention) {
             next.attention = selected?.contactPerson ?? ""
           }
-          if ((patch as any).attentionAr === undefined && !(next as any).attentionAr) {
-            (next as any).attentionAr = (selected as any)?.contactPersonAr ?? ""
+          if (patch.attentionAr === undefined && !next.attentionAr) {
+            next.attentionAr =
+              selected?.contactPersonAr || selected?.contactPerson || ""
           }
         }
 

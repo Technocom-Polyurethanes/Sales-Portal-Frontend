@@ -158,6 +158,9 @@
         "attention": "Attention (Contact Person)",
         "attentionHint": "This name is printed on the offer and can be edited per offer.",
         "attentionPlaceholder": "Enter contact person name...",
+        "validity": "Offer validity (days)",
+        "validityHint": "Days the offer stays valid from the issue date. Leave empty to hide it on the offer.",
+        "validityExpires": "Expires on {date}, {days} days after the issue date.",
         "dueDate": "Due date"
       },
       "packaging": {

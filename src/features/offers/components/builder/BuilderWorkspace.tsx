@@ -63,11 +63,7 @@ export default function BuilderWorkspace({
 
   const documentData = useMemo(
     () => {
-      // Use server document if available, otherwise build from draft + calculations
-      if (serverCalculations?.document) {
-        return serverCalculations.document
-      }
-      return buildDocumentData(
+      const local = buildDocumentData(
         {
           reference: serverCalculations?.reference || calculations.reference,
           issueDate: draft.issueDate,
@@ -76,6 +72,8 @@ export default function BuilderWorkspace({
           paymentTermId: draft.paymentTermId,
           customerId: draft.customerId,
           attention: draft.attention,
+          attentionAr: draft.attentionAr,
+          validityDays: draft.validityDays,
           taxId: draft.taxId ?? "",
           lines: draft.lines.map((line: any, index) => ({
             productId: line.productId || line.materialId || "",
@@ -111,6 +109,19 @@ export default function BuilderWorkspace({
           ),
         },
       )
+
+      // The document of the backend is used when there is one. The fields the
+      // builder owns are taken from the draft, so what is typed always shows.
+      if (serverCalculations?.document) {
+        return {
+          ...serverCalculations.document,
+          attention: local.attention,
+          attentionAr: local.attentionAr,
+          validityDays: local.validityDays,
+          expiryDate: local.expiryDate,
+        }
+      }
+      return local
     },
     [calculations, serverCalculations, draft, customer, catalog],
   )

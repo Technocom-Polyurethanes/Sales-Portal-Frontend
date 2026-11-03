@@ -1,5 +1,6 @@
 
 import { roundMoney } from "../../lib/calculations/round"
+import { expiryDateFrom, normalizeValidityDays } from "../../lib/calculations/validity"
 import { translateCategory } from "../../pdf/format"
 import { formatPackagingSummaryDocument } from "../../pdf/format"
 import type { PackagingLine } from "../../lib/calculations/packaging"
@@ -27,7 +28,10 @@ export type DocumentSource = {
   customerId: string
   /** Contact person printed in the "Attention" line, empty hides it. */
   attention?: string
+  /** Arabic contact person, `undefined` falls back to the customer record. */
   attentionAr?: string
+  /** Days the offer stays valid, 0 or missing prints no validity row. */
+  validityDays?: number
   taxId?: string
   lines: {
     productId: string
@@ -154,15 +158,17 @@ export function buildDocumentData(source: DocumentSource,
           ? ""
           : String(source.attention).trim(),
     attentionAr:
-      (source as any).attentionAr === undefined
+      source.attentionAr === undefined
         ? (options.customer?.contactPersonAr ?? options.customer?.contactPerson ?? "").trim()
-        : String((source as any).attentionAr).trim() === ""
+        : String(source.attentionAr).trim() === ""
           ? ""
-          : String((source as any).attentionAr).trim(),
+          : String(source.attentionAr).trim(),
     reference: source.reference,
     issueDate: source.issueDate,
     dueDate: source.dueDate,
     paymentTerm: options.paymentTermLabel,
+    validityDays: normalizeValidityDays(source.validityDays),
+    expiryDate: expiryDateFrom(source.issueDate, source.validityDays ?? 0),
     currency: source.currency,
     taxId: source.taxId ?? "",
     lines,
@@ -261,5 +267,7 @@ export function offerToDocumentSource(offer: Offer): DocumentSource {
     })),
     notes: offer.notes ?? "",
     attention: offer.attention ?? "",
+    attentionAr: offer.attentionAr,
+    validityDays: offer.validityDays,
   }
 }
