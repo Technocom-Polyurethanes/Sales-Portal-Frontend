@@ -13,6 +13,8 @@ import {
   offerVersions,
   updateOfferStatus,
 } from "./db"
+import { commit, history, preview, template } from "./import"
+import type { ImportSource } from "../features/import/types"
 
 
 /** Offer to the list-row shape the real API returns. */
@@ -51,6 +53,28 @@ type Route = {
 }
 
 const routes: Route[] = [
+  {
+    method: "GET",
+    segments: ["import", "templates", ":type"],
+    handle: ({ params }) => template(params[0] as ImportSource),
+  },
+  {
+    method: "POST",
+    segments: ["import", ":type", "preview"],
+    handle: ({ params, body }) =>
+      preview(params[0] as ImportSource, body),
+  },
+  {
+    method: "POST",
+    segments: ["import", ":id", "commit"],
+    handle: ({ params }) => commit(params[0]),
+  },
+  {
+    method: "GET",
+    segments: ["import", "history"],
+    handle: ({ query }) =>
+      history(Number(query.page ?? 1), Number(query.pageSize ?? 10)),
+  },
   {
     method: "GET",
     segments: ["customers"],

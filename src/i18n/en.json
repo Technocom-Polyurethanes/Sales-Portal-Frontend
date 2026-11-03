@@ -272,7 +272,81 @@
     "dropFile": "Drop an Excel or CSV file here",
     "orBrowse": "or browse from your computer",
     "start": "Start import",
-    "cancel": "Cancel import"
+    "cancel": "Cancel import",
+    "steps": {
+      "source": "Source",
+      "preview": "Preview",
+      "confirm": "Confirm"
+    },
+    "downloadTemplate": "Download template",
+    "templateHint": "Use the template so every column matches.",
+    "fileTooLarge": "The file is larger than 5 MB.",
+    "fileWrongType": "Choose an .xlsx or .csv file.",
+    "fileEmpty": "The file is empty.",
+    "previewTitle": "Review the file",
+    "previewHint": "Nothing is saved until you confirm.",
+    "filterStatus": "Filter by status",
+    "allStatuses": "All rows",
+    "row": "Row",
+    "values": "Values",
+    "details": "Errors and changes",
+    "downloadErrors": "Download errors",
+    "confirmImport": "Confirm import",
+    "status": {
+      "new": "New",
+      "update": "Will update",
+      "unchanged": "Unchanged",
+      "error": "Error"
+    },
+    "summary": {
+      "total": "Total",
+      "new": "New",
+      "update": "Updates",
+      "unchanged": "Unchanged",
+      "error": "Errors"
+    },
+    "result": {
+      "title": "Import complete",
+      "created": "Created",
+      "updated": "Updated",
+      "skipped": "Skipped",
+      "failed": "Failed",
+      "restart": "Import another file"
+    },
+    "history": {
+      "title": "Import history",
+      "subtitle": "Committed imports, newest first.",
+      "empty": "No imports yet.",
+      "date": "When",
+      "type": "What",
+      "file": "File",
+      "user": "By",
+      "result": "Result"
+    },
+    "fields": {
+      "customerCode": "Customer code",
+      "erpNextId": "ERP Next id",
+      "name": "Name",
+      "nameAr": "Name (Arabic)",
+      "taxId": "Tax id",
+      "contactPerson": "Contact person",
+      "contactPersonAr": "Contact person (Arabic)",
+      "email": "Email",
+      "phone": "Phone",
+      "city": "City",
+      "cityAr": "City (Arabic)",
+      "address": "Address",
+      "addressAr": "Address (Arabic)",
+      "defaultPaymentTerm": "Payment term",
+      "defaultCurrency": "Currency",
+      "itemCode": "Item code",
+      "erpNextItemCode": "ERP Next item code",
+      "category": "Category",
+      "referencePricePerKg": "Reference price per kg",
+      "uom": "Unit",
+      "isActive": "Active",
+      "defaultWeightKg": "Default weight (kg)"
+    }
   },
   "settings": {
     "title": "Settings",
