@@ -9,6 +9,7 @@ export const englishTemplate: OfferTemplate = {
   reference: "Reference",
   date: "Date",
   terms: "Payment Terms",
+  validity: "Offer Validity",
   dueDate: "Due Date",
   item: "Material & Description",
   quantity: "Qty (kg)",

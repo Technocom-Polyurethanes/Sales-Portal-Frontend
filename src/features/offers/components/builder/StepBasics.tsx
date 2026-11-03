@@ -3,7 +3,13 @@ import Field from "../../../../components/ui/Field"
 import Input from "../../../../components/ui/Input"
 import Select from "../../../../components/ui/Select"
 import { useTranslation } from "../../../../i18n/I18nProvider"
+import {
+  expiryDateFrom,
+  MAX_VALIDITY_DAYS,
+  normalizeValidityDays,
+} from "../../../../lib/calculations/validity"
 import { formatCurrencyLabel } from "../../../../lib/formatters/currency"
+import { formatIsoDay } from "../../../../lib/formatters/date"
 import { localeForLanguage } from "../../../../lib/formatters/locale"
 import CustomerPickerModal from "../../../../components/pickers/CustomerPickerModal"
 import type { Customer } from "../../../customers/types"
@@ -30,6 +36,18 @@ export default function StepBasics({
   const locale = localeForLanguage(language)
   const [open, setOpen] = useState(false)
   const selected = customers.find((customer) => customer.id === draft.customerId)
+
+  // The attention field edits the name printed on the document language that
+  // is selected: the Arabic name on the Arabic document, the English name on
+  // the English one. Both come from the customer record and both stay editable.
+  const arabicDocument = draft.documentLanguage === "ar"
+  const attentionValue = arabicDocument
+    ? (draft.attentionAr ??
+      selected?.contactPersonAr ??
+      selected?.contactPerson ??
+      "")
+    : (draft.attention ?? "")
+  const validityDays = normalizeValidityDays(draft.validityDays)
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -67,6 +85,7 @@ export default function StepBasics({
             onChange({
               customerId: customer.id,
               attention: customer.contactPerson ?? "",
+              attentionAr: customer.contactPersonAr || customer.contactPerson || "",
               taxId: customer.taxId ?? "",
               paymentTermId: customer.paymentTermId ?? draft.paymentTermId,
             })
@@ -101,15 +120,24 @@ export default function StepBasics({
 
       <div className="sm:col-span-2 grid gap-4 sm:grid-cols-2">
         <Field
-          label={t("offers.builder.basics.attention")}
+          label={`${t("offers.builder.basics.attention")} · ${
+            arabicDocument ? t("common.arabic") : t("common.english")
+          }`}
           htmlFor="offer-attention"
           hint={t("offers.builder.basics.attentionHint")}
         >
           <Input
             id="offer-attention"
-            value={draft.attention ?? ""}
+            dir={arabicDocument ? "rtl" : "ltr"}
+            value={attentionValue}
             placeholder={t("offers.builder.basics.attentionPlaceholder")}
-            onChange={(event) => onChange({ attention: event.target.value })}
+            onChange={(event) =>
+              onChange(
+                arabicDocument
+                  ? { attentionAr: event.target.value }
+                  : { attention: event.target.value },
+              )
+            }
           />
         </Field>
         <Field label={language === "ar" ? "رقم التسجيل الضريبي" : "Tax Registration Number"} htmlFor="offer-tax-id">
@@ -137,6 +165,36 @@ export default function StepBasics({
             </option>
           ))}
         </Select>
+      </Field>
+
+      <Field
+        label={t("offers.builder.basics.validity")}
+        htmlFor="offer-validity"
+        hint={
+          validityDays > 0
+            ? t("offers.builder.basics.validityExpires", {
+                date: formatIsoDay(
+                  expiryDateFrom(draft.issueDate, validityDays),
+                ),
+                days: validityDays,
+              })
+            : t("offers.builder.basics.validityHint")
+        }
+      >
+        <Input
+          id="offer-validity"
+          type="number"
+          inputMode="numeric"
+          dir="ltr"
+          min={0}
+          max={MAX_VALIDITY_DAYS}
+          step={1}
+          value={validityDays > 0 ? validityDays : ""}
+          placeholder="7"
+          onChange={(event) =>
+            onChange({ validityDays: normalizeValidityDays(event.target.value) })
+          }
+        />
       </Field>
 
       <Field

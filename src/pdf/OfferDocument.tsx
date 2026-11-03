@@ -8,6 +8,7 @@ import {
   formatDocumentCurrency,
   formatDocumentDate,
   formatDocumentNumber,
+  formatDocumentValidity,
   formatDocumentWeekday,
   translateCategory,
 } from "./format"
@@ -35,7 +36,23 @@ export type OfferDocumentProps = {
 function buildReferenceRows(
   data: OfferDocumentData,
   template: ReturnType<typeof getTemplate>,
+  language: DocumentLanguage,
 ): ReferenceRow[] {
+  const validityDays = data.validityDays ?? 0
+  const validity: ReferenceRow[] =
+    validityDays > 0 && data.expiryDate
+      ? [
+          {
+            label: template.validity,
+            value: formatDocumentValidity(
+              validityDays,
+              data.expiryDate,
+              language,
+            ),
+          },
+        ]
+      : []
+
   return [
     { label: template.reference, value: data.reference, ltr: true },
     {
@@ -44,6 +61,7 @@ function buildReferenceRows(
       ltr: true,
     },
     { label: template.terms, value: data.paymentTerm },
+    ...validity,
   ]
 }
 
@@ -125,7 +143,7 @@ function deliveryColumns(data: OfferDocumentData, language: DocumentLanguage): A
 function OfferDocument({ data, language }: OfferDocumentProps) {
   const template = getTemplate(language)
   const arabic = language === "ar"
-  const referenceRows = buildReferenceRows(data, template)
+  const referenceRows = buildReferenceRows(data, template, language)
   const totalsRows = buildTotalsRows(data, template, language)
   const columns = deliveryColumns(data, language)
   const currency = formatDocumentCurrency(data.currency, language)

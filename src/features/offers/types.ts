@@ -47,12 +47,15 @@ export type OfferDraft = {
   customerId: string
   /** Contact person printed in the "Attention" line, editable per offer. */
   attention: string
+  /** Arabic contact person, printed on the Arabic document. Empty hides it. */
   attentionAr?: string
   /** Customer tax ID, editable per offer. */
   taxId?: string
   issueDate: string
   currency: string
   paymentTermId: string
+  /** Days the offer stays valid from the issue date, 0 hides the row. */
+  validityDays: number
   lines: OfferDraftLine[]
   taxPercent: number
   otherTaxEnabled: boolean
@@ -91,12 +94,16 @@ export type Offer = {
   customerName: string
   /** Contact person printed in the "Attention" line of the document. */
   attention: string
+  /** Arabic contact person, printed on the Arabic document. */
+  attentionAr?: string
   /** Customer tax ID. */
   taxId?: string
   issueDate: string
   dueDate: string
   currency: string
   paymentTermId: string
+  /** Days the offer stays valid from the issue date. */
+  validityDays?: number
   lines: OfferLine[]
   delivery: DeliveryBatch[]
   taxPercent: number

@@ -3,7 +3,7 @@ import { act } from "react"
 import { createRoot } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 
-import { buildDocumentData } from "../features/offers/document"
+import { buildDocumentData, type DocumentSource } from "../features/offers/document"
 import { customers } from "../mock/data/customers"
 import { banks, company } from "../mock/data/company"
 import { packageTypes } from "../mock/data/packageTypes"
@@ -202,5 +202,126 @@ describe("offer document", () => {
       expect(page.querySelector(".doc-footer")).not.toBeNull()
     }
     expect(container.querySelectorAll(".doc-title")).toHaveLength(1)
+  })
+
+  describe("delivery total, offer validity and attention", () => {
+    const renderWith = (
+      language: "en" | "ar",
+      patch: Partial<DocumentSource>,
+      contact: Partial<typeof customer> = {},
+    ) => {
+      const data = buildDocumentData(
+        { ...(source as DocumentSource), ...patch },
+        {
+          customer: { ...customer, ...contact },
+          company,
+          banks,
+          packageTypes,
+          language,
+          paymentTermLabel: language === "ar" ? "شيك — ٣٠ يوم" : "Cheque — 30 days",
+        },
+      )
+      const root = createRoot(container)
+      act(() => {
+        root.render(<OfferDocument data={data} language={language} />)
+      })
+    }
+
+    const referenceLabels = () =>
+      Array.from(container.querySelectorAll(".doc-reference th")).map(
+        (cell) => cell.textContent,
+      )
+    const referenceValue = (label: string) =>
+      Array.from(container.querySelectorAll(".doc-reference tr"))
+        .find((row) => row.querySelector("th")?.textContent === label)
+        ?.querySelector("td")?.textContent
+
+    it("labels the total of the delivery schedule in Arabic", () => {
+      renderWith("ar", {})
+
+      const total = container.querySelector(".doc-schedule .doc-total-row th")
+      expect(total?.textContent).toBe("صافي الكمية")
+
+      // The grand total keeps its own label.
+      const grand = container.querySelector(".doc-totals .doc-grand th")
+      expect(grand?.textContent).toBe("صافي القيمة")
+    })
+
+    it("keeps the total of the delivery schedule in English", () => {
+      renderWith("en", {})
+      const total = container.querySelector(".doc-schedule .doc-total-row th")
+      expect(total?.textContent).toBe("Total")
+    })
+
+    it("prints the offer validity right under the payment terms", () => {
+      renderWith("en", { validityDays: 7 })
+
+      expect(referenceLabels()).toEqual([
+        "Reference",
+        "Date",
+        "Payment Terms",
+        "Offer Validity",
+      ])
+      expect(referenceValue("Offer Validity")).toBe("7 days — until 28/10/2026")
+    })
+
+    it("prints the offer validity in Arabic", () => {
+      renderWith("ar", { validityDays: 7 })
+
+      expect(referenceLabels()).toContain("صلاحية العرض")
+      expect(referenceValue("صلاحية العرض")).toBe("7 أيام — حتى 28/10/2026")
+    })
+
+    it("writes a single day in the singular", () => {
+      renderWith("en", { validityDays: 1 })
+      expect(referenceValue("Offer Validity")).toBe("1 day — until 22/10/2026")
+    })
+
+    it("prints no validity row when the validity is empty", () => {
+      renderWith("en", { validityDays: 0 })
+      expect(referenceLabels()).not.toContain("Offer Validity")
+
+      renderWith("en", {})
+      expect(referenceLabels()).not.toContain("Offer Validity")
+    })
+
+    it("prints the attention name of the document language", () => {
+      const patch = { attention: "Nader William", attentionAr: "نادر وليام" }
+
+      renderWith("en", patch, { contactPersonAr: "اسم من قاعدة البيانات" })
+      expect(container.textContent).toContain("Attention: Nader William")
+      expect(container.textContent).not.toContain("نادر وليام")
+
+      renderWith("ar", patch, { contactPersonAr: "اسم من قاعدة البيانات" })
+      expect(container.textContent).toContain("عناية: نادر وليام")
+    })
+
+    it("lets a typed Arabic name replace the one of the customer record", () => {
+      renderWith(
+        "ar",
+        { attentionAr: "اسم مكتوب يدويًا" },
+        { contactPersonAr: "اسم من قاعدة البيانات" },
+      )
+      expect(container.textContent).toContain("اسم مكتوب يدويًا")
+      expect(container.textContent).not.toContain("اسم من قاعدة البيانات")
+    })
+
+    it("falls back to the customer record when no Arabic name was typed", () => {
+      renderWith(
+        "ar",
+        { attention: undefined as never, attentionAr: undefined },
+        { contactPersonAr: "اسم من قاعدة البيانات" },
+      )
+      expect(container.textContent).toContain("اسم من قاعدة البيانات")
+    })
+
+    it("hides the Arabic attention line when it was cleared", () => {
+      renderWith(
+        "ar",
+        { attentionAr: "" },
+        { contactPersonAr: "اسم من قاعدة البيانات" },
+      )
+      expect(container.textContent).not.toContain("عناية")
+    })
   })
 })

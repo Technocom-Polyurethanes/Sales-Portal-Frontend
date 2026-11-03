@@ -9,6 +9,7 @@ export const arabicTemplate: OfferTemplate = {
   reference: "المرجع",
   date: "التاريخ",
   terms: "شروط الدفع",
+  validity: "صلاحية العرض",
   dueDate: "تاريخ الاستحقاق",
   item: "الخامة والوصف",
   quantity: "الكمية (كجم)",

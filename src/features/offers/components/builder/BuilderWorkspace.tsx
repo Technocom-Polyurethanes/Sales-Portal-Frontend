@@ -79,6 +79,8 @@ export default function BuilderWorkspace({
           paymentTermId: draft.paymentTermId,
           customerId: draft.customerId,
           attention: draft.attention,
+          attentionAr: draft.attentionAr,
+          validityDays: draft.validityDays,
           taxId: draft.taxId ?? "",
           lines: draft.lines.map((line: any, index) => ({
             productId: line.productId || line.materialId || "",

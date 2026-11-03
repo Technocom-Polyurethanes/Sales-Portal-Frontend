@@ -1,6 +1,7 @@
 import { todayIso } from "../../lib/calculations/date"
 import type { PackagingLine } from "../../lib/calculations/packaging"
 import { OTHER_TAX_PERCENT } from "../../lib/calculations/tax"
+import { DEFAULT_VALIDITY_DAYS, normalizeValidityDays } from "../../lib/calculations/validity"
 import type { Product } from "../products/types"
 import type { PackageType } from "../settings/types"
 import { calculateDraft, type DraftCalculations } from "./calculations"
@@ -59,6 +60,7 @@ export function createEmptyDraft(
     issueDate: todayIso(),
     currency: "EGP",
     paymentTermId: "bank-transfer-purchase-order",
+    validityDays: DEFAULT_VALIDITY_DAYS,
     lines: [],
     taxPercent: 14,
     otherTaxEnabled: false,
@@ -88,6 +90,7 @@ export function draftToPayload(
     customerId: draft.customerId || undefined,
     attention: draft.attention.trim(),
     attentionAr: (draft.attentionAr ?? "").trim(),
+    validityDays: normalizeValidityDays(draft.validityDays),
     taxId: draft.taxId ?? "",
     issueDate: draft.issueDate,
     paymentTermId: draft.paymentTermId || undefined,
@@ -208,10 +211,12 @@ export function offerToDraft(offer: Offer): OfferDraft {
     reference: offer.reference,
     customerId: offer.customerId,
     attention: offer.attention ?? "",
+    attentionAr: offer.attentionAr,
     taxId: offer.taxId ?? "",
     issueDate: offer.issueDate,
     currency: offer.currency,
     paymentTermId: offer.paymentTermId,
+    validityDays: offer.validityDays ?? DEFAULT_VALIDITY_DAYS,
     lines,
     taxPercent: offer.taxPercent,
     otherTaxEnabled: offer.otherTaxEnabled,

@@ -8,6 +8,7 @@ export type OfferTemplate = {
   reference: string
   date: string
   terms: string
+  validity: string
   dueDate: string
   item: string
   quantity: string
@@ -82,6 +83,10 @@ export type OfferDocumentData = {
   issueDate: string
   dueDate: string
   paymentTerm: string
+  /** Days the offer stays valid, 0 or missing hides the validity row. */
+  validityDays?: number
+  /** Day the offer expires (ISO). */
+  expiryDate?: string
   currency: string
   lines: OfferDocumentLine[]
   subtotal: number

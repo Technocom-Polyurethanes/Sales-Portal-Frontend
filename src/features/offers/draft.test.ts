@@ -60,4 +60,18 @@ describe("draftToPayload", () => {
     ])
     expect(draftId("x")).toMatch(/^[0-9a-f-]{36}$/)
   })
+
+  it("sends the Arabic attention and the validity days", () => {
+    const draft = createEmptyDraft({
+      attention: "Ahmed",
+      attentionAr: " أحمد ",
+      validityDays: 14.9,
+    })
+
+    const payload = draftToPayload(draft, { version: 1 })
+
+    expect(payload.attention).toBe("Ahmed")
+    expect(payload.attentionAr).toBe("أحمد")
+    expect(payload.validityDays).toBe(14)
+  })
 })
