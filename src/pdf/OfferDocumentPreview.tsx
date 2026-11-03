@@ -20,7 +20,7 @@ export type OfferDocumentPreviewProps = {
  * Scaled preview of the printed offer.
  *
  * The preview shows the real A4 sheets of the document, one under the other,
- * each 210mm wide with 15mm margins, and the whole stack is scaled down to fit
+ * each 210mm wide with 12.7mm (narrow) margins, and the whole stack is scaled down to fit
  * the panel. The document itself is never modified.
  */
 export default function OfferDocumentPreview({

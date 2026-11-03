@@ -1,9 +1,9 @@
 :root {
   --page-w: 210mm;
   --page-h: 297mm;
-  --page-margin: 15mm;
-  --content-w: 180mm;
-  --content-h: 267mm;
+  --page-margin: 12.7mm;
+  --content-w: 184.6mm;
+  --content-h: 271.6mm;
   --page-width: var(--page-w);
 }
 
@@ -57,7 +57,7 @@
   flex-direction: column;
   width: var(--page-w, 210mm);
   height: var(--page-h, 297mm);
-  padding: var(--page-margin, 15mm);
+  padding: var(--page-margin, 12.7mm);
   box-sizing: border-box;
   overflow: hidden;
   background: #fff;

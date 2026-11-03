@@ -10,6 +10,7 @@ import {
   createEmptyDraft,
   createPackagingRow,
   draftId,
+  draftToPayload,
   reconcileDelivery,
 } from "../draft"
 import { offersApi } from "../api"
@@ -17,33 +18,10 @@ import { calculateDraft, type DraftCalculations } from "../calculations"
 import type { DeliveryBatch, OfferDraft, OfferDraftLine } from "../types"
 
 export type ServerCalculations = {
-  lines: Array<{
-    lineId: string
-    productId: string
-    materialName: string
-    materialCode: string
-    category: string
-    packaging: PackagingLine[]
-    quantityKg: number
-    ratePerKg: number
-    discountPercent: number
-    amount: number
-  }>
-  subtotal: number
-  orderDiscountPercent: number
-  orderDiscount: number
-  taxPercent: number
-  taxAmount: number
-  otherTaxEnabled: boolean
-  otherTaxPercent: number
-  otherTaxAmount: number
-  total: number
-  deliveryCaps: Record<string, Record<string, number>>
   warnings: string[]
   validationErrors: string[]
   reference: string
   dueDate: string
-  document: any
 }
 
 export type OfferBuilderController = {
@@ -134,34 +112,7 @@ export function useOfferBuilder({
       setCalculateError(null)
 
       try {
-        // Prepare draft for server calculate
-        const payload = {
-          reference: draft.reference,
-          customerId: draft.customerId,
-          attention: draft.attention,
-          attentionAr: draft.attentionAr,
-          taxId: draft.taxId,
-          issueDate: draft.issueDate,
-          currency: draft.currency,
-          paymentTermId: draft.paymentTermId,
-          validityDays: draft.validityDays,
-          lines: draft.lines.map((line: any) => ({
-            productId: line.productId || line.materialId,
-            materialName: line.materialName,
-            materialCode: line.materialCode,
-            category: line.category,
-            ratePerKg: line.ratePerKg,
-            discountPercent: line.discountPercent,
-            packaging: line.packaging,
-          })),
-          taxPercent: draft.taxPercent,
-          otherTaxEnabled: draft.otherTaxEnabled,
-          otherTaxPercent: draft.otherTaxPercent,
-          orderDiscountPercent: draft.orderDiscountPercent,
-          delivery: draft.delivery,
-          notes: draft.notes,
-          documentLanguage: draft.documentLanguage,
-        }
+        const payload = draftToPayload(draft, { version: 1 })
 
         const response = await offersApi.calculate(payload)
 
@@ -170,35 +121,11 @@ export function useOfferBuilder({
           return
         }
 
-        // Map server response to our calculations type
         setServerCalculations({
-          lines: (response.lines || []).map((l: any, idx: number) => ({
-            lineId: draft.lines[idx]?.id || l.productId || `line-${idx}`,
-            productId: l.productId || l.materialId || "",
-            materialName: l.materialName || "",
-            materialCode: l.materialCode || "",
-            category: l.category || "",
-            packaging: l.packaging || [],
-            quantityKg: l.quantityKg || 0,
-            ratePerKg: l.ratePerKg || 0,
-            discountPercent: l.discountPercent || 0,
-            amount: l.amount || 0,
-          })),
-          subtotal: response.subtotal || 0,
-          orderDiscountPercent: response.orderDiscountPercent || 0,
-          orderDiscount: response.orderDiscount || 0,
-          taxPercent: response.taxPercent || 0,
-          taxAmount: response.taxAmount || 0,
-          otherTaxEnabled: response.otherTaxEnabled || false,
-          otherTaxPercent: response.otherTaxPercent || 0,
-          otherTaxAmount: response.otherTaxAmount || 0,
-          total: response.total || 0,
-          deliveryCaps: response.deliveryCaps || {},
-          warnings: response.warnings || [],
-          validationErrors: response.validationErrors || [],
-          reference: response.reference || draft.reference,
-          dueDate: response.dueDate || "",
-          document: response.document,
+          warnings: response.validationWarnings ?? [],
+          validationErrors: response.validationErrors ?? [],
+          reference: response.draft?.reference || draft.reference,
+          dueDate: response.totals?.dueDate ?? "",
         })
       } catch (error: any) {
         if (error?.name === "AbortError") return

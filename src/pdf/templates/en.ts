@@ -2,7 +2,7 @@ import type { OfferTemplate } from "./types"
 
 export const englishTemplate: OfferTemplate = {
   language: "en",
-  title: "Quotation",
+  title: "Offer",
   billTo: "Bill To / Ship To",
   attention: "Attention",
   taxId: "Tax Registration Number",
@@ -20,8 +20,8 @@ export const englishTemplate: OfferTemplate = {
   discount: "Discount",
   tax: "(VAT)",
   otherTax: "Commercial and industrial profit tax (1%)",
-  total: "Total",
-  scheduleTotal: "Total",
+  itemsTotalLabel: "Total",
+  deliveryTotalLabel: "Total",
   schedule: "Delivery Schedule",
   batch: "Batch #",
   deliveryDate: "Delivery Date",

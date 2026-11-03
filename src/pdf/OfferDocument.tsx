@@ -102,7 +102,7 @@ function buildTotalsRows(
   }
 
   rows.push({
-    label: template.total,
+    label: template.itemsTotalLabel,
     value: formatDocumentNumber(data.total),
     currency,
     variant: "grand",
@@ -248,7 +248,7 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
             <TotalsBlock rows={totalsRows} />
           </div>
 
-          <div data-doc-unit>
+          <div data-doc-unit data-doc-keep>
             <DeliveryScheduleTable
               heading={template.schedule}
               headings={{
@@ -256,7 +256,7 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
                 deliveryDate: template.deliveryDate,
                 packages: template.packages,
                 totalWeight: template.totalWeight,
-                total: template.scheduleTotal,
+                total: template.deliveryTotalLabel,
               }}
               batches={batches}
               columns={columns}
@@ -273,7 +273,7 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
             />
           </div>
 
-          <div data-doc-unit>
+          <div data-doc-unit data-doc-keep>
             <BankAccountsTable
               heading={template.bankDetails}
               headings={{

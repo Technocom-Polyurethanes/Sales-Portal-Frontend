@@ -240,7 +240,7 @@ describe("offer document", () => {
       renderWith("ar", {})
 
       const total = container.querySelector(".doc-schedule .doc-total-row th")
-      expect(total?.textContent).toBe("صافي الكميه")
+      expect(total?.textContent).toBe("صافي الكمية")
 
       // The grand total keeps its own label.
       const grand = container.querySelector(".doc-totals .doc-grand th")
