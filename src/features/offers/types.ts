@@ -120,6 +120,8 @@ export type Offer = {
   version: number
   /** Set when the offer is a new version of an earlier offer. */
   parentOfferId?: string
+  /** Shared by every version of the offer, it stays the same when the reference changes. */
+  rootOfferId?: string
   totals: Totals
   documentLanguage: DocumentLanguage
   createdAt: string
@@ -130,6 +132,8 @@ export type OfferListItem = {
   reference: string
   serialNumber: number
   version: number
+  /** Shared by every version of the offer. */
+  rootOfferId?: string
   customerId: string
   customerName: string
   customerNameAr: string | null
