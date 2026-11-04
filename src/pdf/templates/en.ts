@@ -13,7 +13,7 @@ export const englishTemplate: OfferTemplate = {
   dueDate: "Due Date",
   item: "Material & Description",
   quantity: "Qty (kg)",
-  rate: "Rate (per kg)",
+  rate: "Unit Price",
   amount: "Amount",
   packaging: "Packaging",
   subtotal: "Subtotal",

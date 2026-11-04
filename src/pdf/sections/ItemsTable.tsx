@@ -36,7 +36,7 @@ export default function ItemsTable({
             {headings.quantity}
           </th>
           <th scope="col" className="doc-num">
-            Unit Price ({currency}/{weightUnit})
+            {headings.rate} ({currency}/{weightUnit})
           </th>
           <th scope="col" className="doc-num">
             {headings.amount} ({currency})

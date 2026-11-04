@@ -13,7 +13,7 @@ export const arabicTemplate: OfferTemplate = {
   dueDate: "تاريخ الاستحقاق",
   item: "الخامة والوصف",
   quantity: "الكمية (كجم)",
-  rate: "السعر (للكجم)",
+  rate: "سعر الوحدة",
   amount: "المبلغ",
   packaging: "العبوة",
   subtotal: "الإجمالي",
