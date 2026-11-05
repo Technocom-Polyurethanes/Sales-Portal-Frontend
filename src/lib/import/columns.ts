@@ -31,6 +31,20 @@ export const IMPORT_COLUMNS: Record<ImportSource, string[]> = {
     "defaultWeightKg",
   ],
   prices: ["itemCode", "referencePricePerKg"],
+  "bank-accounts": [
+    "bank",
+    "bankAr",
+    "branch",
+    "branchAr",
+    "accountHolderName",
+    "accountHolderNameAr",
+    "accountNumber",
+    "swift",
+    "iban",
+    "currency",
+    "isActive",
+    "sortOrder",
+  ],
 }
 
 /** The fields shown in the preview table for each source. */
@@ -38,12 +52,14 @@ export const IDENTIFIER_FIELD: Record<ImportSource, string> = {
   customers: "customerCode",
   materials: "itemCode",
   prices: "itemCode",
+  "bank-accounts": "accountNumber",
 }
 
 export const NAME_FIELD: Record<ImportSource, string> = {
   customers: "name",
   materials: "name",
   prices: "referencePricePerKg",
+  "bank-accounts": "bank",
 }
 
 export type CustomerRecord = {
@@ -77,6 +93,22 @@ export type MaterialRecord = {
   defaultWeightKg?: number
 }
 
+export type BankAccountRecord = {
+  id: string
+  bank: string
+  bankAr?: string | null
+  branch: string
+  branchAr?: string | null
+  accountHolderName?: string | null
+  accountHolderNameAr?: string | null
+  accountNumber: string
+  swift?: string | null
+  iban?: string | null
+  currency: string
+  isActive?: boolean
+  sortOrder?: number
+}
+
 export type PaymentTermRecord = {
   id: string
   code: string
@@ -88,6 +120,7 @@ export type PreviewInput = {
   rows: ParsedRow[]
   customers: CustomerRecord[]
   materials: MaterialRecord[]
+  bankAccounts: BankAccountRecord[]
   paymentTerms: PaymentTermRecord[]
 }
 

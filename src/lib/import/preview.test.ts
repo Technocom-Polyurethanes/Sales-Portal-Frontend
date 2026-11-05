@@ -56,6 +56,7 @@ function preview(
     rows,
     customers: existing.customers ?? [],
     materials: existing.materials ?? [],
+    bankAccounts: [],
     paymentTerms,
   })
 }

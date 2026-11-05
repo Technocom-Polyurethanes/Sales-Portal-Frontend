@@ -205,6 +205,14 @@
         "hint": "Free text printed under the offer. The terms and conditions are not printed.",
         "placeholder": "Prices are valid for 7 days…"
       },
+      "banks": {
+        "title": "Bank accounts",
+        "hint": "Only the selected accounts are printed on this offer.",
+        "selectAll": "Select all",
+        "selectNone": "Select none",
+        "empty": "No bank accounts are available in the settings.",
+        "required": "Select at least one bank account before saving the offer."
+      },
       "preview": {
         "title": "Document preview",
         "hint": "The document updates with every field you change."
@@ -264,11 +272,12 @@
   },
   "import": {
     "title": "Data Import",
-    "subtitle": "Bring customers, materials and prices into the workspace.",
+    "subtitle": "Bring customers, materials, prices and bank accounts into the workspace.",
     "chooseSource": "Choose what you want to import",
     "customers": "Customers",
     "products": "Materials & products",
     "prices": "Price list",
+    "bankAccounts": "Bank accounts",
     "dropFile": "Drop an Excel or CSV file here",
     "orBrowse": "or browse from your computer",
     "start": "Start import",
@@ -345,7 +354,17 @@
       "referencePricePerKg": "Reference price per kg",
       "uom": "Unit",
       "isActive": "Active",
-      "defaultWeightKg": "Default weight (kg)"
+      "defaultWeightKg": "Default weight (kg)",
+      "bank": "Bank",
+      "bankAr": "Bank (Arabic)",
+      "branch": "Branch",
+      "branchAr": "Branch (Arabic)",
+      "accountHolderName": "Account holder",
+      "accountHolderNameAr": "Account holder (Arabic)",
+      "accountNumber": "Account number",
+      "swift": "SWIFT",
+      "iban": "IBAN",
+      "sortOrder": "Sort order"
     }
   },
   "settings": {
@@ -365,7 +384,7 @@
     "formCode": "Form code",
     "logoSize": "Logo size",
     "logoHint": "The logo prints at approximately 55 × 25 mm on every offer.",
-    "bankHint": "All bank accounts listed here appear on every offer.",
+    "bankHint": "Choose which bank accounts print on each offer.",
     "packageType": "Package type",
     "weightPerPackage": "Weight per package (kg)",
     "addPackageType": "Add package type",

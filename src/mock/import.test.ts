@@ -38,6 +38,24 @@ describe("mock import", () => {
     expect(page.items[0].updated).toBe(1)
   })
 
+  it("previews and commits bank accounts", async () => {
+    const csv =
+      template("bank-accounts") +
+      "New Bank,بنك جديد,Cairo,القاهرة,TECHNOCOM,شركة تكنوكوم,555,SWIFT,EG,usd,yes,9\r\n"
+
+    const result = await preview("bank-accounts", form(csv, "banks.csv"))
+    expect(result.summary.new).toBe(1)
+
+    const committed = commit(result.importId)
+    expect(committed.created).toBe(1)
+
+    const account = db.banks.find((bank) => bank.accountNumber === "555")
+    expect(account?.bank).toBe("New Bank")
+    expect(account?.currency).toBe("USD")
+    expect(account?.isActive).toBe(true)
+    expect(account?.sortOrder).toBe(9)
+  })
+
   it("rejects a file that is not CSV", async () => {
     await expect(
       preview("prices", form("a,b\r\n1,2\r\n", "prices.xlsx")),

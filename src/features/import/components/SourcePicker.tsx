@@ -6,11 +6,12 @@ import type { ImportSource } from "../types"
 
 const SOURCES: {
   source: ImportSource
-  icon: "customers" | "products" | "offers"
+  icon: "customers" | "products" | "offers" | "settings"
 }[] = [
   { source: "customers", icon: "customers" },
   { source: "materials", icon: "products" },
   { source: "prices", icon: "offers" },
+  { source: "bank-accounts", icon: "settings" },
 ]
 
 export type SourcePickerProps = {
@@ -34,7 +35,7 @@ export default function SourcePicker({
       <div
         role="radiogroup"
         aria-label={t("import.chooseSource")}
-        className="grid gap-3 sm:grid-cols-3"
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
       >
         {SOURCES.map(({ source, icon }) => {
           const selected = value === source

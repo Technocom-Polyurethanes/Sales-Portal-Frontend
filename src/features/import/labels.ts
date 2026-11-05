@@ -6,6 +6,7 @@ export const SOURCE_KEYS: Record<ImportSource, TranslationKey> = {
   customers: "import.customers",
   materials: "import.products",
   prices: "import.prices",
+  "bank-accounts": "import.bankAccounts",
 }
 
 export const STATUS_KEYS: Record<ImportRowStatus, TranslationKey> = {

@@ -1,4 +1,9 @@
-import type { CustomerRecord, MaterialRecord, PreviewInput } from "./columns"
+import type {
+  BankAccountRecord,
+  CustomerRecord,
+  MaterialRecord,
+  PreviewInput,
+} from "./columns"
 
 export function findCustomer(
   input: PreviewInput,
@@ -41,6 +46,17 @@ export function findMaterial(
     : undefined
 }
 
+export function findBankAccount(
+  input: PreviewInput,
+  accountNumber: string | null,
+) {
+  if (!accountNumber) return undefined
+  const wanted = accountNumber.trim().toLowerCase()
+  return input.bankAccounts.find(
+    (account) => account.accountNumber.trim().toLowerCase() === wanted,
+  )
+}
+
 export function customerSnapshot(
   customer: CustomerRecord,
   input: PreviewInput,
@@ -79,6 +95,25 @@ export function materialSnapshot(
     uom: material.uom ?? null,
     isActive: material.isActive === false ? "false" : "true",
     defaultWeightKg: formatNumber(material.defaultWeightKg),
+  }
+}
+
+export function bankAccountSnapshot(
+  account: BankAccountRecord,
+): Record<string, string | null> {
+  return {
+    bank: account.bank,
+    bankAr: account.bankAr ?? null,
+    branch: account.branch,
+    branchAr: account.branchAr ?? null,
+    accountHolderName: account.accountHolderName ?? null,
+    accountHolderNameAr: account.accountHolderNameAr ?? null,
+    accountNumber: account.accountNumber,
+    swift: account.swift ?? null,
+    iban: account.iban ?? null,
+    currency: account.currency,
+    isActive: account.isActive === false ? "false" : "true",
+    sortOrder: account.sortOrder == null ? null : String(account.sortOrder),
   }
 }
 

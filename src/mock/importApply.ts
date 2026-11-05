@@ -1,6 +1,7 @@
 import type { Customer } from "../features/customers/types"
 import type { ImportRow, ImportSource } from "../features/import/types"
 import type { Product } from "../features/products/types"
+import type { BankAccount } from "../features/settings/types"
 import { PAYMENT_TERMS } from "../lib/calculations/dueDate"
 import { db } from "./db"
 
@@ -49,6 +50,32 @@ export function applyImport(
     return true
   }
 
+  if (source === "bank-accounts") {
+    let account = db.banks.find((item) => item.id === targetId)
+    if (!account) {
+      account = emptyBank(batchId, row.rowNumber)
+      db.banks.push(account)
+    }
+    account.bank = value("bank") ?? account.bank
+    account.bankAr = value("bankAr") ?? account.bankAr
+    account.branch = value("branch") ?? account.branch
+    account.branchAr = value("branchAr") ?? account.branchAr
+    account.accountHolderName =
+      value("accountHolderName") ?? account.accountHolderName
+    account.accountHolderNameAr =
+      value("accountHolderNameAr") ?? account.accountHolderNameAr
+    account.accountNumber = value("accountNumber") ?? account.accountNumber
+    account.swift = value("swift") ?? account.swift
+    account.iban = value("iban") ?? account.iban
+    account.currency = value("currency") ?? account.currency
+
+    const active = value("isActive")
+    if (active != null) account.isActive = active === "true"
+    const sortOrder = amount("sortOrder")
+    if (sortOrder != null) account.sortOrder = sortOrder
+    return true
+  }
+
   let product = db.products.find((item) => item.id === targetId)
   if (!product) {
     if (source === "prices") return false
@@ -84,6 +111,20 @@ function emptyCustomer(batchId: string, rowNumber: number): Customer {
     paymentTermId: PAYMENT_TERMS[0].id,
     offersCount: 0,
     totalValue: 0,
+  }
+}
+
+function emptyBank(batchId: string, rowNumber: number): BankAccount {
+  return {
+    id: `${batchId}-bank-${rowNumber}`,
+    bank: "",
+    branch: "",
+    accountNumber: "",
+    swift: "",
+    iban: "",
+    currency: "EGP",
+    isActive: true,
+    sortOrder: 0,
   }
 }
 

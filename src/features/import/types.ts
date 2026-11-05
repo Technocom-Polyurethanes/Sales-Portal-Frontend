@@ -1,4 +1,4 @@
-export type ImportSource = "customers" | "materials" | "prices"
+export type ImportSource = "customers" | "materials" | "prices" | "bank-accounts"
 
 export type ImportRowStatus = "new" | "update" | "unchanged" | "error"
 
