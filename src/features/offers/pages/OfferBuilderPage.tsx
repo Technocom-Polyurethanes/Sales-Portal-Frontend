@@ -22,8 +22,8 @@ export default function OfferBuilderPage() {
   )
 
   const initialDraft = useMemo(
-    () => (source ? offerToDraft(source) : undefined),
-    [source],
+    () => (source ? offerToDraft(source, catalog?.banks) : undefined),
+    [source, catalog],
   )
 
   // The backend numbers a new version itself (highest version of the offer + 1) and keeps it in

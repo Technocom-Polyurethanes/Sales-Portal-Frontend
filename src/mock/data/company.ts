@@ -12,6 +12,8 @@ export const banks: BankAccount[] = [
     swift: "QNBAEGCX",
     iban: "EG12 QNBA 0021 4589 0012",
     currency: "EGP",
+    isActive: true,
+    sortOrder: 1,
   },
   {
     id: "bank-2",
@@ -21,6 +23,8 @@ export const banks: BankAccount[] = [
     swift: "SBNKEGCX",
     iban: "EG45 SAIB 0098 7123 4567",
     currency: "EGP",
+    isActive: true,
+    sortOrder: 2,
   },
 ]
 

@@ -13,7 +13,9 @@ import {
   type PreviewOutput,
 } from "./columns"
 import {
+  bankAccountSnapshot,
   customerSnapshot,
+  findBankAccount,
   findCustomer,
   findMaterial,
   formatNumber,
@@ -62,7 +64,7 @@ export function buildPreview(
       targetId = material?.id
       checkMaterial(material, values, errors)
       if (material) existing = materialSnapshot(material)
-    } else {
+    } else if (source === "prices") {
       const material = findMaterial(input, values.itemCode, null)
       targetId = material?.id
       if (values.itemCode && !material) {
@@ -83,20 +85,68 @@ export function buildPreview(
           referencePricePerKg: formatNumber(material.referencePricePerKg),
         }
       }
+    } else {
+      const accountNumber = values.accountNumber?.trim() ?? null
+      values.accountNumber = accountNumber
+      const account = findBankAccount(input, accountNumber)
+      targetId = account?.id
+
+      if (values.bank == null) errors.push("Bank is required.")
+      if (values.branch == null) errors.push("Branch is required.")
+
+      if (values.currency) {
+        values.currency = values.currency.trim().toUpperCase()
+      } else if (!account) {
+        values.currency = "EGP"
+      }
+
+      if (values.isActive) {
+        const active = values.isActive.toLowerCase()
+        if (["true", "yes", "1"].includes(active)) values.isActive = "true"
+        else if (["false", "no", "0"].includes(active)) values.isActive = "false"
+        else errors.push("Is active must be true or false.")
+      } else if (!account) {
+        values.isActive = "true"
+      }
+
+      if (values.sortOrder) {
+        if (!/^-?\d+$/.test(values.sortOrder.trim())) {
+          errors.push("Sort order must be a whole number.")
+        }
+      } else if (!account) {
+        const maxSortOrder = input.bankAccounts.reduce(
+          (max, item) => Math.max(max, item.sortOrder ?? 0),
+          0,
+        )
+        values.sortOrder = String(maxSortOrder + parsed.rowNumber)
+      }
+
+      if (account) {
+        // Keep the stored spelling so a case-only difference is not a change.
+        values.accountNumber = account.accountNumber
+        existing = bankAccountSnapshot(account)
+      }
     }
 
     const code = values[IDENTIFIER_FIELD[source]]
     if (code) {
       if (seen.has(code.toLowerCase())) {
-        const label = source === "customers" ? "customer" : "item"
-        errors.push(`Duplicate ${label} code '${code}' in this file.`)
+        const label =
+          source === "customers"
+            ? "customer code"
+            : source === "bank-accounts"
+              ? "account number"
+              : "item code"
+        errors.push(`Duplicate ${label} '${code}' in this file.`)
       }
       seen.add(code.toLowerCase())
     } else {
       errors.push(
         source === "customers"
           ? "Customer code is required."
-          : "Item code is required.",
+          : source === "bank-accounts"
+            ? "Account number is required."
+            : "Item code is required.",
       )
     }
 

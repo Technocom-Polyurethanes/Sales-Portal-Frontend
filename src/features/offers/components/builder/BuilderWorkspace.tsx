@@ -11,6 +11,7 @@ import { getPaymentTerm } from "../../../../lib/calculations/dueDate"
 import { usePdfLanguage } from "../../../../pdf/PdfLanguageProvider"
 import { usePrintOffer } from "../../../../pdf/PrintProvider"
 import { offersApi } from "../../api"
+import { banksForOffer, hasBankSelection } from "../../bankSelection"
 import { buildDocumentData } from "../../document"
 import { createEmptyDraft, draftToPayload } from "../../draft"
 import { useOfferBuilder } from "../../hooks/useOfferBuilder"
@@ -18,6 +19,7 @@ import type { PaymentTerm } from "../../../settings/types"
 import type { BuilderCatalog } from "../../hooks/useBuilderCatalog"
 import type { OfferStatus } from "../../types"
 import type { OfferDraft } from "../../types"
+import BankAccountsStep from "./BankAccountsStep"
 import BuilderStepper from "./BuilderStepper"
 import DeliveryScheduleEditor from "./DeliveryScheduleEditor"
 import LivePreview from "./LivePreview"
@@ -56,10 +58,13 @@ export default function BuilderWorkspace({
     customers: catalog.customers,
     initialDraft:
       initialDraft ??
-      createEmptyDraft({
-        documentLanguage: defaultDocumentLanguage,
-        paymentTermId: catalog.paymentTerms[0]?.id ?? "",
-      }),
+      createEmptyDraft(
+        {
+          documentLanguage: defaultDocumentLanguage,
+          paymentTermId: catalog.paymentTerms[0]?.id ?? "",
+        },
+        catalog.banks,
+      ),
   })
 
   const { draft, calculations, serverCalculations } = controller
@@ -107,7 +112,7 @@ export default function BuilderWorkspace({
         {
           customer,
           company: catalog.company,
-          banks: catalog.banks,
+          banks: banksForOffer(catalog.banks, draft.bankAccountIds),
           packageTypes: catalog.packageTypes,
           language: draft.documentLanguage,
           paymentTermLabel: paymentTermLabel(
@@ -140,6 +145,10 @@ export default function BuilderWorkspace({
     }
     if (draft.lines.length === 0) {
       setError(t("offers.builder.validation.lines"))
+      return false
+    }
+    if (!hasBankSelection(draft.bankAccountIds)) {
+      setError(t("offers.builder.banks.required"))
       return false
     }
     setError(undefined)
@@ -233,10 +242,19 @@ export default function BuilderWorkspace({
           )}
 
           {controller.step === 4 && (
-            <StepNotes
-              notes={draft.notes}
-              onChange={(notes) => controller.setDraft({ notes })}
-            />
+            <div className="space-y-4">
+              <BankAccountsStep
+                banks={catalog.banks}
+                selected={draft.bankAccountIds}
+                onChange={(bankAccountIds) =>
+                  controller.setDraft({ bankAccountIds })
+                }
+              />
+              <StepNotes
+                notes={draft.notes}
+                onChange={(notes) => controller.setDraft({ notes })}
+              />
+            </div>
           )}
         </Card>
 

@@ -14,6 +14,7 @@ import { formatCurrency } from "../../../lib/formatters/number"
 import OfferDocumentPreview from "../../../pdf/OfferDocumentPreview"
 import { usePrintOffer } from "../../../pdf/PrintProvider"
 import { offersApi } from "../api"
+import { banksForOffer } from "../bankSelection"
 import DetailsSkeleton from "../components/DetailsSkeleton"
 import OfferSummary from "../components/OfferSummary"
 import StatusDialog from "../components/StatusDialog"
@@ -41,7 +42,7 @@ export default function OfferDetailsPage() {
     return buildDocumentData(offerToDocumentSource(data.offer), {
       customer: data.customer,
       company: data.company,
-      banks: data.banks,
+      banks: banksForOffer(data.banks, data.offer.bankAccountIds),
       packageTypes: data.packageTypes,
       language,
       paymentTermLabel: language === "ar" ? term.labelAr : term.label,

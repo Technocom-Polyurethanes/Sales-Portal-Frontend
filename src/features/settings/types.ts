@@ -10,6 +10,8 @@ export type BankAccount = {
   currency: string
   accountHolderName?: string
   accountHolderNameAr?: string
+  isActive?: boolean
+  sortOrder?: number
 }
 
 export type PackageType = {

@@ -3,7 +3,8 @@ import type { PackagingLine } from "../../lib/calculations/packaging"
 import { OTHER_TAX_PERCENT } from "../../lib/calculations/tax"
 import { DEFAULT_VALIDITY_DAYS, normalizeValidityDays } from "../../lib/calculations/validity"
 import type { Product } from "../products/types"
-import type { PackageType } from "../settings/types"
+import type { BankAccount, PackageType } from "../settings/types"
+import { activeBankIds } from "./bankSelection"
 import { calculateDraft, type DraftCalculations } from "./calculations"
 import type { DeliveryBatch, Offer, OfferDraft, OfferDraftLine } from "./types"
 
@@ -50,6 +51,7 @@ export function createDraftLine(
 /** An empty builder draft. */
 export function createEmptyDraft(
   overrides: Partial<OfferDraft> = {},
+  banks: BankAccount[] = [],
 ): OfferDraft {
   return {
     reference: "",
@@ -65,6 +67,7 @@ export function createEmptyDraft(
     taxPercent: 14,
     otherTaxEnabled: false,
     otherTaxPercent: 0,
+    bankAccountIds: activeBankIds(banks),
     orderDiscountPercent: 0,
     delivery: [],
     notes: "",
@@ -101,6 +104,7 @@ export function draftToPayload(
     taxPercent: draft.taxPercent,
     otherTaxEnabled: draft.otherTaxEnabled,
     otherTaxPercent: draft.otherTaxEnabled ? draft.otherTaxPercent : 0,
+    bankAccountIds: draft.bankAccountIds,
     lines: draft.lines.map((line, lineIndex) => ({
       id: line.id,
       sortOrder: lineIndex,
@@ -189,7 +193,10 @@ export function reconcileDelivery(
 }
 
 /** Turns a stored offer back into an editable draft. */
-export function offerToDraft(offer: Offer): OfferDraft {
+export function offerToDraft(
+  offer: Offer,
+  banks: BankAccount[] = [],
+): OfferDraft {
   const rowIds = new Map<string, string>()
 
   const lines = offer.lines.map((line) => ({
@@ -221,6 +228,7 @@ export function offerToDraft(offer: Offer): OfferDraft {
     taxPercent: offer.taxPercent,
     otherTaxEnabled: offer.otherTaxEnabled,
     otherTaxPercent: offer.otherTaxEnabled ? OTHER_TAX_PERCENT : 0,
+    bankAccountIds: offer.bankAccountIds ?? activeBankIds(banks),
     orderDiscountPercent: offer.orderDiscountPercent ?? 0,
     delivery: offer.delivery.map((batch) => ({
       ...batch,

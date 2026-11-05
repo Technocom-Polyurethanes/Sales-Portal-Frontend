@@ -73,6 +73,24 @@ function materials() {
   }))
 }
 
+function bankAccounts() {
+  return db.banks.map((account) => ({
+    id: account.id,
+    bank: account.bank,
+    bankAr: account.bankAr ?? null,
+    branch: account.branch,
+    branchAr: account.branchAr ?? null,
+    accountHolderName: account.accountHolderName ?? null,
+    accountHolderNameAr: account.accountHolderNameAr ?? null,
+    accountNumber: account.accountNumber,
+    swift: account.swift ?? null,
+    iban: account.iban ?? null,
+    currency: account.currency,
+    isActive: account.isActive !== false,
+    sortOrder: account.sortOrder ?? 0,
+  }))
+}
+
 function summarize(rows: ImportRow[]): ImportSummary {
   const count = (status: ImportRow["status"]) =>
     rows.filter((row) => row.status === status).length
@@ -120,6 +138,7 @@ export async function preview(
     rows: parsed,
     customers: customers(),
     materials: materials(),
+    bankAccounts: bankAccounts(),
     paymentTerms,
   })
 
