@@ -1,6 +1,6 @@
 import { monthIndex, parseIsoDate } from "./date"
 
-/** Month abbreviations used inside an offer reference. */
+/** Month abbreviations used inside an offer reference (legacy). */
 export const MONTH_ABBREVIATIONS = [
   "JAN.",
   "FEB.",
@@ -29,7 +29,7 @@ export function monthAbbreviation(issueDate: string): string {
 }
 
 /**
- * Builds an offer reference such as `3089/OCT./YL/AA`.
+ * Builds a legacy offer reference such as `3089/OCT./YL/AA`.
  */
 export function referenceNumber(
   sequence: number,
@@ -37,6 +37,18 @@ export function referenceNumber(
   suffix: string = DEFAULT_REFERENCE_SUFFIX,
 ): string {
   return `${sequence}/${monthAbbreviation(issueDate)}/${suffix}`
+}
+
+/**
+ * Builds the new offer reference such as `Loc/42/YL/JD` or `Int/43/YL/JD`.
+ */
+export function buildOfferReference(
+  offerType: "Loc" | "Int",
+  sequence: number,
+  userInitials: string,
+): string {
+  const initials = (userInitials || "AA").toUpperCase().slice(0, 2)
+  return `${offerType}/${sequence}/YL/${initials}`
 }
 
 /** The sequence number used for the next issued offer. */
@@ -54,4 +66,15 @@ export function referencePreview(
   suffix: string = DEFAULT_REFERENCE_SUFFIX,
 ): string {
   return `${issueDate} → ${referenceNumber(sequence, issueDate, suffix)}`
+}
+
+/**
+ * New reference preview using the new format.
+ */
+export function newReferencePreview(
+  offerType: "Loc" | "Int",
+  sequence: number,
+  userInitials: string,
+): string {
+  return `${offerType}/${sequence}/YL/${(userInitials || "AA").toUpperCase().slice(0, 2)}`
 }

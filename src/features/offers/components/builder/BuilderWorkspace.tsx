@@ -15,6 +15,7 @@ import { banksForOffer, hasBankSelection } from "../../bankSelection"
 import { buildDocumentData } from "../../document"
 import { createEmptyDraft, draftToPayload } from "../../draft"
 import { useOfferBuilder } from "../../hooks/useOfferBuilder"
+import type { AccountUser } from "../../../account/api"
 import type { PaymentTerm } from "../../../settings/types"
 import type { BuilderCatalog } from "../../hooks/useBuilderCatalog"
 import type { OfferStatus } from "../../types"
@@ -34,6 +35,7 @@ export type BuilderWorkspaceProps = {
   initialDraft?: OfferDraft
   version: number
   parentOfferId?: string
+  user?: AccountUser | undefined
 }
 
 /** The five step offer builder with its live document preview. */
@@ -42,6 +44,7 @@ export default function BuilderWorkspace({
   initialDraft,
   version,
   parentOfferId,
+  user,
 }: BuilderWorkspaceProps) {
   const { t } = useTranslation()
   const { notify } = useToast()
@@ -56,6 +59,7 @@ export default function BuilderWorkspace({
     sequence: catalog.sequence,
     packageTypes: catalog.packageTypes,
     customers: catalog.customers,
+    user: user ?? undefined,
     initialDraft:
       initialDraft ??
       createEmptyDraft(

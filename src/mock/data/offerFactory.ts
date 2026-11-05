@@ -3,7 +3,7 @@ import {
   totalQuantityKg,
   type PackagingLine,
 } from "../../lib/calculations/packaging"
-import { referenceNumber } from "../../lib/calculations/reference"
+import { buildOfferReference } from "../../lib/calculations/reference"
 import { calculateTotals } from "../../lib/calculations/tax"
 import type {
   DeliveryAllocation,
@@ -135,7 +135,8 @@ export function buildOffer(spec: OfferSpec): Offer {
 
   return {
     id: `offer-${spec.sequence}`,
-    reference: referenceNumber(spec.sequence, spec.issueDate),
+    reference: buildOfferReference("Loc", spec.sequence, "AA"),
+    offerType: "Loc",
     customerId: customer.id,
     customerName: customer.name,
     issueDate: spec.issueDate,

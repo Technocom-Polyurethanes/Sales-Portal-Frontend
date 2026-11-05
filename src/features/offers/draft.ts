@@ -6,7 +6,7 @@ import type { Product } from "../products/types"
 import type { BankAccount, PackageType } from "../settings/types"
 import { activeBankIds } from "./bankSelection"
 import { calculateDraft, type DraftCalculations } from "./calculations"
-import type { DeliveryBatch, Offer, OfferDraft, OfferDraftLine } from "./types"
+import type { DeliveryBatch, Offer, OfferDraft, OfferDraftLine, OfferType } from "./types"
 
 /** Unique id used while the offer is built. A real GUID, because the API binds these ids as GUIDs and links delivery allocations to rows by them. */
 export function draftId(_kind: string): string {
@@ -54,6 +54,7 @@ export function createEmptyDraft(
   banks: BankAccount[] = [],
 ): OfferDraft {
   return {
+    offerType: "Loc",
     reference: "",
     customerId: "",
     attention: "",
@@ -89,6 +90,7 @@ export function draftToPayload(
     reference: draft.reference.trim(),
     version: options.version,
     parentOfferId: options.parentOfferId,
+    offerType: draft.offerType,
     // Empty GUIDs are omitted: "" fails model binding (400), a missing one gets a validation message.
     customerId: draft.customerId || undefined,
     attention: draft.attention.trim(),
@@ -230,6 +232,7 @@ export function offerToDraft(
     otherTaxPercent: offer.otherTaxEnabled ? OTHER_TAX_PERCENT : 0,
     bankAccountIds: offer.bankAccountIds ?? activeBankIds(banks),
     orderDiscountPercent: offer.orderDiscountPercent ?? 0,
+    offerType: (offer.offerType ?? "Loc") as OfferType,
     delivery: offer.delivery.map((batch) => ({
       ...batch,
       id: draftId("batch"),

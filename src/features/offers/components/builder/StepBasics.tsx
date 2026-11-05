@@ -25,6 +25,11 @@ export type StepBasicsProps = {
 
 const CURRENCIES = ["EGP", "USD", "EUR", "SAR", "AED"]
 
+const OFFER_TYPES: { value: "Loc" | "Int"; label: string }[] = [
+  { value: "Loc", label: "Local" },
+  { value: "Int", label: "International" },
+]
+
 /** Step 1: customer, reference, dates, currency and payment terms. */
 export default function StepBasics({
   draft,
@@ -51,6 +56,26 @@ export default function StepBasics({
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
+      <div className="sm:col-span-2">
+        <Field
+          label={t("offers.builder.basics.offerType")}
+          htmlFor="offer-type"
+        >
+          <Select
+            id="offer-type"
+            value={draft.offerType}
+            onChange={(event) =>
+              onChange({ offerType: event.target.value as "Loc" | "Int" })}
+          >
+            {OFFER_TYPES.map((type) => (
+              <option key={type.value} value={type.value}>
+                {type.label}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      </div>
+
       <div className="sm:col-span-2">
         <Field
           label={t("offers.builder.basics.customer")}
@@ -206,7 +231,7 @@ export default function StepBasics({
           id="offer-reference"
           dir="ltr"
           value={draft.reference}
-          placeholder="3090/OCT./YL/AA"
+          placeholder="Loc/3090/YL/AA"
           onChange={(event) => onChange({ reference: event.target.value })}
           className="font-medium text-primary"
         />

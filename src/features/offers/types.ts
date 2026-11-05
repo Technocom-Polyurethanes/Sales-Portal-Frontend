@@ -40,8 +40,12 @@ export type OfferDraftLine = {
   packaging: PackagingLine[]
 }
 
+export type OfferType = "Loc" | "Int"
+
 /** The state of the offer while it is being built. */
 export type OfferDraft = {
+  /** Local or International offer type. */
+  offerType: OfferType
   /** Typed by the user, printed verbatim on the document. */
   reference: string
   customerId: string
@@ -94,6 +98,8 @@ export type Offer = {
   reference: string
   customerId: string
   customerName: string
+  /** Local or International offer type. */
+  offerType: OfferType
   /** Contact person printed in the "Attention" line of the document. */
   attention: string
   /** Arabic contact person, printed on the Arabic document. */

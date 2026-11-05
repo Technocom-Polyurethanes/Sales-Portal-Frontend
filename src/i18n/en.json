@@ -154,6 +154,7 @@
         "issueDate": "Issue date",
         "paymentTerm": "Payment terms",
         "paymentTermHint": "The due date is the issue date shifted by the term.",
+        "offerType": "Offer type",
         "reference": "Offer reference",
         "referenceHint": "The reference is entered by hand",
         "referenceInputHint": "Type the offer number exactly as it should be printed.",

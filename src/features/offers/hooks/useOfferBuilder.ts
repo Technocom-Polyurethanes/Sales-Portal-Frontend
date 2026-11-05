@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { referenceNumber } from "../../../lib/calculations/reference"
+import { buildOfferReference } from "../../../lib/calculations/reference"
 import type { PackagingLine } from "../../../lib/calculations/packaging"
 import type { Product } from "../../products/types"
 import type { Customer } from "../../customers/types"
@@ -16,6 +16,7 @@ import {
 import { offersApi } from "../api"
 import { calculateDraft, type DraftCalculations } from "../calculations"
 import type { DeliveryBatch, OfferDraft, OfferDraftLine } from "../types"
+import type { AccountUser } from "../../account/api"
 
 export type ServerCalculations = {
   warnings: string[]
@@ -61,6 +62,7 @@ export type UseOfferBuilderOptions = {
   sequence: number
   packageTypes: PackageType[]
   customers: Customer[]
+  user: AccountUser | undefined
 }
 
 /** State of the five step offer builder. */
@@ -69,6 +71,7 @@ export function useOfferBuilder({
   sequence,
   packageTypes,
   customers,
+  user,
 }: UseOfferBuilderOptions): OfferBuilderController {
   const [draft, setDraftState] = useState<OfferDraft>(() => {
     const base = initialDraft ?? createEmptyDraft()
@@ -78,7 +81,7 @@ export function useOfferBuilder({
       // The user owns the reference: only suggest one when the draft has none.
       reference: base.reference.trim()
         ? base.reference
-        : referenceNumber(sequence, base.issueDate),
+        : buildOfferReference(base.offerType, sequence, user?.initials ?? ""),
       otherTaxPercent: base.otherTaxEnabled ? 1 : 0,
     }
   })
@@ -192,20 +195,23 @@ export function useOfferBuilder({
           }
         }
 
-        if (patch.issueDate && patch.issueDate !== current.issueDate) {
-          // Option: if reference follows the standard format, update its month automatically
+        if (patch.offerType && patch.offerType !== current.offerType) {
+          // Regenerate the reference with the new offer type prefix and user initials
           const parts = current.reference.split("/")
-          if (parts.length === 4) {
-            const newMonth = referenceNumber(1, patch.issueDate).split("/")[1]
-            parts[1] = newMonth
-            next.reference = parts.join("/")
+          const sequence = Number.parseInt(parts[0], 10)
+          if (Number.isFinite(sequence)) {
+            next.reference = buildOfferReference(
+              patch.offerType,
+              sequence,
+              user?.initials ?? "",
+            )
           }
         }
 
         return next
       })
     },
-    [customers],
+    [customers, user],
   )
 
   const addLine = useCallback(
