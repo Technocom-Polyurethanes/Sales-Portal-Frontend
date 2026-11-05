@@ -8,6 +8,7 @@ import {
 } from "react"
 import type { ReactNode } from "react"
 
+import { clearCache } from "../../lib/cache/queryCache"
 import { accountApi, type AccountUser } from "./api"
 
 const SESSION_STORAGE_KEY = "technocom.session"
@@ -113,6 +114,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem(SESSION_STORAGE_KEY)
       localStorage.removeItem(TOKEN_STORAGE_KEY)
     }
+    clearCache()
     setAuthenticated(false)
     setUser(undefined)
   }, [])

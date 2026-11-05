@@ -1,7 +1,7 @@
 import { ReactNode } from "react"
 import Button from "./ui/Button"
 import Icon from "./ui/Icon"
-import Spinner from "./ui/Spinner"
+import TableSkeleton from "./ui/TableSkeleton"
 import { useTranslation } from "../i18n/I18nProvider"
 
 export type TableStateType = "loading" | "error" | "empty-data" | "empty-results" | "data"
@@ -21,6 +21,9 @@ export type TableStateProps = {
   resultsHint?: string
   children?: ReactNode
   colSpan?: number
+  /** Shape of the loading skeleton: match the real table so nothing jumps when data arrives. */
+  skeletonRows?: number
+  skeletonColumns?: number
 }
 
 export default function TableState({
@@ -37,16 +40,13 @@ export default function TableState({
   resultsTitle,
   resultsHint,
   children,
-  colSpan = 1,
+  skeletonRows = 6,
+  skeletonColumns = 4,
 }: TableStateProps) {
   const { language, t } = useTranslation()
 
   if (state === "loading") {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Spinner size={24} />
-      </div>
-    )
+    return <TableSkeleton rows={skeletonRows} columns={skeletonColumns} />
   }
 
   if (state === "error") {

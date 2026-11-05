@@ -2,7 +2,7 @@ import Button from "../../../components/ui/Button"
 import Card from "../../../components/ui/Card"
 import DataTable, { type Column } from "../../../components/ui/DataTable"
 import EmptyState from "../../../components/ui/EmptyState"
-import Spinner from "../../../components/ui/Spinner"
+import TableSkeleton from "../../../components/ui/TableSkeleton"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import { formatIsoDay } from "../../../lib/formatters"
 import { SOURCE_KEYS } from "../labels"
@@ -71,11 +71,7 @@ export default function HistoryTable({
       title={t("import.history.title")}
       description={t("import.history.subtitle")}
     >
-      {loading && (
-        <div className="flex justify-center py-8">
-          <Spinner size={24} />
-        </div>
-      )}
+      {loading && <TableSkeleton rows={4} columns={5} />}
 
       {!loading && error && (
         <div

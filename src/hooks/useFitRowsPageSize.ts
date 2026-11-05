@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react"
 
+/**
+ * How many rows fit in the container. Returns 0 until the container has been measured, so a
+ * caller can wait for the real size instead of fetching a page it would immediately replace.
+ */
 export function useFitRowsPageSize(
   containerRef: React.RefObject<HTMLElement | null>,
   headerHeight = 44,
@@ -7,7 +11,7 @@ export function useFitRowsPageSize(
   padding = 0,
   enabled = true,
 ): number {
-  const [pageSize, setPageSize] = useState(8)
+  const [pageSize, setPageSize] = useState(0)
 
   useEffect(() => {
     if (!enabled) return

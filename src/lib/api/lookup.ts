@@ -41,13 +41,24 @@ export function paginate<T>(items: T[], params: LookupQueryParams): PaginatedRes
   }
 }
 
+// Codes sort the way they read: "2" before "10", "CUST-9" before "CUST-10", case ignored.
+const codeCollator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" })
+
+export function compareCodes(a: unknown, b: unknown): number {
+  return codeCollator.compare(String(a ?? ""), String(b ?? ""))
+}
+
 export function queryCustomers<T extends { id: string; code?: string; customerCode?: string; erpNextId?: string; name: string; nameAr?: string }>(
   customers: T[],
   params: LookupQueryParams,
 ): PaginatedResult<T> {
-  const filtered = customers.filter((customer) =>
-    matchesSearch(customer, params.search ?? "", ["code", "customerCode", "erpNextId", "name", "nameAr"]),
-  )
+  const filtered = customers
+    .filter((customer) =>
+      matchesSearch(customer, params.search ?? "", ["code", "customerCode", "erpNextId", "name", "nameAr"]),
+    )
+    .sort((a, b) =>
+      compareCodes(a.customerCode ?? a.erpNextId ?? a.code, b.customerCode ?? b.erpNextId ?? b.code),
+    )
   return paginate(filtered, params)
 }
 
@@ -55,8 +66,12 @@ export function queryMaterials<T extends { id: string; code?: string; itemCode?:
   materials: T[],
   params: LookupQueryParams,
 ): PaginatedResult<T> {
-  const filtered = materials.filter((material) =>
-    matchesSearch(material, params.search ?? "", ["code", "itemCode", "erpNextItemCode", "name", "category"]),
-  )
+  const filtered = materials
+    .filter((material) =>
+      matchesSearch(material, params.search ?? "", ["code", "itemCode", "erpNextItemCode", "name", "category"]),
+    )
+    .sort((a, b) =>
+      compareCodes(a.itemCode ?? a.erpNextItemCode ?? a.code, b.itemCode ?? b.erpNextItemCode ?? b.code),
+    )
   return paginate(filtered, params)
 }

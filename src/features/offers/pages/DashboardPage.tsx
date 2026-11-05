@@ -203,6 +203,8 @@ export default function DashboardPage() {
           onCreate={() => navigate("/offers/new")}
           emptyTitle={t("offers.list.empty")}
           emptyDescription={t("dashboard.subtitle")}
+          skeletonRows={5}
+          skeletonColumns={5}
         >
           <DataTable
             columns={columns}

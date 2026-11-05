@@ -2,10 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import Button from "../ui/Button"
 import Icon from "../ui/Icon"
 import Input from "../ui/Input"
+import TableSkeleton from "../ui/TableSkeleton"
+import PickerFooter from "./PickerFooter"
+import { useLookupPage } from "./useLookupPage"
 import { useTranslation } from "../../i18n/I18nProvider"
 import { queryCustomers } from "../../lib/api/lookup"
 import { useFitRowsPageSize } from "../../hooks/useFitRowsPageSize"
-import { api } from "../../lib/api/client"
 import type { Customer } from "../../features/customers/types"
 
 export type CustomerPickerModalProps = {
@@ -15,67 +17,36 @@ export type CustomerPickerModalProps = {
   onClose: () => void
 }
 
+const FALLBACK_ROWS = 8
+
 export default function CustomerPickerModal({
   open,
   customers,
   onSelect,
   onClose,
 }: CustomerPickerModalProps) {
-  const { t, language } = useTranslation()
+  const { language } = useTranslation()
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
   const [highlight, setHighlight] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const pageSize = useFitRowsPageSize(containerRef, 44, 48, 0, open)
-  const [remoteItems, setRemoteItems] = useState<Customer[] | null>(null)
-  const [remoteTotalCount, setRemoteTotalCount] = useState(0)
-  const [remoteTotalPages, setRemoteTotalPages] = useState(1)
-  const [useRemote, setUseRemote] = useState(true)
 
-  useEffect(() => {
-    if (!open) {
-      setRemoteItems(null)
-      return
-    }
-    if (!useRemote) return
-    const controller = new AbortController()
-    const timeout = window.setTimeout(async () => {
-      try {
-        const response: any = await api.get<any>("/customers/lookup", {
-          search: search || undefined,
-          page,
-          pageSize,
-        })
-        if (controller.signal.aborted) return
-        const items = Array.isArray(response)
-          ? response
-          : response.items ?? response.data ?? []
-        const totalCount =
-          response.totalCount ?? response.total ?? items.length
-        const totalPages =
-          response.totalPages ??
-          (Array.isArray(response) ? 1 : Math.max(1, Math.ceil(totalCount / pageSize)))
-        setRemoteItems(items)
-        setRemoteTotalCount(totalCount)
-        setRemoteTotalPages(totalPages)
-      } catch {
-        if (controller.signal.aborted) return
-        setUseRemote(false)
-      }
-    }, 200)
-    return () => {
-      controller.abort()
-      window.clearTimeout(timeout)
-    }
-  }, [open, search, page, pageSize, useRemote])
+  const lookup = useLookupPage<Customer>({
+    path: "/customers/lookup",
+    tag: "customers",
+    search,
+    page,
+    pageSize,
+    enabled: open,
+  })
 
   useEffect(() => {
     if (open) {
       setSearch("")
       setPage(1)
       setHighlight(0)
-      setRemoteItems(null)
       setTimeout(() => inputRef.current?.focus(), 0)
     }
   }, [open])
@@ -85,32 +56,30 @@ export default function CustomerPickerModal({
     setHighlight(0)
   }, [search, pageSize])
 
-  const result = useMemo(() => {
-    if (useRemote && remoteItems) {
-      const totalCount = remoteTotalCount || remoteItems.length
-      const totalPages = remoteTotalPages || 1
-      const currentPage = Math.min(Math.max(1, page), totalPages)
-      return {
-        items: remoteItems,
-        page: currentPage,
-        pageSize,
-        totalCount,
-        totalPages,
-      }
-    }
-    const local = queryCustomers(customers, { search, page, pageSize })
-    return local
-  }, [customers, page, pageSize, remoteItems, remoteTotalCount, remoteTotalPages, search, useRemote])
+  // The lists the builder already holds answer when the lookup endpoint is unavailable.
+  const fallback = useMemo(
+    () =>
+      lookup.failed
+        ? queryCustomers(customers, { search, page, pageSize: pageSize || FALLBACK_ROWS })
+        : null,
+    [lookup.failed, customers, search, page, pageSize],
+  )
 
-
-  const start = result.totalCount === 0 ? 0 : (result.page - 1) * result.pageSize + 1
-  const end = Math.min(result.page * result.pageSize, result.totalCount)
+  const current = fallback ?? lookup.data
+  const shown = current ?? lookup.previous
+  const items = shown?.items ?? []
+  const showSkeleton = lookup.loading && !lookup.previous
+  const totals = fallback ?? lookup.totals
+  const totalCount = totals?.totalCount ?? 0
+  const totalPages = Math.max(1, totals?.totalPages ?? 1)
+  const currentPage = Math.min(Math.max(1, page), totalPages)
+  const rows = pageSize || FALLBACK_ROWS
+  const start = totalCount === 0 ? 0 : (currentPage - 1) * rows + 1
+  const end = Math.min(currentPage * rows, totalCount)
 
   useEffect(() => {
-    setHighlight((current) =>
-      result.items.length === 0 ? 0 : Math.min(current, result.items.length - 1),
-    )
-  }, [result.items.length])
+    setHighlight((value) => (items.length === 0 ? 0 : Math.min(value, items.length - 1)))
+  }, [items.length])
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Escape") {
@@ -120,31 +89,29 @@ export default function CustomerPickerModal({
     }
     if (event.key === "ArrowDown") {
       event.preventDefault()
-      if (result.items.length === 0) return
-      setHighlight((current) => (current + 1) % result.items.length)
+      if (items.length === 0) return
+      setHighlight((value) => (value + 1) % items.length)
       return
     }
     if (event.key === "ArrowUp") {
       event.preventDefault()
-      if (result.items.length === 0) return
-      setHighlight((current) => (current - 1 + result.items.length) % result.items.length)
+      if (items.length === 0) return
+      setHighlight((value) => (value - 1 + items.length) % items.length)
       return
     }
     if (event.key === "Enter") {
       event.preventDefault()
-      if (result.items[highlight]) {
-        onSelect(result.items[highlight])
-      }
+      if (items[highlight]) onSelect(items[highlight])
       return
     }
     if (event.key === "PageDown") {
       event.preventDefault()
-      if (result.page < result.totalPages) setPage(result.page + 1)
+      if (currentPage < totalPages) setPage(currentPage + 1)
       return
     }
     if (event.key === "PageUp") {
       event.preventDefault()
-      if (result.page > 1) setPage(result.page - 1)
+      if (currentPage > 1) setPage(currentPage - 1)
     }
   }
 
@@ -182,7 +149,7 @@ export default function CustomerPickerModal({
           </div>
         </div>
         <div ref={containerRef} className="flex-1 overflow-hidden">
-          <table className="w-full table-fixed">
+          <table className="w-full table-fixed" aria-busy={lookup.loading}>
             <thead>
               <tr className="h-11 bg-page">
                 <th className="w-56 border-b border-line px-4 text-start text-xs font-semibold uppercase tracking-wide text-muted">
@@ -193,43 +160,37 @@ export default function CustomerPickerModal({
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {result.items.map((customer, index) => {
-                const code = customer.customerCode ?? customer.erpNextId ?? customer.code
-                const name = language === "ar" && customer.nameAr ? customer.nameAr : customer.name
-                return (
-                  <tr
-                    key={customer.id}
-                    className={`h-12 max-h-12 cursor-pointer border-b border-slate-100 hover:bg-slate-50 ${highlight === index ? "bg-slate-100 font-semibold" : ""}`}
-                    onClick={() => onSelect(customer)}
-                    onMouseEnter={() => setHighlight(index)}
-                  >
-                    <td className="truncate whitespace-nowrap px-4 font-mono text-sm text-slate-700">{code}</td>
-                    <td className="truncate whitespace-nowrap px-4 text-sm text-ink">{name}</td>
-                  </tr>
-                )
-              })}
+            <tbody className={lookup.loading && lookup.previous ? "opacity-60 transition-opacity" : ""}>
+              {showSkeleton && <TableSkeleton asRows rows={rows} columns={2} />}
+              {!showSkeleton &&
+                items.map((customer, index) => {
+                  const code = customer.customerCode ?? customer.erpNextId ?? customer.code
+                  const name = language === "ar" && customer.nameAr ? customer.nameAr : customer.name
+                  return (
+                    <tr
+                      key={customer.id}
+                      className={`h-12 max-h-12 cursor-pointer border-b border-slate-100 hover:bg-slate-50 ${highlight === index ? "bg-slate-100 font-semibold" : ""}`}
+                      onClick={() => onSelect(customer)}
+                      onMouseEnter={() => setHighlight(index)}
+                    >
+                      <td className="truncate whitespace-nowrap px-4 font-mono text-sm text-slate-700">{code}</td>
+                      <td className="truncate whitespace-nowrap px-4 text-sm text-ink">{name}</td>
+                    </tr>
+                  )
+                })}
             </tbody>
           </table>
         </div>
-        <div className="flex h-12 items-center justify-between border-t border-slate-200 px-4 text-sm text-slate-600">
-          <div>
-            {language === "ar"
-              ? `عرض ${start}–${end} من أصل ${result.totalCount}`
-              : `Showing ${start}–${end} of ${result.totalCount}`}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" disabled={result.page <= 1} onClick={() => setPage(result.page - 1)}>
-              {language === "ar" ? "السابق" : "Previous"}
-            </Button>
-            <span>
-              {language === "ar" ? `صفحة ${result.page} من ${result.totalPages}` : `Page ${result.page} of ${result.totalPages}`}
-            </span>
-            <Button variant="ghost" size="sm" disabled={result.page >= result.totalPages} onClick={() => setPage(result.page + 1)}>
-              {language === "ar" ? "التالي" : "Next"}
-            </Button>
-          </div>
-        </div>
+        <PickerFooter
+          language={language}
+          page={currentPage}
+          totalPages={totalPages}
+          start={start}
+          end={end}
+          totalCount={totalCount}
+          pending={totals === null}
+          onPage={setPage}
+        />
       </div>
     </div>
   )
