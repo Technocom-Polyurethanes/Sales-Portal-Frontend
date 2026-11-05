@@ -24,6 +24,7 @@ const banks: BankAccount[] = Array.from({ length: 30 }, (_, index) => ({
 let container: HTMLDivElement | null = null
 afterEach(() => {
   container?.remove()
+  document.body.innerHTML = ""
   container = null
 })
 
@@ -48,28 +49,41 @@ function type(input: HTMLInputElement, value: string) {
   })
 }
 
+function buttonWith(root: ParentNode, text: string) {
+  return [...root.querySelectorAll("button")].find((button) =>
+    button.textContent?.includes(text),
+  ) as HTMLButtonElement
+}
+
 describe("BankAccountsStep", () => {
-  it("searches a long list and selects only the matches", () => {
+  it("lists only the selected accounts and removes one", () => {
+    const onChange = vi.fn()
+    const root = mount(["b1", "b2"], onChange)
+    expect(root.querySelectorAll("li")).toHaveLength(2)
+    expect(root.querySelector("input[type=checkbox]")).toBeNull()
+
+    act(() => (root.querySelector("li button") as HTMLButtonElement).click())
+    expect(onChange).toHaveBeenCalledWith(["b2"])
+  })
+
+  it("searches the picker and adds only the matches", () => {
     const onChange = vi.fn()
     const root = mount(["b29"], onChange)
-    expect(root.querySelectorAll("input[type=checkbox]")).toHaveLength(30)
+    act(() => buttonWith(root, "Add account").click())
 
-    type(root.querySelector("input[type=search]")!, "alpha")
-    expect(root.querySelectorAll("input[type=checkbox]")).toHaveLength(15)
+    const dialog = document.body.querySelector("[role=dialog]")!
+    expect(dialog.querySelectorAll("ul button")).toHaveLength(30)
+    type(dialog.querySelector("input")!, "alpha")
+    expect(dialog.querySelectorAll("ul button")).toHaveLength(15)
 
-    const select = [...root.querySelectorAll("button")].find((button) =>
-      button.textContent?.includes("15"),
-    )!
-    act(() => select.click())
+    act(() => buttonWith(dialog, "Select shown (15)").click())
     const ids = onChange.mock.calls[0][0] as string[]
     expect(ids).toHaveLength(16)
     expect(ids).toContain("b29")
   })
 
-  it("shows the empty-selection warning and a no-match message", () => {
+  it("warns when nothing is selected", () => {
     const root = mount([], vi.fn())
     expect(root.querySelector("[role=alert]")).not.toBeNull()
-    type(root.querySelector("input[type=search]")!, "zzz")
-    expect(root.querySelectorAll("input[type=checkbox]")).toHaveLength(0)
   })
 })
