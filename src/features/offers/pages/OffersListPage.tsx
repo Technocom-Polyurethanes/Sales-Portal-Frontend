@@ -49,8 +49,14 @@ export default function OffersListPage() {
   }
 
   const search = searchParams.get("search") ?? ""
-  const { data, loading, error } = useOffers({ status, search })
+  const [page, setPage] = useState(1)
+  const { data, loading, error } = useOffers({ status, search, page })
   const locale = localeForLanguage(language)
+
+  // A new filter or search starts again from the first page.
+  useEffect(() => {
+    setPage(1)
+  }, [status, search])
 
   const columns = useMemo<Column<OfferListItem>[]>(
     () => [
@@ -190,6 +196,8 @@ export default function OffersListPage() {
           onCreate={() => navigate("/offers/new")}
           emptyTitle={t("offers.list.empty")}
           emptyDescription={t("offers.list.subtitle")}
+          skeletonRows={8}
+          skeletonColumns={6}
         >
           <DataTable
             columns={columns}
@@ -199,10 +207,28 @@ export default function OffersListPage() {
           />
         </TableState>
 
-        {!loading && !error && offersList.length > 0 && data && (
-          <div className="flex items-center justify-between border-t border-line px-4 py-3 text-xs text-muted">
+        {!error && data && data.totalCount > 0 && (
+          <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-3 text-xs text-muted">
             <span>{t("offers.list.count", { count: data.totalCount })}</span>
-            <span>{t("common.page", { page: data.page, pages: data.totalPages })}</span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={loading || data.page <= 1}
+                onClick={() => setPage(data.page - 1)}
+              >
+                {t("common.previous")}
+              </Button>
+              <span>{t("common.page", { page: data.page, pages: data.totalPages })}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={loading || data.page >= data.totalPages}
+                onClick={() => setPage(data.page + 1)}
+              >
+                {t("common.next")}
+              </Button>
+            </div>
           </div>
         )}
       </div>

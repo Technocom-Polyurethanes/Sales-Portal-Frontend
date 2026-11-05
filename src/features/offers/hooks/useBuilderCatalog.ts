@@ -1,5 +1,6 @@
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
 import { api } from "../../../lib/api/client"
+import { cached } from "../../../lib/cache/queryCache"
 import { customersApi } from "../../customers/api"
 import type { Customer } from "../../customers/types"
 import { productsApi } from "../../products/api"
@@ -27,9 +28,11 @@ export type BuilderCatalog = {
 export function useBuilderCatalog() {
   return useAsyncData<BuilderCatalog>(async () => {
     try {
-      const bootstrap: any = await api
-        .get<any>("/catalog/bootstrap")
-        .catch(() => api.get<any>("/settings/bootstrap"))
+      // Customers, materials and settings are cached by their own api modules, so starting
+      // another offer only asks the server for the next sequence number.
+      const bootstrap: any = await cached("catalog:bootstrap", ["catalog"], () =>
+        api.get<any>("/catalog/bootstrap").catch(() => api.get<any>("/settings/bootstrap")),
+      )
       const [customers, products, sequence] = await Promise.all([
         customersApi.list().catch(() => []),
         productsApi.list().catch(() => []),

@@ -1,4 +1,5 @@
 import { api } from "../../lib/api/client"
+import { invalidate } from "../../lib/cache/queryCache"
 import type {
   ImportHistoryPage,
   ImportPreview,
@@ -16,8 +17,11 @@ export const importApi = {
     form.append("file", file, file.name)
     return api.post<ImportPreview>(`/import/${source}/preview`, form)
   },
-  commit(importId: string): Promise<ImportResult> {
-    return api.post<ImportResult>(`/import/${importId}/commit`)
+  async commit(importId: string): Promise<ImportResult> {
+    const result = await api.post<ImportResult>(`/import/${importId}/commit`)
+    // A commit can add or change customers, materials and prices.
+    invalidate("customers", "materials", "catalog")
+    return result
   },
   history(page = 1, pageSize = 10): Promise<ImportHistoryPage> {
     return api.get<ImportHistoryPage>("/import/history", { page, pageSize })

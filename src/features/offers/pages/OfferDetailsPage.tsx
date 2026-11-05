@@ -6,7 +6,6 @@ import Badge from "../../../components/ui/Badge"
 import Button from "../../../components/ui/Button"
 import Card from "../../../components/ui/Card"
 import Icon from "../../../components/ui/Icon"
-import Spinner from "../../../components/ui/Spinner"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import { getPaymentTerm } from "../../../lib/calculations/dueDate"
 import { formatIsoDay } from "../../../lib/formatters/date"
@@ -15,6 +14,7 @@ import { formatCurrency } from "../../../lib/formatters/number"
 import OfferDocumentPreview from "../../../pdf/OfferDocumentPreview"
 import { usePrintOffer } from "../../../pdf/PrintProvider"
 import { offersApi } from "../api"
+import DetailsSkeleton from "../components/DetailsSkeleton"
 import OfferSummary from "../components/OfferSummary"
 import StatusDialog from "../components/StatusDialog"
 import VersionHistory from "../components/VersionHistory"
@@ -65,9 +65,7 @@ export default function OfferDetailsPage() {
     return (
       <>
         <PageHeader title={t("offers.details.title")} />
-        <div className="flex justify-center py-20">
-          <Spinner size={26} />
-        </div>
+        <DetailsSkeleton />
       </>
     )
   }

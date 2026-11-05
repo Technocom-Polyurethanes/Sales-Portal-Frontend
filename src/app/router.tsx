@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom"
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom"
 
 import AppShell from "./layout/AppShell"
 import LoginScreen from "./layout/LoginScreen"
@@ -16,15 +16,26 @@ import SettingsPage from "../features/settings/pages/SettingsPage"
 
 export function AppRouter() {
   const { authenticated, signIn } = useSession()
+  const navigate = useNavigate()
 
   if (!authenticated) {
-    return <LoginScreen onLogin={signIn} />
+    // The sign in screen answers every address, so a session that expires on /offers/12 (or the
+    // /login redirect after a 401) asks for credentials instead of showing "page not found".
+    const handleLogin = async (username: string, password: string) => {
+      const signedIn = await signIn(username, password)
+      // Always land on the home page, not on the address the user was signed out from.
+      if (signedIn) navigate("/", { replace: true })
+      return signedIn
+    }
+
+    return <LoginScreen onLogin={handleLogin} />
   }
 
   return (
     <Routes>
       <Route element={<AppShell />}>
         <Route index element={<DashboardPage />} />
+        <Route path="login" element={<Navigate to="/" replace />} />
         <Route path="offers" element={<OffersListPage />} />
         <Route path="offers/new" element={<OfferBuilderPage />} />
         <Route path="offers/:id" element={<OfferDetailsPage />} />

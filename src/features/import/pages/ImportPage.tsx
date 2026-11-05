@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import PageHeader from "../../../app/layout/PageHeader"
 import Button from "../../../components/ui/Button"
 import Card from "../../../components/ui/Card"
-import Spinner from "../../../components/ui/Spinner"
+import TableSkeleton from "../../../components/ui/TableSkeleton"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import type { TranslationKey } from "../../../i18n/types"
 import { downloadCsv, errorsCsv } from "../../../lib/import/csv"
@@ -103,9 +103,8 @@ export default function ImportPage() {
               )}
 
               {flow.busy === "preview" && (
-                <div className="flex items-center gap-2 text-sm text-muted">
-                  <Spinner size={16} />
-                  {t("common.loading")}
+                <div className="rounded-lg border border-line bg-surface">
+                  <TableSkeleton rows={5} columns={5} />
                 </div>
               )}
             </div>

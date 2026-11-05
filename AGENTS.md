@@ -24,7 +24,7 @@ path is missing, or when the repository contradicts this guide.
   - `src/app/providers/AppProviders.tsx` - i18n, PDF language, toast, session and router providers
   - `src/app/layout/` - sidebar, top bar, page header, login screen, footer, mobile bottom bar
   - `src/app/navigation.ts` - navigation items and breadcrumb labels
-- `src/components/ui/` - shared UI: buttons, inputs, selects, textareas, fields, tables, dialogs, badges, toasts, toggle, stepper, spinner, icons
+- `src/components/ui/` - shared UI: buttons, inputs, selects, textareas, fields, tables, dialogs, badges, toasts, toggle, stepper, skeletons (use these for loading states, never spinners), icons
 - `src/features/` - one folder per business area
   - `src/features/offers/` - offer builder, list, details, hooks, api
     - `src/features/offers/calculations.ts` - pure maths of a draft (line amounts, totals, reference, due date, scheduled packages)

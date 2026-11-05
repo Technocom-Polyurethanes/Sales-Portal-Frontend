@@ -2,8 +2,8 @@ import { useMemo, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 
 import PageHeader from "../../../app/layout/PageHeader"
-import Spinner from "../../../components/ui/Spinner"
 import { useTranslation } from "../../../i18n/I18nProvider"
+import BuilderSkeleton from "../components/BuilderSkeleton"
 import BuilderWorkspace from "../components/builder/BuilderWorkspace"
 import { offerToDraft } from "../draft"
 import { useBuilderCatalog } from "../hooks/useBuilderCatalog"
@@ -38,9 +38,7 @@ export default function OfferBuilderPage() {
           title={t("offers.builder.title")}
           subtitle={t("offers.builder.subtitle")}
         />
-        <div className="flex justify-center py-20">
-          <Spinner size={26} />
-        </div>
+        <BuilderSkeleton />
       </>
     )
   }
