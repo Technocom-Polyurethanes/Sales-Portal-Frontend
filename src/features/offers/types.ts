@@ -61,6 +61,8 @@ export type OfferDraft = {
   otherTaxEnabled: boolean
   /** Fixed at 1% while the deduction is enabled, 0 otherwise. */
   otherTaxPercent: number
+  /** Bank accounts printed on the document; an empty selection is not allowed. */
+  bankAccountIds: string[]
   /** Order discount percentage applied to the subtotal. */
   orderDiscountPercent: number
   delivery: DeliveryBatch[]
@@ -110,6 +112,8 @@ export type Offer = {
   otherTaxEnabled: boolean
   otherTaxName: string
   otherTaxPercent: number
+  /** Selected bank accounts; null for offers saved before per-offer selection existed. */
+  bankAccountIds?: string[] | null
   orderDiscount: number
   /** Order discount percentage applied to the subtotal. */
   orderDiscountPercent: number
