@@ -211,7 +211,15 @@
         "selectAll": "Select all",
         "selectNone": "Select none",
         "empty": "No bank accounts are available in the settings.",
-        "required": "Select at least one bank account before saving the offer."
+        "required": "Select at least one bank account before saving the offer.",
+        "count": "{selected} of {total} selected",
+        "selected": "Selected accounts",
+        "remove": "Remove",
+        "search": "Search bank, branch or account number",
+        "allCurrencies": "All",
+        "selectShown": "Select shown ({count})",
+        "clearShown": "Clear shown",
+        "noMatch": "No bank accounts match your search."
       },
       "preview": {
         "title": "Document preview",

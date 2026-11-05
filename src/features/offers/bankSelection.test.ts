@@ -116,3 +116,32 @@ describe("banksForOffer", () => {
     ])
   })
 })
+
+describe("large bank lists", () => {
+  const many: BankAccount[] = Array.from({ length: 40 }, (_, index) => ({
+    id: `b${index}`,
+    bank: index % 2 ? "Alpha Bank" : "Beta Bank",
+    branch: `Branch ${index}`,
+    accountNumber: `ACC-${1000 + index}`,
+    swift: "",
+    iban: "",
+    currency: index % 4 === 0 ? "USD" : "EGP",
+    isActive: true,
+    sortOrder: index,
+  }))
+
+  it("filters by text and currency", async () => {
+    const { filterBanks } = await import("./bankSelection")
+    expect(filterBanks(many, "acc-1007", null).map((bank) => bank.id)).toEqual(["b7"])
+    expect(filterBanks(many, "", "USD")).toHaveLength(10)
+    expect(filterBanks(many, "alpha", "USD")).toHaveLength(0)
+  })
+
+  it("selects and clears only the shown banks", async () => {
+    const { filterBanks, setBanks } = await import("./bankSelection")
+    const shown = filterBanks(many, "alpha", null)
+    const picked = setBanks(["b0"], shown, true)
+    expect(picked).toHaveLength(21)
+    expect(setBanks(picked, shown, false)).toEqual(["b0"])
+  })
+})
