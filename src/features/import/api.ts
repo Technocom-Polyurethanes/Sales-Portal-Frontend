@@ -19,8 +19,8 @@ export const importApi = {
   },
   async commit(importId: string): Promise<ImportResult> {
     const result = await api.post<ImportResult>(`/import/${importId}/commit`)
-    // A commit can add or change customers, materials and prices.
-    invalidate("customers", "materials", "catalog")
+    // A commit can add or change customers, materials, prices and bank accounts.
+    invalidate("customers", "materials", "banks", "catalog")
     return result
   },
   history(page = 1, pageSize = 10): Promise<ImportHistoryPage> {

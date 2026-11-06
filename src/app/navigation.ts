@@ -13,6 +13,7 @@ export const NAV_ITEMS: NavItem[] = [
   { to: "/offers", labelKey: "nav.offers", icon: "offers" },
   { to: "/customers", labelKey: "nav.customers", icon: "customers" },
   { to: "/products", labelKey: "nav.products", icon: "products" },
+  { to: "/banks", labelKey: "nav.banks", icon: "bank" },
   { to: "/import", labelKey: "nav.import", icon: "import" },
   { to: "/settings", labelKey: "nav.settings", icon: "settings" },
 ]
@@ -31,6 +32,7 @@ const PATH_LABELS: PathLabel[] = [
   { prefix: "/offers", labelKey: "offers.list.title" },
   { prefix: "/customers", labelKey: "customers.title" },
   { prefix: "/products", labelKey: "products.title" },
+  { prefix: "/banks", labelKey: "banks.title" },
   { prefix: "/import", labelKey: "import.title" },
   { prefix: "/settings", labelKey: "settings.title" },
   { prefix: "/account", labelKey: "account.title" },
