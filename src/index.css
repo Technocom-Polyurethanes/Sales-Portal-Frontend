@@ -93,3 +93,11 @@
   scrollbar-width: thin;
   scrollbar-color: var(--color-line) transparent;
 }
+
+/* A field that failed validation: the border carries the state next to the message. */
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"],
+[data-invalid="true"] {
+  border-color: var(--color-danger);
+}

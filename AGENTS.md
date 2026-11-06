@@ -77,6 +77,11 @@ path is missing, or when the repository contradicts this guide.
 
 ## Business rules
 
+- **Offer builder steps**: a step can only be left when its required fields are
+  filled (`src/features/offers/stepValidation.ts`). The stepper locks every step
+  after the first incomplete one, Next shows the errors instead of advancing,
+  and going back is always allowed. Save as draft needs only a customer, a
+  material and a bank; issuing needs every step complete.
 - **Reference number**: `{Loc|Int}/{sequence}/YL/{user initials}`, for example
   `Loc/42/YL/JD`. It is never typed: the offer type, the sequence and the user's
   initials build it, and changing the offer type rewrites the first segment. The

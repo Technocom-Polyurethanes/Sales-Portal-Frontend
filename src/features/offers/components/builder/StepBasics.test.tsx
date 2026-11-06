@@ -51,11 +51,48 @@ describe("StepBasics reference", () => {
     expect(document.getElementById("offer-sequence")).toBeNull()
   })
 
-  it("never offers a reference input and always shows the generated reference", () => {
+  it("has no reference field at all, the reference is automatic", () => {
     mount(false)
     expect(document.getElementById("offer-reference")).toBeNull()
+    expect(document.querySelector('[data-testid="offer-reference"]')).toBeNull()
+    expect(document.body.textContent).not.toContain("Loc/3090/YL/JD")
+  })
+
+  it("puts the customer and the offer type side by side in one two-column row", () => {
+    mount(false)
+    const customer = document.getElementById("offer-customer")!
+    const offerType = document.getElementById("offer-type")!
+    const row = customer.closest(".grid")!
+    expect(row.className).toContain("sm:grid-cols-2")
+    expect(row.contains(offerType)).toBe(true)
+    // Neither one spans the full width any more.
+    expect(customer.closest(".sm\\:col-span-2")).toBeNull()
+    expect(offerType.closest(".sm\\:col-span-2")).toBeNull()
+  })
+
+  it("shows the message of an invalid field and links it to the control", () => {
+    container = document.createElement("div")
+    document.body.append(container)
+    act(() => {
+      createRoot(container!).render(
+        <I18nProvider>
+          <StepBasics
+            draft={createEmptyDraft()}
+            customers={[]}
+            dueDate=""
+            onChange={vi.fn()}
+            errors={{ "offer-customer": "Choose a customer to continue." }}
+          />
+        </I18nProvider>,
+      )
+    })
+    const message = document.getElementById("offer-customer-error")
+    expect(message?.textContent).toBe("Choose a customer to continue.")
     expect(
-      document.querySelector('[data-testid="offer-reference"]')?.textContent,
-    ).toBe("Loc/3090/YL/JD")
+      document.getElementById("offer-customer")?.getAttribute("aria-describedby"),
+    ).toBe("offer-customer-error")
+    expect(
+      document.getElementById("offer-customer")?.getAttribute("data-invalid"),
+    ).toBe("true")
   })
 })
