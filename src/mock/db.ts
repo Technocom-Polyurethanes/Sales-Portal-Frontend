@@ -58,6 +58,11 @@ export function updateOfferStatus(
   return offer
 }
 
+/** True while no offer exists, the only time the user may choose the starting number. */
+export function isFirstOffer(): boolean {
+  return db.offers.length === 0
+}
+
 /** The sequence the next issued offer will use. */
 export function nextOfferSequence(): number {
   const sequences = db.offers.map((offer) => referenceSequence(offer.reference) ?? 0)

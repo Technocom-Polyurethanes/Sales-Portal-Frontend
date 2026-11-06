@@ -80,8 +80,9 @@ path is missing, or when the repository contradicts this guide.
 - **Reference number**: `{Loc|Int}/{sequence}/YL/{user initials}`, for example
   `Loc/42/YL/JD`. It is never typed: the offer type, the sequence and the user's
   initials build it, and changing the offer type rewrites the first segment. The
-  sequence is global and suggested by the server; a new offer may start from a
-  higher number and numbering continues from it. See
+  sequence is global and suggested by the server. Only the very first offer
+  (no offer exists yet) shows a sequence input to choose the starting number;
+  numbering continues from it and the input is hidden afterwards. See
   `src/lib/calculations/reference.ts`.
 - **Packaging**: a line quantity is `packages × weight per package`; a material
   may mix several packaging types. See `src/lib/calculations/packaging.ts`.

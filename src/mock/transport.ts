@@ -9,6 +9,7 @@ import {
   db,
   findCustomer,
   findOffer,
+  isFirstOffer,
   nextOfferSequence,
   offerVersions,
   updateOfferStatus,
@@ -149,7 +150,10 @@ const routes: Route[] = [
   {
     method: "GET",
     segments: ["offers", "next-sequence"],
-    handle: () => nextOfferSequence(),
+    handle: () => ({
+      suggestedSequence: nextOfferSequence(),
+      isFirstOffer: isFirstOffer(),
+    }),
   },
   {
     method: "GET",

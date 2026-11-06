@@ -22,10 +22,10 @@ export type StepBasicsProps = {
   paymentTerms?: any[]
   dueDate: string
   onChange: (patch: Partial<OfferDraft>) => void
-  /** The next free sequence: a new offer may start from it or from a higher number. */
+  /** The next free sequence: the first offer may start from it or from a higher number. */
   nextSequence?: number
-  /** An offer that already has a number keeps it. */
-  sequenceLocked?: boolean
+  /** Only the very first offer shows the sequence input; later offers number themselves. */
+  showSequence?: boolean
 }
 
 const CURRENCIES = ["EGP", "USD", "EUR", "SAR", "AED"]
@@ -42,7 +42,7 @@ export default function StepBasics({
   paymentTerms = [],
   onChange,
   nextSequence = 1,
-  sequenceLocked = false,
+  showSequence = false,
 }: StepBasicsProps) {
   const { t, language } = useTranslation()
   const locale = localeForLanguage(language)
@@ -230,30 +230,27 @@ export default function StepBasics({
         />
       </Field>
 
-      <Field
-        label={t("offers.builder.basics.sequence")}
-        htmlFor="offer-sequence"
-        hint={
-          sequenceLocked
-            ? t("offers.builder.basics.sequenceLockedHint")
-            : t("offers.builder.basics.sequenceHint", { min: minSequence })
-        }
-      >
-        <Input
-          id="offer-sequence"
-          dir="ltr"
-          type="number"
-          inputMode="numeric"
-          min={minSequence}
-          step={1}
-          disabled={sequenceLocked}
-          value={draft.sequence > 0 ? draft.sequence : ""}
-          onChange={(event) => {
-            const value = Math.floor(Number(event.target.value))
-            onChange({ sequence: Number.isFinite(value) && value > 0 ? value : minSequence })
-          }}
-        />
-      </Field>
+      {showSequence && (
+        <Field
+          label={t("offers.builder.basics.sequence")}
+          htmlFor="offer-sequence"
+          hint={t("offers.builder.basics.sequenceHint", { min: minSequence })}
+        >
+          <Input
+            id="offer-sequence"
+            dir="ltr"
+            type="number"
+            inputMode="numeric"
+            min={minSequence}
+            step={1}
+            value={draft.sequence > 0 ? draft.sequence : ""}
+            onChange={(event) => {
+              const value = Math.floor(Number(event.target.value))
+              onChange({ sequence: Number.isFinite(value) && value > 0 ? value : minSequence })
+            }}
+          />
+        </Field>
+      )}
 
       <div className="sm:col-span-2" aria-live="polite">
         <p className="text-xs text-muted">

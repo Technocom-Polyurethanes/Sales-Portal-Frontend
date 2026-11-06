@@ -22,6 +22,8 @@ export type BuilderCatalog = {
   company: CompanySettings
   banks: BankAccount[]
   sequence: number
+  /** No offer exists yet: the only time the user may choose the starting number. */
+  isFirstOffer: boolean
   workspaceSettings?: Record<string, unknown>
 }
 
@@ -36,7 +38,7 @@ export function useBuilderCatalog() {
       const [customers, products, sequence] = await Promise.all([
         customersApi.list().catch(() => []),
         productsApi.list().catch(() => []),
-        offersApi.nextSequence().catch(() => 1),
+        offersApi.nextSequence().catch(() => ({ sequence: 1, isFirstOffer: false })),
       ])
 
       return {
@@ -50,7 +52,8 @@ export function useBuilderCatalog() {
         paymentTerms: bootstrap.paymentTerms ?? [],
         company: bootstrap.companySettings ?? bootstrap.company ?? {},
         banks: bootstrap.bankAccounts ?? bootstrap.banks ?? [],
-        sequence: typeof sequence === "number" ? sequence : Number(sequence) || 1,
+        sequence: sequence.sequence,
+        isFirstOffer: sequence.isFirstOffer,
         workspaceSettings: bootstrap.workspaceSettings ?? bootstrap,
       }
     } catch {
@@ -58,7 +61,7 @@ export function useBuilderCatalog() {
         customersApi.list().catch(() => []),
         productsApi.list().catch(() => []),
         settingsApi.load().catch(() => ({} as any)),
-        offersApi.nextSequence().catch(() => 1),
+        offersApi.nextSequence().catch(() => ({ sequence: 1, isFirstOffer: false })),
       ])
 
       return {
@@ -68,7 +71,8 @@ export function useBuilderCatalog() {
         paymentTerms: settings?.paymentTerms ?? [],
         company: settings?.company ?? {},
         banks: settings?.banks ?? [],
-        sequence: typeof sequence === "number" ? sequence : Number(sequence) || 1,
+        sequence: sequence.sequence,
+        isFirstOffer: sequence.isFirstOffer,
       }
 
     }

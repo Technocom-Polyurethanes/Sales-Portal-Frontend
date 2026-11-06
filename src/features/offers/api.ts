@@ -6,6 +6,7 @@ type RawNextSequenceResponse =
   | number
   | {
       suggestedSequence?: number
+      isFirstOffer?: boolean
       sequence?: number
       nextSequence?: number
       serialNumber?: number
@@ -53,14 +54,21 @@ export const offersApi = {
       .then((res) => mapOfferDetail(res))
   },
 
-  /** The next free sequence. The number is global; the offer type is only needed to build the suggested reference. */
-  async nextSequence(offerType: "Loc" | "Int" = "Loc"): Promise<number> {
+  /**
+   * The next free sequence. The number is global; the offer type is only needed to build the
+   * suggested reference. `isFirstOffer` is true while no offer exists, the only time the user
+   * may choose the starting number.
+   */
+  async nextSequence(
+    offerType: "Loc" | "Int" = "Loc",
+  ): Promise<{ sequence: number; isFirstOffer: boolean }> {
     const res = await api.get<RawNextSequenceResponse>("/offers/next-sequence", { offerType })
-    if (typeof res === "number") return res
-    if (res && typeof res === "object") {
-      return res.suggestedSequence ?? res.sequence ?? res.nextSequence ?? res.serialNumber ?? 1
+    if (typeof res === "number") return { sequence: res, isFirstOffer: false }
+    return {
+      sequence:
+        res?.suggestedSequence ?? res?.sequence ?? res?.nextSequence ?? res?.serialNumber ?? 1,
+      isFirstOffer: res?.isFirstOffer === true,
     }
-    return 1
   },
 
   /** The offer and every version created from it, newest first. */
