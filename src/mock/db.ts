@@ -1,3 +1,4 @@
+import { referenceSequence } from "../lib/calculations/reference"
 import type { Customer } from "../features/customers/types"
 import type { Offer, OfferStatus } from "../features/offers/types"
 import type { Product } from "../features/products/types"
@@ -59,10 +60,7 @@ export function updateOfferStatus(
 
 /** The sequence the next issued offer will use. */
 export function nextOfferSequence(): number {
-  const sequences = db.offers.map((offer) => {
-    const parsed = Number.parseInt(offer.reference.split("/")[0] ?? "", 10)
-    return Number.isFinite(parsed) ? parsed : 0
-  })
+  const sequences = db.offers.map((offer) => referenceSequence(offer.reference) ?? 0)
 
   return sequences.length > 0 ? Math.max(...sequences) + 1 : 1
 }

@@ -77,8 +77,12 @@ path is missing, or when the repository contradicts this guide.
 
 ## Business rules
 
-- **Reference number**: `{sequence}/{MONTH.}/YL/AA`, the month always follows the
-  issue date. See `src/lib/calculations/reference.ts`.
+- **Reference number**: `{Loc|Int}/{sequence}/YL/{user initials}`, for example
+  `Loc/42/YL/JD`. It is never typed: the offer type, the sequence and the user's
+  initials build it, and changing the offer type rewrites the first segment. The
+  sequence is global and suggested by the server; a new offer may start from a
+  higher number and numbering continues from it. See
+  `src/lib/calculations/reference.ts`.
 - **Packaging**: a line quantity is `packages × weight per package`; a material
   may mix several packaging types. See `src/lib/calculations/packaging.ts`.
 - **Tax**: tax is added to the subtotal, the "other tax" row is calculated from

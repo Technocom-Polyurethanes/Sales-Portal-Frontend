@@ -214,6 +214,8 @@ export default function BuilderWorkspace({
               paymentTerms={catalog.paymentTerms}
               dueDate={serverCalculations?.dueDate || calculations.dueDate}
               onChange={controller.setDraft}
+              nextSequence={catalog.sequence}
+              sequenceLocked={Boolean(parentOfferId)}
             />
           )}
 

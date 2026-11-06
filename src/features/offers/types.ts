@@ -46,7 +46,9 @@ export type OfferType = "Loc" | "Int"
 export type OfferDraft = {
   /** Local or International offer type. */
   offerType: OfferType
-  /** Typed by the user, printed verbatim on the document. */
+  /** Sequence number of the reference. Suggested automatically, editable for a new offer. */
+  sequence: number
+  /** Generated from the offer type, the sequence and the user initials; never typed. */
   reference: string
   customerId: string
   /** Contact person printed in the "Attention" line, editable per offer. */

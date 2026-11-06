@@ -4,6 +4,7 @@ import { OTHER_TAX_PERCENT } from "../../lib/calculations/tax"
 import { DEFAULT_VALIDITY_DAYS, normalizeValidityDays } from "../../lib/calculations/validity"
 import type { Product } from "../products/types"
 import type { BankAccount, PackageType } from "../settings/types"
+import { referenceSequence } from "../../lib/calculations/reference"
 import { activeBankIds } from "./bankSelection"
 import { calculateDraft, type DraftCalculations } from "./calculations"
 import type { DeliveryBatch, Offer, OfferDraft, OfferDraftLine, OfferType } from "./types"
@@ -55,6 +56,7 @@ export function createEmptyDraft(
 ): OfferDraft {
   return {
     offerType: "Loc",
+    sequence: 0,
     reference: "",
     customerId: "",
     attention: "",
@@ -91,6 +93,8 @@ export function draftToPayload(
     version: options.version,
     parentOfferId: options.parentOfferId,
     offerType: draft.offerType,
+    // The server builds the reference; the sequence is only sent so a new offer can start from a chosen number.
+    serialNumber: draft.sequence > 0 ? draft.sequence : undefined,
     // Empty GUIDs are omitted: "" fails model binding (400), a missing one gets a validation message.
     customerId: draft.customerId || undefined,
     attention: draft.attention.trim(),
@@ -233,6 +237,7 @@ export function offerToDraft(
     bankAccountIds: offer.bankAccountIds ?? activeBankIds(banks),
     orderDiscountPercent: offer.orderDiscountPercent ?? 0,
     offerType: (offer.offerType ?? "Loc") as OfferType,
+    sequence: referenceSequence(offer.reference) ?? 0,
     delivery: offer.delivery.map((batch) => ({
       ...batch,
       id: draftId("batch"),

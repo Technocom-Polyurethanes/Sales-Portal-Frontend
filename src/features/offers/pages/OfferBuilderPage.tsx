@@ -24,8 +24,13 @@ export default function OfferBuilderPage() {
   )
 
   const initialDraft = useMemo(
-    () => (source ? offerToDraft(source, catalog?.banks) : undefined),
-    [source, catalog],
+    () => {
+      if (!source) return undefined
+      const draft = offerToDraft(source, catalog?.banks)
+      // A duplicate is a new offer: it takes the next number, not the number of the source.
+      return duplicate ? { ...draft, reference: "", sequence: 0 } : draft
+    },
+    [source, catalog, duplicate],
   )
 
   // The backend numbers a new version itself (highest version of the offer + 1) and keeps it in

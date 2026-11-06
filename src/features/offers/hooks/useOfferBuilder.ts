@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { buildOfferReference } from "../../../lib/calculations/reference"
+import {
+  buildOfferReference,
+  parseReference,
+  referenceSequence,
+  resolveInitials,
+} from "../../../lib/calculations/reference"
 import type { PackagingLine } from "../../../lib/calculations/packaging"
 import type { Product } from "../../products/types"
 import type { Customer } from "../../customers/types"
@@ -76,12 +81,20 @@ export function useOfferBuilder({
   const [draft, setDraftState] = useState<OfferDraft>(() => {
     const base = initialDraft ?? createEmptyDraft()
 
+    const existing = base.reference.trim() ? parseReference(base.reference) : null
+    const draftSequence = base.reference.trim()
+      ? (referenceSequence(base.reference) ?? sequence)
+      : sequence
+
     return {
       ...base,
-      // The user owns the reference: only suggest one when the draft has none.
-      reference: base.reference.trim()
-        ? base.reference
-        : buildOfferReference(base.offerType, sequence, user?.initials ?? ""),
+      sequence: draftSequence,
+      // The reference is automatic: offer type / sequence / YL / user initials.
+      reference: buildOfferReference(
+        base.offerType,
+        draftSequence,
+        existing?.initials ?? resolveInitials(user?.initials, user?.fullName ?? user?.name),
+      ),
       otherTaxPercent: base.otherTaxEnabled ? 1 : 0,
     }
   })
@@ -195,17 +208,18 @@ export function useOfferBuilder({
           }
         }
 
-        if (patch.offerType && patch.offerType !== current.offerType) {
-          // Regenerate the reference with the new offer type prefix and user initials
-          const parts = current.reference.split("/")
-          const sequence = Number.parseInt(parts[0], 10)
-          if (Number.isFinite(sequence)) {
-            next.reference = buildOfferReference(
-              patch.offerType,
-              sequence,
-              user?.initials ?? "",
-            )
-          }
+        if (
+          (patch.offerType && patch.offerType !== current.offerType) ||
+          (patch.sequence !== undefined && patch.sequence !== current.sequence)
+        ) {
+          // The reference follows the offer type and the sequence. Initials stay
+          // those already in the reference, so an existing offer keeps its creator.
+          next.reference = buildOfferReference(
+            next.offerType,
+            next.sequence,
+            parseReference(current.reference)?.initials ??
+              resolveInitials(user?.initials, user?.fullName ?? user?.name),
+          )
         }
 
         return next

@@ -1,80 +1,73 @@
-import { monthIndex, parseIsoDate } from "./date"
+export type OfferType = "Loc" | "Int"
 
-/** Month abbreviations used inside an offer reference (legacy). */
-export const MONTH_ABBREVIATIONS = [
-  "JAN.",
-  "FEB.",
-  "MAR.",
-  "APR.",
-  "MAY",
-  "JUN.",
-  "JUL.",
-  "AUG.",
-  "SEP.",
-  "OCT.",
-  "NOV.",
-  "DEC.",
-] as const
+/** Static company identifier printed in every reference. */
+export const REFERENCE_COMPANY_CODE = "YL"
 
-export const DEFAULT_REFERENCE_SUFFIX = "YL/AA"
+const REFERENCE_PATTERN = /^(Loc|Int)\/(\d+)\/YL\/([A-Za-z0-9]+)$/i
 
-/**
- * The month shown in a reference always follows the issue date, so the same
- * sequence can be reused in a later month.
- */
-export function monthAbbreviation(issueDate: string): string {
-  const parsed = parseIsoDate(issueDate)
-  if (!parsed) return MONTH_ABBREVIATIONS[0]
-  return MONTH_ABBREVIATIONS[monthIndex(issueDate)]
+export type ParsedReference = {
+  offerType: OfferType
+  sequence: number
+  initials: string
 }
 
 /**
- * Builds a legacy offer reference such as `3089/OCT./YL/AA`.
+ * Initials printed in the reference. Stored initials win (dots and spaces are
+ * dropped so the reference stays valid), otherwise the first letters of the
+ * full name are used. Mirrors `ReferenceRules.InitialsFrom` in the backend.
  */
-export function referenceNumber(
-  sequence: number,
-  issueDate: string,
-  suffix: string = DEFAULT_REFERENCE_SUFFIX,
-): string {
-  return `${sequence}/${monthAbbreviation(issueDate)}/${suffix}`
+export function resolveInitials(initials?: string, fullName?: string): string {
+  const cleaned = (initials ?? "").replace(/[^\p{L}\p{N}]/gu, "").toUpperCase()
+  if (cleaned) return cleaned
+
+  const derived = (fullName ?? "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0]!.toUpperCase())
+    .join("")
+
+  return derived || "NA"
 }
 
 /**
- * Builds the new offer reference such as `Loc/42/YL/JD` or `Int/43/YL/JD`.
+ * Builds an offer reference such as `Loc/42/YL/JD` or `Int/43/YL/JD`:
+ * offer type / sequence / `YL` / user initials.
  */
 export function buildOfferReference(
-  offerType: "Loc" | "Int",
+  offerType: OfferType,
   sequence: number,
-  userInitials: string,
+  initials: string,
 ): string {
-  const initials = (userInitials || "AA").toUpperCase().slice(0, 2)
-  return `${offerType}/${sequence}/YL/${initials}`
+  return `${offerType}/${sequence}/${REFERENCE_COMPANY_CODE}/${initials.trim().toUpperCase()}`
 }
 
-/** The sequence number used for the next issued offer. */
+/** Reads the parts of a new-format reference, or `null` for anything else. */
+export function parseReference(reference: string): ParsedReference | null {
+  const match = REFERENCE_PATTERN.exec(reference.trim())
+  if (!match) return null
+
+  const type = match[1]!.toLowerCase() === "loc" ? "Loc" : "Int"
+  return {
+    offerType: type,
+    sequence: Number.parseInt(match[2]!, 10),
+    initials: match[3]!.toUpperCase(),
+  }
+}
+
+/**
+ * Sequence of a stored reference. Legacy references such as `3089/OCT./YL/AA`
+ * carry it as the first segment.
+ */
+export function referenceSequence(reference: string): number | null {
+  const parsed = parseReference(reference)
+  if (parsed) return parsed.sequence
+
+  const first = Number.parseInt(reference.split("/")[0] ?? "", 10)
+  return Number.isFinite(first) ? first : null
+}
+
+/** The sequence used for the next issued offer. */
 export function nextReferenceSequence(sequence: number): number {
   return sequence + 1
-}
-
-/**
- * Reference preview shown next to the reference field, e.g.
- * `21/10/2026 → 3089/OCT./YL/AA`.
- */
-export function referencePreview(
-  sequence: number,
-  issueDate: string,
-  suffix: string = DEFAULT_REFERENCE_SUFFIX,
-): string {
-  return `${issueDate} → ${referenceNumber(sequence, issueDate, suffix)}`
-}
-
-/**
- * New reference preview using the new format.
- */
-export function newReferencePreview(
-  offerType: "Loc" | "Int",
-  sequence: number,
-  userInitials: string,
-): string {
-  return `${offerType}/${sequence}/YL/${(userInitials || "AA").toUpperCase().slice(0, 2)}`
 }

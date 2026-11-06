@@ -13,6 +13,7 @@ import { formatIsoDay } from "../../../../lib/formatters/date"
 import { localeForLanguage } from "../../../../lib/formatters/locale"
 import CustomerPickerModal from "../../../../components/pickers/CustomerPickerModal"
 import type { Customer } from "../../../customers/types"
+import type { TranslationKey } from "../../../../i18n/types"
 import type { OfferDraft } from "../../types"
 
 export type StepBasicsProps = {
@@ -21,13 +22,17 @@ export type StepBasicsProps = {
   paymentTerms?: any[]
   dueDate: string
   onChange: (patch: Partial<OfferDraft>) => void
+  /** The next free sequence: a new offer may start from it or from a higher number. */
+  nextSequence?: number
+  /** An offer that already has a number keeps it. */
+  sequenceLocked?: boolean
 }
 
 const CURRENCIES = ["EGP", "USD", "EUR", "SAR", "AED"]
 
-const OFFER_TYPES: { value: "Loc" | "Int"; label: string }[] = [
-  { value: "Loc", label: "Local" },
-  { value: "Int", label: "International" },
+const OFFER_TYPES: { value: "Loc" | "Int"; labelKey: TranslationKey }[] = [
+  { value: "Loc", labelKey: "offers.builder.basics.offerTypeLocal" },
+  { value: "Int", labelKey: "offers.builder.basics.offerTypeInternational" },
 ]
 
 /** Step 1: customer, reference, dates, currency and payment terms. */
@@ -36,6 +41,8 @@ export default function StepBasics({
   customers,
   paymentTerms = [],
   onChange,
+  nextSequence = 1,
+  sequenceLocked = false,
 }: StepBasicsProps) {
   const { t, language } = useTranslation()
   const locale = localeForLanguage(language)
@@ -53,6 +60,7 @@ export default function StepBasics({
       "")
     : (draft.attention ?? "")
   const validityDays = normalizeValidityDays(draft.validityDays)
+  const minSequence = Math.max(1, nextSequence)
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
@@ -69,7 +77,7 @@ export default function StepBasics({
           >
             {OFFER_TYPES.map((type) => (
               <option key={type.value} value={type.value}>
-                {type.label}
+                {t(type.labelKey)}
               </option>
             ))}
           </Select>
@@ -223,19 +231,41 @@ export default function StepBasics({
       </Field>
 
       <Field
-        label={t("offers.builder.basics.reference")}
-        htmlFor="offer-reference"
-        hint={t("offers.builder.basics.referenceInputHint")}
+        label={t("offers.builder.basics.sequence")}
+        htmlFor="offer-sequence"
+        hint={
+          sequenceLocked
+            ? t("offers.builder.basics.sequenceLockedHint")
+            : t("offers.builder.basics.sequenceHint", { min: minSequence })
+        }
       >
         <Input
-          id="offer-reference"
+          id="offer-sequence"
           dir="ltr"
-          value={draft.reference}
-          placeholder="Loc/3090/YL/AA"
-          onChange={(event) => onChange({ reference: event.target.value })}
-          className="font-medium text-primary"
+          type="number"
+          inputMode="numeric"
+          min={minSequence}
+          step={1}
+          disabled={sequenceLocked}
+          value={draft.sequence > 0 ? draft.sequence : ""}
+          onChange={(event) => {
+            const value = Math.floor(Number(event.target.value))
+            onChange({ sequence: Number.isFinite(value) && value > 0 ? value : minSequence })
+          }}
         />
       </Field>
+
+      <div className="sm:col-span-2" aria-live="polite">
+        <p className="text-xs text-muted">
+          {t("offers.builder.basics.reference")}
+        </p>
+        <p dir="ltr" className="font-medium text-primary" data-testid="offer-reference">
+          {draft.reference}
+        </p>
+        <p className="text-xs text-muted">
+          {t("offers.builder.basics.referenceAutoHint")}
+        </p>
+      </div>
     </div>
   )
 }
