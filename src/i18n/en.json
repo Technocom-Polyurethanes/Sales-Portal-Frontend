@@ -154,16 +154,22 @@
         "issueDate": "Issue date",
         "paymentTerm": "Payment terms",
         "paymentTermHint": "The due date is the issue date shifted by the term.",
-        "reference": "Offer reference",
-        "referenceHint": "The reference is entered by hand",
-        "referenceInputHint": "Type the offer number exactly as it should be printed.",
+        "offerType": "Offer type",
+        "offerTypeLocal": "Local",
+        "offerTypeInternational": "International",
+        "sequence": "Sequence number",
+        "sequenceHint": "This is the first offer. Start from {min} or enter your own first number; numbering continues from it.",
         "attention": "Attention (Contact Person)",
         "attentionHint": "This name is printed on the offer and can be edited per offer.",
         "attentionPlaceholder": "Enter contact person name...",
         "validity": "Offer validity (days)",
         "validityHint": "Days the offer stays valid from the issue date. Leave empty to hide it on the offer.",
         "validityExpires": "Expires on {date}, {days} days after the issue date.",
-        "dueDate": "Due date"
+        "dueDate": "Due date",
+        "sectionCustomer": "Customer & offer",
+        "sectionTerms": "Dates & terms",
+        "customerPlaceholder": "Select customer…",
+        "customerChange": "Change"
       },
       "packaging": {
         "type": "Package type",
@@ -238,9 +244,24 @@
         "bankNote": "The bank details for the total of {total} {currency} are printed on the document."
       },
       "validation": {
-        "customer": "Choose a customer before saving the offer.",
-        "lines": "Add at least one material before saving the offer."
-      }
+        "customer": "Choose a customer to continue.",
+        "lines": "Add at least one material.",
+        "issueDate": "Enter the issue date.",
+        "currency": "Choose a currency.",
+        "paymentTerm": "Choose the payment terms.",
+        "sequence": "Enter a sequence number of 1 or more.",
+        "rate": "{name}: enter a price per kg above 0.",
+        "packagingMissing": "{name}: add at least one package type.",
+        "packagingType": "{name}: choose a package type for every packaging row.",
+        "packagingWeight": "{name}: enter the weight per package.",
+        "packagingPackages": "{name}: enter the number of packages.",
+        "taxPercent": "VAT must be between 0 and 100.",
+        "discountPercent": "The discount must be between 0 and 100.",
+        "batchDate": "Delivery batch {number}: choose a delivery date.",
+        "summaryTitle": "Complete these before continuing:"
+      },
+      "stepsLabel": "Offer steps",
+      "stepLocked": "Complete the current step first"
     },
     "details": {
       "title": "Offer details",

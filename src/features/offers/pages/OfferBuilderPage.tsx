@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 
 import PageHeader from "../../../app/layout/PageHeader"
 import { useTranslation } from "../../../i18n/I18nProvider"
+import { useSession } from "../../../features/account/SessionProvider"
 import BuilderSkeleton from "../components/BuilderSkeleton"
 import BuilderWorkspace from "../components/builder/BuilderWorkspace"
 import { offerToDraft } from "../draft"
@@ -12,6 +13,7 @@ import { useOffer } from "../hooks/useOffer"
 /** New offer: the five step builder with a live document preview. */
 export default function OfferBuilderPage() {
   const { t } = useTranslation()
+  const { user } = useSession()
   const [searchParams] = useSearchParams()
   const sourceId = searchParams.get("from")
   const duplicate = searchParams.get("duplicate") === "1"
@@ -22,8 +24,13 @@ export default function OfferBuilderPage() {
   )
 
   const initialDraft = useMemo(
-    () => (source ? offerToDraft(source, catalog?.banks) : undefined),
-    [source, catalog],
+    () => {
+      if (!source) return undefined
+      const draft = offerToDraft(source, catalog?.banks)
+      // A duplicate is a new offer: it takes the next number, not the number of the source.
+      return duplicate ? { ...draft, reference: "", sequence: 0 } : draft
+    },
+    [source, catalog, duplicate],
   )
 
   // The backend numbers a new version itself (highest version of the offer + 1) and keeps it in
@@ -62,6 +69,7 @@ export default function OfferBuilderPage() {
           initialDraft={initialDraft}
           version={version}
           parentOfferId={parentOfferId}
+          user={user}
         />
       )}
     </>

@@ -1,37 +1,45 @@
 import { describe, expect, it } from "vitest"
 
 import {
-  monthAbbreviation,
+  buildOfferReference,
   nextReferenceSequence,
-  referenceNumber,
-  referencePreview,
+  parseReference,
+  referenceSequence,
+  resolveInitials,
 } from "./reference"
 
 describe("offer reference numbers", () => {
-  it("takes the month from the issue date", () => {
-    expect(referenceNumber(3089, "2026-10-21")).toBe("3089/OCT./YL/AA")
-    expect(referenceNumber(3090, "2026-11-05")).toBe("3090/NOV./YL/AA")
-    expect(referenceNumber(1, "2026-01-09")).toBe("1/JAN./YL/AA")
-    expect(referenceNumber(1, "2026-12-31")).toBe("1/DEC./YL/AA")
+  it("builds type / sequence / YL / initials", () => {
+    expect(buildOfferReference("Loc", 42, "JD")).toBe("Loc/42/YL/JD")
+    expect(buildOfferReference("Int", 43, "jd")).toBe("Int/43/YL/JD")
   })
 
-  it("exposes the month abbreviation on its own", () => {
-    expect(monthAbbreviation("2026-07-15")).toBe("JUL.")
-    expect(monthAbbreviation("invalid")).toBe("JAN.")
+  it("keeps every letter of the initials", () => {
+    expect(buildOfferReference("Loc", 1, "ABC")).toBe("Loc/1/YL/ABC")
+  })
+
+  it("parses a reference back into its parts", () => {
+    expect(parseReference("Int/43/YL/JD")).toEqual({
+      offerType: "Int",
+      sequence: 43,
+      initials: "JD",
+    })
+    expect(parseReference("3089/OCT./YL/AA")).toBeNull()
+  })
+
+  it("reads the sequence of new and legacy references", () => {
+    expect(referenceSequence("Loc/42/YL/JD")).toBe(42)
+    expect(referenceSequence("3089/OCT./YL/AA")).toBe(3089)
+    expect(referenceSequence("nonsense")).toBeNull()
+  })
+
+  it("resolves initials from the user", () => {
+    expect(resolveInitials("j.d", "John Doe")).toBe("JD")
+    expect(resolveInitials("", "John Doe")).toBe("JD")
+    expect(resolveInitials(undefined, undefined)).toBe("NA")
   })
 
   it("increments the sequence for the next offer", () => {
     expect(nextReferenceSequence(3089)).toBe(3090)
-  })
-
-  it("builds a preview of the reference for a date", () => {
-    expect(referencePreview(3089, "2026-10-21")).toBe(
-      "2026-10-21 → 3089/OCT./YL/AA",
-    )
-  })
-
-  it("keeps the same month for every day of that month", () => {
-    expect(referenceNumber(3089, "2026-10-01")).toBe("3089/OCT./YL/AA")
-    expect(referenceNumber(3089, "2026-10-31")).toBe("3089/OCT./YL/AA")
   })
 })

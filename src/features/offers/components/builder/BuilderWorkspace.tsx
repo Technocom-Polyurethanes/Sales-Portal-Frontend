@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
 import Button from "../../../../components/ui/Button"
@@ -11,12 +11,19 @@ import { getPaymentTerm } from "../../../../lib/calculations/dueDate"
 import { usePdfLanguage } from "../../../../pdf/PdfLanguageProvider"
 import { usePrintOffer } from "../../../../pdf/PrintProvider"
 import { offersApi } from "../../api"
-import { banksForOffer, hasBankSelection } from "../../bankSelection"
+import { banksForOffer } from "../../bankSelection"
 import { buildDocumentData } from "../../document"
 import { createEmptyDraft, draftToPayload } from "../../draft"
 import { useOfferBuilder } from "../../hooks/useOfferBuilder"
+import type { AccountUser } from "../../../account/api"
 import type { PaymentTerm } from "../../../settings/types"
 import type { BuilderCatalog } from "../../hooks/useBuilderCatalog"
+import {
+  furthestOpenStep,
+  SUMMARY_FIELD,
+  validateAllSteps,
+  type StepValidationContext,
+} from "../../stepValidation"
 import type { OfferStatus } from "../../types"
 import type { OfferDraft } from "../../types"
 import BankAccountsStep from "./BankAccountsStep"
@@ -34,6 +41,7 @@ export type BuilderWorkspaceProps = {
   initialDraft?: OfferDraft
   version: number
   parentOfferId?: string
+  user?: AccountUser | undefined
 }
 
 /** The five step offer builder with its live document preview. */
@@ -42,6 +50,7 @@ export default function BuilderWorkspace({
   initialDraft,
   version,
   parentOfferId,
+  user,
 }: BuilderWorkspaceProps) {
   const { t } = useTranslation()
   const { notify } = useToast()
@@ -56,6 +65,7 @@ export default function BuilderWorkspace({
     sequence: catalog.sequence,
     packageTypes: catalog.packageTypes,
     customers: catalog.customers,
+    user: user ?? undefined,
     initialDraft:
       initialDraft ??
       createEmptyDraft(
@@ -134,22 +144,91 @@ export default function BuilderWorkspace({
     { id: "notes", label: t("offers.builder.steps.notes") },
   ]
 
-  const validate = (): boolean => {
-    if (!draft.customerId) {
-      setError(t("offers.builder.validation.customer"))
-      return false
+  // What each step still needs. The stepper and the Next button are gated on it.
+  const validationContext = useMemo<StepValidationContext>(
+    () => ({
+      sequenceRequired: catalog.isFirstOffer && !parentOfferId,
+      hasPaymentTerms: catalog.paymentTerms.length > 0,
+      hasPackageTypes: catalog.packageTypes.length > 0,
+    }),
+    [catalog.isFirstOffer, catalog.paymentTerms, catalog.packageTypes, parentOfferId],
+  )
+  const issuesByStep = useMemo(
+    () => validateAllSteps(draft, validationContext),
+    [draft, validationContext],
+  )
+  const furthestStep = furthestOpenStep(issuesByStep)
+  const stepComplete = issuesByStep.map((issues) => issues.length === 0)
+
+  // Errors only appear once the user tried to leave a step, then follow the edits live.
+  const [revealed, setRevealed] = useState<number[]>([])
+  const [focusRequest, setFocusRequest] = useState(0)
+  const summaryRef = useRef<HTMLDivElement>(null)
+
+  const reveal = (stepIndex: number) => {
+    setRevealed((current) =>
+      current.includes(stepIndex) ? current : [...current, stepIndex],
+    )
+    setFocusRequest((value) => value + 1)
+  }
+
+  const currentIssues = issuesByStep[controller.step] ?? []
+  const showIssues = revealed.includes(controller.step)
+  const fieldErrors: Record<string, string> = {}
+  if (showIssues) {
+    for (const issue of currentIssues) {
+      if (issue.field !== SUMMARY_FIELD && !fieldErrors[issue.field]) {
+        fieldErrors[issue.field] = t(issue.message, issue.params)
+      }
     }
-    if (!draft.reference?.trim()) {
-      setError("Reference is required")
-      return false
+  }
+  const summaryIssues = showIssues
+    ? currentIssues.filter((issue) => issue.field === SUMMARY_FIELD)
+    : []
+
+  // Move the focus to the first thing that needs attention.
+  useEffect(() => {
+    if (focusRequest === 0) return
+    const first = (issuesByStep[controller.step] ?? [])[0]
+    if (!first) return
+    const target =
+      first.field === SUMMARY_FIELD
+        ? summaryRef.current
+        : document.getElementById(first.field)
+    target?.focus()
+    target?.scrollIntoView({ block: "center", behavior: "smooth" })
+    // Only a new request moves the focus, not every edit of the draft.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusRequest])
+
+  const goToStep = (index: number) => {
+    // Going back is always possible; going forward stops at the first incomplete step.
+    if (index <= controller.step || index <= furthestStep) {
+      controller.setStep(index)
     }
-    if (draft.lines.length === 0) {
-      setError(t("offers.builder.validation.lines"))
-      return false
+  }
+
+  const goNext = () => {
+    if (currentIssues.length > 0) {
+      reveal(controller.step)
+      return
     }
-    if (!hasBankSelection(draft.bankAccountIds)) {
-      setError(t("offers.builder.banks.required"))
-      return false
+    controller.setStep(controller.step + 1)
+  }
+
+  // A draft only needs a customer, a material and a bank; issuing needs every step complete.
+  const validate = (mode: "draft" | "issue"): boolean => {
+    for (let index = 0; index < issuesByStep.length; index += 1) {
+      const blocking =
+        mode === "draft"
+          ? issuesByStep[index].filter((issue) => issue.blocksDraft)
+          : issuesByStep[index]
+      if (blocking.length > 0) {
+        controller.setStep(index)
+        reveal(index)
+        setError(undefined)
+        return false
+      }
     }
     setError(undefined)
     return true
@@ -157,7 +236,7 @@ export default function BuilderWorkspace({
 
   // The API always creates a draft, so issuing is a second call on the saved offer.
   const save = async (status: OfferStatus) => {
-    if (saving || !validate()) return
+    if (saving || !validate(status === "issued" ? "issue" : "draft")) return
 
     setSaving(status)
     let saved
@@ -185,13 +264,21 @@ export default function BuilderWorkspace({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
       <div className="no-print space-y-4">
         <BuilderStepper
           steps={steps}
           current={controller.step}
-          onChange={controller.setStep}
+          furthest={furthestStep}
+          complete={stepComplete}
+          onChange={goToStep}
+          label={t("offers.builder.stepsLabel")}
+          lockedHint={t("offers.builder.stepLocked")}
         />
+
+        <p className="sr-only" aria-live="polite">
+          {controller.step + 1} / {steps.length} · {steps[controller.step]?.label}
+        </p>
 
         {error && (
           <p className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
@@ -199,10 +286,27 @@ export default function BuilderWorkspace({
           </p>
         )}
 
-        <Card
-          title={steps[controller.step]?.label}
-          description={t("offers.builder.packagingHint")}
-        >
+        <Card title={steps[controller.step]?.label}>
+          {summaryIssues.length > 0 && (
+            <div
+              ref={summaryRef}
+              role="alert"
+              tabIndex={-1}
+              className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2.5 text-sm text-danger focus:outline-none"
+            >
+              <p className="font-medium">
+                {t("offers.builder.validation.summaryTitle")}
+              </p>
+              <ul className="mt-1 list-disc space-y-0.5 ps-5 text-xs">
+                {summaryIssues.map((issue, index) => (
+                  <li key={`${issue.message}-${index}`}>
+                    {t(issue.message, issue.params)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {controller.step === 0 && (
             <StepBasics
               draft={draft}
@@ -210,6 +314,9 @@ export default function BuilderWorkspace({
               paymentTerms={catalog.paymentTerms}
               dueDate={serverCalculations?.dueDate || calculations.dueDate}
               onChange={controller.setDraft}
+              errors={fieldErrors}
+              nextSequence={catalog.sequence}
+              showSequence={catalog.isFirstOffer && !parentOfferId}
             />
           )}
 
@@ -288,10 +395,7 @@ export default function BuilderWorkspace({
             </Button>
 
             {controller.step < steps.length - 1 ? (
-              <Button
-                variant="primary"
-                onClick={() => controller.setStep(controller.step + 1)}
-              >
+              <Button variant="primary" onClick={goNext}>
                 {t("common.next")}
               </Button>
             ) : (
@@ -299,7 +403,7 @@ export default function BuilderWorkspace({
                 variant="primary"
                 icon={<Icon name="check" size={16} />}
                 onClick={() => {
-                  if (validate()) setReviewOpen(true)
+                  if (validate("issue")) setReviewOpen(true)
                 }}
               >
                 {t("offers.builder.saveIssue")}

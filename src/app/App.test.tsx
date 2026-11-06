@@ -47,7 +47,7 @@ describe("application shell", () => {
     expect(text).toContain("TECHNOCOM")
     expect(text.toLowerCase()).toContain("good")
     expect(text).toContain("Recent offers")
-    expect(text).toContain("3089/OCT./YL/AA")
+    expect(text).toContain("Loc/3089/YL/AA")
   })
 
   it("shows the home page instead of 'not found' when a signed in user is on /login", async () => {

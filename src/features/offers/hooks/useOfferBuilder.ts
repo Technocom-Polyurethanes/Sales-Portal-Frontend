@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { referenceNumber } from "../../../lib/calculations/reference"
+import {
+  buildOfferReference,
+  parseReference,
+  referenceSequence,
+  resolveInitials,
+} from "../../../lib/calculations/reference"
 import type { PackagingLine } from "../../../lib/calculations/packaging"
 import type { Product } from "../../products/types"
 import type { Customer } from "../../customers/types"
@@ -16,6 +21,7 @@ import {
 import { offersApi } from "../api"
 import { calculateDraft, type DraftCalculations } from "../calculations"
 import type { DeliveryBatch, OfferDraft, OfferDraftLine } from "../types"
+import type { AccountUser } from "../../account/api"
 
 export type ServerCalculations = {
   warnings: string[]
@@ -61,6 +67,7 @@ export type UseOfferBuilderOptions = {
   sequence: number
   packageTypes: PackageType[]
   customers: Customer[]
+  user: AccountUser | undefined
 }
 
 /** State of the five step offer builder. */
@@ -69,16 +76,25 @@ export function useOfferBuilder({
   sequence,
   packageTypes,
   customers,
+  user,
 }: UseOfferBuilderOptions): OfferBuilderController {
   const [draft, setDraftState] = useState<OfferDraft>(() => {
     const base = initialDraft ?? createEmptyDraft()
 
+    const existing = base.reference.trim() ? parseReference(base.reference) : null
+    const draftSequence = base.reference.trim()
+      ? (referenceSequence(base.reference) ?? sequence)
+      : sequence
+
     return {
       ...base,
-      // The user owns the reference: only suggest one when the draft has none.
-      reference: base.reference.trim()
-        ? base.reference
-        : referenceNumber(sequence, base.issueDate),
+      sequence: draftSequence,
+      // The reference is automatic: offer type / sequence / YL / user initials.
+      reference: buildOfferReference(
+        base.offerType,
+        draftSequence,
+        existing?.initials ?? resolveInitials(user?.initials, user?.fullName ?? user?.name),
+      ),
       otherTaxPercent: base.otherTaxEnabled ? 1 : 0,
     }
   })
@@ -192,20 +208,24 @@ export function useOfferBuilder({
           }
         }
 
-        if (patch.issueDate && patch.issueDate !== current.issueDate) {
-          // Option: if reference follows the standard format, update its month automatically
-          const parts = current.reference.split("/")
-          if (parts.length === 4) {
-            const newMonth = referenceNumber(1, patch.issueDate).split("/")[1]
-            parts[1] = newMonth
-            next.reference = parts.join("/")
-          }
+        if (
+          (patch.offerType && patch.offerType !== current.offerType) ||
+          (patch.sequence !== undefined && patch.sequence !== current.sequence)
+        ) {
+          // The reference follows the offer type and the sequence. Initials stay
+          // those already in the reference, so an existing offer keeps its creator.
+          next.reference = buildOfferReference(
+            next.offerType,
+            next.sequence,
+            parseReference(current.reference)?.initials ??
+              resolveInitials(user?.initials, user?.fullName ?? user?.name),
+          )
         }
 
         return next
       })
     },
-    [customers],
+    [customers, user],
   )
 
   const addLine = useCallback(

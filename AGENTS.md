@@ -77,8 +77,18 @@ path is missing, or when the repository contradicts this guide.
 
 ## Business rules
 
-- **Reference number**: `{sequence}/{MONTH.}/YL/AA`, the month always follows the
-  issue date. See `src/lib/calculations/reference.ts`.
+- **Offer builder steps**: a step can only be left when its required fields are
+  filled (`src/features/offers/stepValidation.ts`). The stepper locks every step
+  after the first incomplete one, Next shows the errors instead of advancing,
+  and going back is always allowed. Save as draft needs only a customer, a
+  material and a bank; issuing needs every step complete.
+- **Reference number**: `{Loc|Int}/{sequence}/YL/{user initials}`, for example
+  `Loc/42/YL/JD`. It is never typed: the offer type, the sequence and the user's
+  initials build it, and changing the offer type rewrites the first segment. The
+  sequence is global and suggested by the server. Only the very first offer
+  (no offer exists yet) shows a sequence input to choose the starting number;
+  numbering continues from it and the input is hidden afterwards. See
+  `src/lib/calculations/reference.ts`.
 - **Packaging**: a line quantity is `packages × weight per package`; a material
   may mix several packaging types. See `src/lib/calculations/packaging.ts`.
 - **Tax**: tax is added to the subtotal, the "other tax" row is calculated from
