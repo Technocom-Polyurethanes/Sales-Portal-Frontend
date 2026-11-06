@@ -1,55 +1,41 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
+import { createContext, useCallback, useContext, useMemo } from "react"
 import type { ReactNode } from "react"
+import { sileo, Toaster, type SileoPosition } from "sileo"
+import "sileo/styles.css"
 
-import Toast, { type ToastItem } from "./Toast"
+import { useTranslation } from "../../i18n/I18nProvider"
+import type { AppLanguage } from "../../i18n/direction"
 
-export type ToastTone = "success" | "info" | "warning"
+export type ToastTone = "success" | "info" | "warning" | "error"
 
 type ToastContextValue = {
-  notify: (message: string, tone?: ToastTone) => void
+  notify: (message: string, tone?: ToastTone, description?: string) => void
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null)
 
-export function ToastProvider({ children }: { children: ReactNode }) {
-  const [toasts, setToasts] = useState<ToastItem[]>([])
-  const counter = useRef(0)
+/** Arabic reads right to left, so its toasts sit on the opposite corner. */
+export function toastPosition(language: AppLanguage): SileoPosition {
+  return language === "ar" ? "bottom-left" : "bottom-right"
+}
 
-  const dismiss = useCallback((id: number) => {
-    setToasts((current) => current.filter((toast) => toast.id !== id))
-  }, [])
+export function ToastProvider({ children }: { children: ReactNode }) {
+  const { language } = useTranslation()
+  const position = toastPosition(language)
 
   const notify = useCallback(
-    (message: string, tone: ToastTone = "success") => {
-      counter.current += 1
-      const id = counter.current
-      setToasts((current) => [...current, { id, message, tone }])
-      window.setTimeout(() => dismiss(id), 3500)
+    (message: string, tone: ToastTone = "success", description?: string) => {
+      sileo[tone]({ title: message, description, position })
     },
-    [dismiss],
+    [position],
   )
 
   const value = useMemo(() => ({ notify }), [notify])
 
   return (
     <ToastContext.Provider value={value}>
+      <Toaster position={position} />
       {children}
-      {toasts.length > 0 && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[60] flex flex-col items-center gap-2 px-4">
-          {toasts.map((toast) => (
-            <div key={toast.id} className="pointer-events-auto w-full max-w-sm">
-              <Toast toast={toast} onDismiss={dismiss} />
-            </div>
-          ))}
-        </div>
-      )}
     </ToastContext.Provider>
   )
 }

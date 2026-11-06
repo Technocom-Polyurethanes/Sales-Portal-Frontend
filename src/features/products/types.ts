@@ -6,7 +6,10 @@ export type Product = {
   name: string
   category: string
   defaultPackageTypeId: string
+  defaultPackageTypeName?: string
   defaultWeightKg: number
   referencePrice: number
+  uom?: string
+  isActive?: boolean
   specifications?: string
 }

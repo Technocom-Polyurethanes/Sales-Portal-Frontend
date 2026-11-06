@@ -5,7 +5,9 @@ import LoginScreen from "./layout/LoginScreen"
 import NotFoundPage from "./pages/NotFoundPage"
 import { useSession } from "../features/account/hooks/useSession"
 import AccountPage from "../features/account/pages/AccountPage"
+import BanksPage from "../features/banks/pages/BanksPage"
 import CustomersPage from "../features/customers/pages/CustomersPage"
+import CustomerHistoryPage from "../features/customers/pages/CustomerHistoryPage"
 import ImportPage from "../features/import/pages/ImportPage"
 import OfferBuilderPage from "../features/offers/pages/OfferBuilderPage"
 import OfferDetailsPage from "../features/offers/pages/OfferDetailsPage"
@@ -40,7 +42,9 @@ export function AppRouter() {
         <Route path="offers/new" element={<OfferBuilderPage />} />
         <Route path="offers/:id" element={<OfferDetailsPage />} />
         <Route path="customers" element={<CustomersPage />} />
+        <Route path="customers/:id" element={<CustomerHistoryPage />} />
         <Route path="products" element={<ProductsPage />} />
+        <Route path="banks" element={<BanksPage />} />
         <Route path="import" element={<ImportPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="account" element={<AccountPage />} />

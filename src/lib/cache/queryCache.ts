@@ -7,7 +7,7 @@
 /** The server also caches and invalidates on every write, so this only bounds cross-user staleness. */
 export const DEFAULT_TTL_MS = 2 * 60 * 1000
 
-export type CacheTag = "customers" | "materials" | "catalog"
+export type CacheTag = "customers" | "materials" | "banks" | "catalog"
 
 type Entry = {
   tags: readonly CacheTag[]

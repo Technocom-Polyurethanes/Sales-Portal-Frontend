@@ -12,6 +12,7 @@ import Sidebar from "./Sidebar"
 import Topbar from "./Topbar"
 
 const MORE_LINKS = [
+  { to: "/banks", labelKey: "nav.banks" as const },
   { to: "/import", labelKey: "nav.import" as const },
   { to: "/settings", labelKey: "nav.settings" as const },
   { to: "/account", labelKey: "nav.account" as const },

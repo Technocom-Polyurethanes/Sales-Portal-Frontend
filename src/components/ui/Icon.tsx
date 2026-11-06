@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 
-export type IconName = "home" | "offers" | "customers" | "products" | "import" | "settings" | "search" | "plus" | "arrow" | "chevron" | "help" | "check" | "clock" | "logout" | "print" | "menu" | "close" | "package" | "calendar" | "trash" | "edit" | "download" | "upload" | "user" | "copy"
+export type IconName = "home" | "offers" | "customers" | "products" | "bank" | "import" | "settings" | "search" | "plus" | "arrow" | "chevron" | "help" | "check" | "clock" | "logout" | "print" | "menu" | "close" | "package" | "calendar" | "trash" | "edit" | "download" | "upload" | "user" | "copy"
 
 const PATHS: Record<IconName, ReactNode> = {
   home: (
@@ -22,6 +22,11 @@ const PATHS: Record<IconName, ReactNode> = {
     </>
   ),
   products: <path d="m12 3 9 5v9l-9 5-9-5V8Z M3 8l9 5 9-5M12 13v9M7 5l10 6" />,
+  bank: (
+    <>
+      <path d="m3 9 9-5 9 5M5 9v8m4-8v8m6-8v8m4-8v8M3 21h18" />
+    </>
+  ),
   import: <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />,
   settings: (
     <>
