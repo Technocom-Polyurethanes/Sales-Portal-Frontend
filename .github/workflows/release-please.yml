@@ -1,20 +1,75 @@
-name: Prepare release
+name: Prepare version bump
 
 on:
-  push:
+  pull_request:
+    types:
+      - closed
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version increment to prepare
+        required: true
+        default: patch
+        type: choice
+        options:
+          - minor
+          - patch
 
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
-  release-please:
+  prepare-version-bump:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true &&
+      (startsWith(github.event.pull_request.head.ref, 'feat/') ||
+      startsWith(github.event.pull_request.head.ref, 'feature/') ||
+      startsWith(github.event.pull_request.head.ref, 'fix/')))
     runs-on: ubuntu-latest
     steps:
-      - name: Prepare release pull request
-        id: release
-        uses: googleapis/release-please-action@v4
+      - name: Check out main
+        uses: actions/checkout@v4
         with:
-          release-type: node
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Determine version increment
+        id: bump
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "level=${{ inputs.bump }}" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.event.pull_request.head.ref }}" == feat/* || "${{ github.event.pull_request.head.ref }}" == feature/* ]]; then
+            echo "level=minor" >> "$GITHUB_OUTPUT"
+          else
+            echo "level=patch" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Increment application version
+        id: version
+        shell: bash
+        run: |
+          npm version "${{ steps.bump.outputs.level }}" --no-git-tag-version
+          echo "value=$(node --print \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
+
+      - name: Open version pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ github.token }}
+          base: main
+          branch: release/version-${{ steps.version.outputs.value }}
+          delete-branch: true
+          commit-message: chore(release): v${{ steps.version.outputs.value }}
+          title: chore(release): v${{ steps.version.outputs.value }}
+          body: |
+            Automated version bump after a merged ${{ steps.bump.outputs.level }}-level change.
+
+            The deployed footer will display v${{ steps.version.outputs.value }} after this pull request is merged.
