@@ -8,11 +8,12 @@ import Card from "../../../components/ui/Card"
 import Icon from "../../../components/ui/Icon"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import { getPaymentTerm } from "../../../lib/calculations/dueDate"
-import { formatIsoDay } from "../../../lib/formatters/date"
+import { formatDateTime, formatIsoDay } from "../../../lib/formatters/date"
 import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatCurrency } from "../../../lib/formatters/number"
 import OfferDocumentPreview from "../../../pdf/OfferDocumentPreview"
 import { usePrintOffer } from "../../../pdf/PrintProvider"
+import { usePermissions } from "../../account/hooks/usePermissions"
 import { offersApi } from "../api"
 import { banksForOffer } from "../bankSelection"
 import DetailsSkeleton from "../components/DetailsSkeleton"
@@ -28,6 +29,8 @@ export default function OfferDetailsPage() {
   const locale = localeForLanguage(language)
   const { id } = useParams()
   const navigate = useNavigate()
+  const { can } = usePermissions()
+  const canWrite = can("offers.write")
   const { data, loading, error, reload } = useOfferDetails(id)
   const { print } = usePrintOffer()
   const [statusOpen, setStatusOpen] = useState(false)
@@ -117,31 +120,35 @@ export default function OfferDetailsPage() {
               {t("common.print")}
             </Button>
 
-            <Button
-              variant="secondary"
-              icon={<Icon name="copy" size={16} />}
-              onClick={() =>
-                navigate(`/offers/new?from=${offer.id}&duplicate=1`)
-              }
-            >
-              {t("offers.details.duplicate")}
-            </Button>
+            {canWrite && (
+              <>
+                <Button
+                  variant="secondary"
+                  icon={<Icon name="copy" size={16} />}
+                  onClick={() =>
+                    navigate(`/offers/new?from=${offer.id}&duplicate=1`)
+                  }
+                >
+                  {t("offers.details.duplicate")}
+                </Button>
 
-            <Button
-              variant="secondary"
-              icon={<Icon name="edit" size={16} />}
-              onClick={() => navigate(`/offers/new?from=${offer.id}`)}
-            >
-              {t("offers.details.newVersion")}
-            </Button>
+                <Button
+                  variant="secondary"
+                  icon={<Icon name="edit" size={16} />}
+                  onClick={() => navigate(`/offers/new?from=${offer.id}`)}
+                >
+                  {t("offers.details.newVersion")}
+                </Button>
 
-            <Button
-              variant="primary"
-              icon={<Icon name="check" size={16} />}
-              onClick={() => setStatusOpen(true)}
-            >
-              {t("offers.details.changeStatus")}
-            </Button>
+                <Button
+                  variant="primary"
+                  icon={<Icon name="check" size={16} />}
+                  onClick={() => setStatusOpen(true)}
+                >
+                  {t("offers.details.changeStatus")}
+                </Button>
+              </>
+            )}
           </div>
         }
       />
@@ -178,6 +185,37 @@ export default function OfferDetailsPage() {
                 <dt className="text-xs text-muted">{t("common.total")}</dt>
                 <dd className="font-semibold text-primary tabular-nums">
                   {formatCurrency(offer.totals?.total ?? (offer as any).total ?? 0, offer.currency, locale)}
+                </dd>
+              </div>
+            </dl>
+
+            <dl
+              aria-label={t("offers.list.createdBy")}
+              className="mb-4 grid gap-3 rounded-md border border-line-soft bg-page/50 p-4 text-sm sm:grid-cols-2"
+            >
+              <div>
+                <dt className="text-xs text-muted">
+                  {t("offers.details.createdBy")}
+                </dt>
+                <dd className="font-medium text-ink">
+                  {offer.createdByName || t("offers.list.unknownUser")}
+                </dd>
+                <dd dir="ltr" className="text-start text-xs text-muted tabular-nums">
+                  {t("offers.details.createdAt")} {formatDateTime(offer.createdAt)}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted">
+                  {t("offers.details.lastModifiedBy")}
+                </dt>
+                <dd className="font-medium text-ink">
+                  {offer.updatedByName ||
+                    offer.createdByName ||
+                    t("offers.list.unknownUser")}
+                </dd>
+                <dd dir="ltr" className="text-start text-xs text-muted tabular-nums">
+                  {t("offers.details.lastModifiedAt")}{" "}
+                  {formatDateTime(offer.updatedAt ?? offer.createdAt)}
                 </dd>
               </div>
             </dl>

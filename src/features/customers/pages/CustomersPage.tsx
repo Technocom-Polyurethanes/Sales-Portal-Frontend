@@ -11,6 +11,7 @@ import { formatIsoDay } from "../../../lib/formatters/date"
 import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatCurrency } from "../../../lib/formatters/number"
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
+import { usePermissions } from "../../account/hooks/usePermissions"
 import { customersApi } from "../api"
 import { type Column } from "../../../components/ui/DataTable"
 import CustomerDialog from "../components/CustomerDialog"
@@ -19,6 +20,9 @@ import type { Customer } from "../types"
 export default function CustomersPage() {
   const { t, language } = useTranslation()
   const navigate = useNavigate()
+  const { can } = usePermissions()
+  const canCreate = can("catalog.create")
+  const canEdit = can("catalog.edit")
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -116,19 +120,26 @@ export default function CustomersPage() {
     [t, locale],
   )
 
+  // A role that may create but not edit (Sales) sees no Edit button.
+  const visibleColumns = canEdit
+    ? columns
+    : columns.filter((column) => column.key !== "actions")
+
   return (
     <>
       <PageHeader
         title={t("customers.title")}
         subtitle={t("customers.subtitle")}
         action={
-          <Button
-            variant="primary"
-            icon={<Icon name="plus" size={18} />}
-            onClick={openNew}
-          >
-            {t("customers.newCustomer")}
-          </Button>
+          canCreate ? (
+            <Button
+              variant="primary"
+              icon={<Icon name="plus" size={18} />}
+              onClick={openNew}
+            >
+              {t("customers.newCustomer")}
+            </Button>
+          ) : undefined
         }
       />
 
@@ -147,7 +158,7 @@ export default function CustomersPage() {
         data={data}
         loading={loading}
         error={error}
-        columns={columns}
+        columns={visibleColumns}
         rowKey={(customer) => customer.id}
         onRowClick={(customer) => navigate(`/customers/${customer.id}`)}
         onPageChange={setPage}
@@ -158,10 +169,10 @@ export default function CustomersPage() {
           setPage(1)
         }}
         hasFilters={search.trim() !== ""}
-        createLabel={t("customers.newCustomer")}
-        onCreate={openNew}
+        createLabel={canCreate ? t("customers.newCustomer") : undefined}
+        onCreate={canCreate ? openNew : undefined}
         emptyTitle={t("customers.empty")}
-        skeletonColumns={7}
+        skeletonColumns={visibleColumns.length}
       />
 
       {dialogOpen && (

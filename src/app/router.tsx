@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useNavigate } from "react-router-dom"
 import AppShell from "./layout/AppShell"
 import LoginScreen from "./layout/LoginScreen"
 import NotFoundPage from "./pages/NotFoundPage"
+import RequirePermission from "./RequirePermission"
 import { useSession } from "../features/account/hooks/useSession"
 import AccountPage from "../features/account/pages/AccountPage"
 import BanksPage from "../features/banks/pages/BanksPage"
@@ -15,6 +16,7 @@ import OffersListPage from "../features/offers/pages/OffersListPage"
 import DashboardPage from "../features/offers/pages/DashboardPage"
 import ProductsPage from "../features/products/pages/ProductsPage"
 import SettingsPage from "../features/settings/pages/SettingsPage"
+import UsersPage from "../features/users/pages/UsersPage"
 
 export function AppRouter() {
   const { authenticated, signIn } = useSession()
@@ -39,13 +41,35 @@ export function AppRouter() {
         <Route index element={<DashboardPage />} />
         <Route path="login" element={<Navigate to="/" replace />} />
         <Route path="offers" element={<OffersListPage />} />
-        <Route path="offers/new" element={<OfferBuilderPage />} />
+        <Route
+          path="offers/new"
+          element={
+            <RequirePermission permission="offers.write">
+              <OfferBuilderPage />
+            </RequirePermission>
+          }
+        />
         <Route path="offers/:id" element={<OfferDetailsPage />} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="customers/:id" element={<CustomerHistoryPage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="banks" element={<BanksPage />} />
-        <Route path="import" element={<ImportPage />} />
+        <Route
+          path="import"
+          element={
+            <RequirePermission permission="import.use">
+              <ImportPage />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="users"
+          element={
+            <RequirePermission permission="users.manage">
+              <UsersPage />
+            </RequirePermission>
+          }
+        />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="account" element={<AccountPage />} />
         <Route path="home" element={<Navigate to="/" replace />} />

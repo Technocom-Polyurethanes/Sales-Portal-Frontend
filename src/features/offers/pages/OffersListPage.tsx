@@ -1,18 +1,18 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 
-import Badge from "../../../components/ui/Badge"
 import Button from "../../../components/ui/Button"
-import DataTable, { type Column } from "../../../components/ui/DataTable"
 import Icon from "../../../components/ui/Icon"
 import PageHeader from "../../../app/layout/PageHeader"
-import TableState from "../../../components/TableState"
+import PagedCards from "../../../components/PagedCards"
 import { useTranslation } from "../../../i18n/I18nProvider"
-import { formatCurrency } from "../../../lib/formatters"
-import { localeForLanguage } from "../../../lib/formatters/locale"
-import { formatIsoDay } from "../../../lib/formatters/date"
+import { usePermissions } from "../../account/hooks/usePermissions"
+import OfferCard from "../components/OfferCard"
 import { useOffers } from "../hooks/useOffers"
-import type { OfferListItem, OfferStatus } from "../types"
+import type { OfferStatus } from "../types"
+
+/** Twelve cards fill whole rows of the one, two and three column grid. */
+const OFFERS_PAGE_SIZE = 12
 
 const STATUS_FILTERS: (OfferStatus | "all")[] = [
   "all",
@@ -23,7 +23,9 @@ const STATUS_FILTERS: (OfferStatus | "all")[] = [
 ]
 
 export default function OffersListPage() {
-  const { t, language } = useTranslation()
+  const { t } = useTranslation()
+  const { can } = usePermissions()
+  const canWrite = can("offers.write")
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const statusParam = searchParams.get("status") as OfferStatus | null
@@ -50,88 +52,17 @@ export default function OffersListPage() {
 
   const search = searchParams.get("search") ?? ""
   const [page, setPage] = useState(1)
-  const { data, loading, error } = useOffers({ status, search, page })
-  const locale = localeForLanguage(language)
+  const { data, loading, error, reload } = useOffers({
+    status,
+    search,
+    page,
+    pageSize: OFFERS_PAGE_SIZE,
+  })
 
   // A new filter or search starts again from the first page.
   useEffect(() => {
     setPage(1)
   }, [status, search])
-
-  const columns = useMemo<Column<OfferListItem>[]>(
-    () => [
-      {
-        key: "reference",
-        header: t("offers.list.reference"),
-        render: (offer) => (
-          <span className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => navigate(`/offers/${offer.id}`)}
-              dir="ltr"
-              className="font-medium text-primary transition-colors hover:text-primary-hover"
-            >
-              {offer.reference}
-            </button>
-            {offer.version > 1 && (
-              <span className="rounded bg-page px-1.5 py-0.5 text-[11px] text-muted">
-                v{offer.version}
-              </span>
-            )}
-          </span>
-        ),
-      },
-      {
-        key: "customer",
-        header: t("offers.list.customer"),
-        render: (offer) => (
-          <span className="text-ink">{offer.customerName}</span>
-        ),
-      },
-      {
-        key: "issueDate",
-        header: t("offers.list.issueDate"),
-        render: (offer) => (
-          <span className="text-muted">{formatIsoDay(offer.issueDate)}</span>
-        ),
-      },
-      {
-        key: "total",
-        header: t("offers.list.total"),
-        align: "end",
-        render: (offer) => (
-          <span className="font-medium text-ink">
-            {formatCurrency(offer.total, offer.currency, locale)}
-          </span>
-        ),
-      },
-      {
-        key: "status",
-        header: t("common.status"),
-        render: (offer) => (
-          <Badge variant={offer.status}>
-            {t(`offers.status.${offer.status}`)}
-          </Badge>
-        ),
-      },
-      {
-        key: "actions",
-        header: "",
-        align: "end",
-        render: (offer) => (
-          <button
-            type="button"
-            onClick={() => navigate(`/offers/${offer.id}`)}
-            className="inline-flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary-hover"
-          >
-            {t("offers.list.open")}
-            <Icon name="chevron" size={15} />
-          </button>
-        ),
-      },
-    ],
-    [t, navigate, locale, language],
-  )
 
   const setSearch = (value: string) => {
     const next = new URLSearchParams(searchParams)
@@ -140,17 +71,7 @@ export default function OffersListPage() {
     setSearchParams(next, { replace: true })
   }
 
-  const offersList = data?.items ?? []
   const hasActiveFilters = search.trim() !== "" || status !== "all"
-  const tableState = error
-    ? "error"
-    : loading
-      ? "loading"
-      : offersList.length === 0 && hasActiveFilters
-        ? "empty-results"
-        : offersList.length === 0
-          ? "empty-data"
-          : "data"
 
   return (
     <>
@@ -158,13 +79,15 @@ export default function OffersListPage() {
         title={t("offers.list.title")}
         subtitle={t("offers.list.subtitle")}
         action={
-          <Button
-            variant="primary"
-            icon={<Icon name="plus" size={18} />}
-            onClick={() => navigate("/offers/new")}
-          >
-            {t("offers.list.create")}
-          </Button>
+          canWrite ? (
+            <Button
+              variant="primary"
+              icon={<Icon name="plus" size={18} />}
+              onClick={() => navigate("/offers/new")}
+            >
+              {t("offers.list.create")}
+            </Button>
+          ) : undefined
         }
       />
 
@@ -185,53 +108,29 @@ export default function OffersListPage() {
         ))}
       </div>
 
-      <div className="rounded-lg border border-line bg-surface">
-        <TableState
-          state={tableState}
-          query={search}
-          errorMessage={(error as any)?.message}
-          onClearSearch={() => setSearch("")}
-          onClearFilters={() => handleStatusChange("all")}
-          createLabel={t("offers.list.create")}
-          onCreate={() => navigate("/offers/new")}
-          emptyTitle={t("offers.list.empty")}
-          emptyDescription={t("offers.list.subtitle")}
-          skeletonRows={8}
-          skeletonColumns={6}
-        >
-          <DataTable
-            columns={columns}
-            rows={offersList}
-            rowKey={(offer) => offer.id}
-            onRowClick={(offer) => navigate(`/offers/${offer.id}`)}
+      <PagedCards
+        data={data}
+        loading={loading}
+        error={error}
+        rowKey={(offer) => offer.id}
+        renderCard={(offer) => (
+          <OfferCard
+            offer={offer}
+            onOpen={(item) => navigate(`/offers/${item.id}`)}
           />
-        </TableState>
-
-        {!error && data && data.totalCount > 0 && (
-          <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-3 text-xs text-muted">
-            <span>{t("offers.list.count", { count: data.totalCount })}</span>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={loading || data.page <= 1}
-                onClick={() => setPage(data.page - 1)}
-              >
-                {t("common.previous")}
-              </Button>
-              <span>{t("common.page", { page: data.page, pages: data.totalPages })}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={loading || data.page >= data.totalPages}
-                onClick={() => setPage(data.page + 1)}
-              >
-                {t("common.next")}
-              </Button>
-            </div>
-          </div>
         )}
-      </div>
+        onPageChange={setPage}
+        onRetry={reload}
+        query={search}
+        onClearSearch={() => setSearch("")}
+        onClearFilters={() => handleStatusChange("all")}
+        hasFilters={hasActiveFilters}
+        createLabel={canWrite ? t("offers.list.create") : undefined}
+        onCreate={canWrite ? () => navigate("/offers/new") : undefined}
+        emptyTitle={t("offers.list.empty")}
+        emptyDescription={t("offers.list.subtitle")}
+        skeletonCount={OFFERS_PAGE_SIZE / 2}
+      />
     </>
   )
 }

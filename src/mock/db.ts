@@ -2,12 +2,14 @@ import { referenceSequence } from "../lib/calculations/reference"
 import type { Customer } from "../features/customers/types"
 import type { Offer, OfferStatus } from "../features/offers/types"
 import type { Product } from "../features/products/types"
+import type { UserRecord } from "../features/users/types"
 import type {
   BankAccount,
   CompanySettings,
   PackageType,
   WorkspaceSettings,
 } from "../features/settings/types"
+import { accounts, type MockSession } from "./data/accounts"
 import { banks, company } from "./data/company"
 import { customers } from "./data/customers"
 import { offers } from "./data/offers"
@@ -26,6 +28,9 @@ export type Database = {
   company: CompanySettings
   users: typeof workspaceUsers
   currentUser: typeof currentUser
+  /** Sign-in accounts managed by the Users screen. */
+  accounts: UserRecord[]
+  session: MockSession
 }
 
 /** In-memory database seeded with the sample data of `src/mock/data`. */
@@ -38,6 +43,8 @@ export const db: Database = {
   company: clone(company),
   users: clone(workspaceUsers),
   currentUser: clone(currentUser),
+  accounts: clone(accounts),
+  session: { userId: "acct-admin" },
 }
 
 export function findCustomer(id: string): Customer | undefined {
@@ -97,4 +104,12 @@ export function offerVersions(id: string): Offer[] {
       return itemRootId === rootId
     })
     .sort((left, right) => left.version - right.version)
+}
+
+/** The account the mock API treats as signed in. */
+export function sessionAccount(): UserRecord {
+  return (
+    db.accounts.find((account) => account.id === db.session.userId) ??
+    db.accounts[0]
+  )
 }

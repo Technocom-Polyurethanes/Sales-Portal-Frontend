@@ -4,6 +4,8 @@ import { Outlet, useNavigate } from "react-router-dom"
 import Button from "../../components/ui/Button"
 import Dialog from "../../components/ui/Dialog"
 import Icon from "../../components/ui/Icon"
+import { usePermissions } from "../../features/account/hooks/usePermissions"
+import type { Permission } from "../../features/account/permissions"
 import { useTranslation } from "../../i18n/I18nProvider"
 import type { TranslationKey } from "../../i18n/types"
 import AppFooter from "./AppFooter"
@@ -11,11 +13,16 @@ import BottomNav from "./BottomNav"
 import Sidebar from "./Sidebar"
 import Topbar from "./Topbar"
 
-const MORE_LINKS = [
-  { to: "/banks", labelKey: "nav.banks" as const },
-  { to: "/import", labelKey: "nav.import" as const },
-  { to: "/settings", labelKey: "nav.settings" as const },
-  { to: "/account", labelKey: "nav.account" as const },
+const MORE_LINKS: {
+  to: string
+  labelKey: TranslationKey
+  permission?: Permission
+}[] = [
+  { to: "/banks", labelKey: "nav.banks" },
+  { to: "/import", labelKey: "nav.import", permission: "import.use" },
+  { to: "/users", labelKey: "nav.users", permission: "users.manage" },
+  { to: "/settings", labelKey: "nav.settings" },
+  { to: "/account", labelKey: "nav.account" },
 ]
 
 const HELP_TIPS: TranslationKey[] = [
@@ -28,6 +35,7 @@ const HELP_TIPS: TranslationKey[] = [
 export default function AppShell() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { can } = usePermissions()
   const [menuOpen, setMenuOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
@@ -99,7 +107,7 @@ export default function AppShell() {
         onClose={() => setMoreOpen(false)}
       >
         <div className="flex flex-col gap-1">
-          {MORE_LINKS.map((link) => (
+          {MORE_LINKS.filter((link) => !link.permission || can(link.permission)).map((link) => (
             <button
               key={link.to}
               type="button"

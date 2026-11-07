@@ -15,6 +15,7 @@ import {
 } from "../../../lib/formatters"
 import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatIsoDay } from "../../../lib/formatters/date"
+import { usePermissions } from "../../account/hooks/usePermissions"
 import { useSession } from "../../account/SessionProvider"
 import { useOffers } from "../hooks/useOffers"
 import type { OfferListItem } from "../types"
@@ -28,6 +29,8 @@ type StatCard = {
 export default function DashboardPage() {
   const { t, language } = useTranslation()
   const navigate = useNavigate()
+  const { can } = usePermissions()
+  const canWriteOffers = can("offers.write")
   const { data: offersPage, loading, error } = useOffers({
     pageSize: 200,
     latestOnly: true,
@@ -153,13 +156,15 @@ export default function DashboardPage() {
         title={getGreeting()}
         subtitle={t("dashboard.subtitle")}
         action={
-          <Button
-            variant="primary"
-            icon={<Icon name="plus" size={16} />}
-            onClick={() => navigate("/offers/new")}
-          >
-            {t("dashboard.createNewOffer")}
-          </Button>
+          canWriteOffers ? (
+            <Button
+              variant="primary"
+              icon={<Icon name="plus" size={16} />}
+              onClick={() => navigate("/offers/new")}
+            >
+              {t("dashboard.createNewOffer")}
+            </Button>
+          ) : undefined
         }
       />
 
@@ -199,8 +204,8 @@ export default function DashboardPage() {
                   : "data"
           }
           errorMessage={(error as any)?.message}
-          createLabel={t("offers.list.create")}
-          onCreate={() => navigate("/offers/new")}
+          createLabel={canWriteOffers ? t("offers.list.create") : undefined}
+          onCreate={canWriteOffers ? () => navigate("/offers/new") : undefined}
           emptyTitle={t("offers.list.empty")}
           emptyDescription={t("dashboard.subtitle")}
           skeletonRows={5}

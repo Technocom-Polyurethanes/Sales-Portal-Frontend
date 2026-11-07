@@ -14,11 +14,13 @@ import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatCurrency } from "../../../lib/formatters/number"
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
 import type { OfferListItem } from "../../offers/types"
+import { usePermissions } from "../../account/hooks/usePermissions"
 import { customersApi } from "../api"
 
 export default function CustomerHistoryPage() {
   const { t, language } = useTranslation()
   const navigate = useNavigate()
+  const { can } = usePermissions()
   const { id = "" } = useParams()
   const [page, setPage] = useState(1)
   const {
@@ -113,13 +115,15 @@ export default function CustomerHistoryPage() {
             <Button variant="secondary" onClick={() => navigate("/customers")}>
               {t("customers.backToCustomers")}
             </Button>
-            <Button
-              variant="primary"
-              icon={<Icon name="plus" size={18} />}
-              onClick={() => navigate("/offers/new")}
-            >
-              {t("customers.newOffer")}
-            </Button>
+            {can("offers.write") && (
+              <Button
+                variant="primary"
+                icon={<Icon name="plus" size={18} />}
+                onClick={() => navigate("/offers/new")}
+              >
+                {t("customers.newOffer")}
+              </Button>
+            )}
           </div>
         }
       />

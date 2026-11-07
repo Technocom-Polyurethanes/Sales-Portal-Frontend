@@ -16,9 +16,11 @@ import {
   isFirstOffer,
   nextOfferSequence,
   offerVersions,
+  sessionAccount,
   updateOfferStatus,
 } from "./db"
 import { commit, history, preview, template } from "./import"
+import { userRoutes } from "./users"
 import type { ImportSource } from "../features/import/types"
 
 /** Offer to the list-row shape the real API returns. */
@@ -36,9 +38,11 @@ function toListItem(offer: Offer): OfferListItem {
     currency: offer.currency,
     status: offer.status,
     total: offer.totals.total,
-    createdByName: null,
+    createdByName: offer.createdByName ?? null,
     createdAt: offer.createdAt,
-    updatedAt: offer.createdAt,
+    updatedAt: offer.updatedAt ?? offer.createdAt,
+    lastModifiedByName: offer.updatedByName ?? offer.createdByName ?? null,
+    lastModifiedAt: offer.updatedAt ?? offer.createdAt,
   }
 }
 
@@ -52,13 +56,13 @@ const pageOf = (query: Query) =>
       }
     : null
 
-type RouteContext = {
+export type RouteContext = {
   params: string[]
   query: Query
   body: unknown
 }
 
-type Route = {
+export type Route = {
   method: string
   segments: string[]
   handle: (context: RouteContext) => unknown
@@ -283,6 +287,7 @@ const routes: Route[] = [
       }
       offer.id = `offer-${Date.now()}`
       offer.createdAt = new Date().toISOString()
+      offer.createdByName = sessionAccount().fullName
       db.offers.unshift(offer)
       return offer
     },
@@ -406,6 +411,17 @@ const routes: Route[] = [
     segments: ["users", "me"],
     handle: () => db.currentUser,
   },
+  {
+    method: "POST",
+    segments: ["auth", "login"],
+    handle: () => ({ token: "mock-token", user: sessionAccount() }),
+  },
+  {
+    method: "GET",
+    segments: ["auth", "me"],
+    handle: () => sessionAccount(),
+  },
+  ...userRoutes,
 ]
 
 function listProducts(query: Query) {

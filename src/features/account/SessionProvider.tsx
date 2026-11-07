@@ -40,7 +40,9 @@ function getStoredToken(): string | null {
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [authenticated, setAuthenticated] = useState(readSession)
   const [user, setUser] = useState<AccountUser | undefined>(undefined)
-  const [loading, setLoading] = useState(false)
+  // True from the first render of a returning session, so a guard waits for the profile
+  // instead of treating a role that has not arrived yet as "no access".
+  const [loading, setLoading] = useState(readSession)
 
   useEffect(() => {
     if (!authenticated) return
@@ -117,6 +119,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     clearCache()
     setAuthenticated(false)
     setUser(undefined)
+    setLoading(false)
   }, [])
 
   useEffect(() => {

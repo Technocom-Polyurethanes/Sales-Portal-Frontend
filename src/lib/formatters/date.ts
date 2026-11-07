@@ -61,3 +61,27 @@ export function formatDateWithWeekday(
   if (!weekday) return value
   return `${weekday} ${formatIsoDay(value)}`
 }
+
+/**
+ * `21/10/2026 14:05` in the viewer's time zone, for a timestamp such as `2026-10-21T11:05:00Z`.
+ * A plain day (`2026-10-21`) has no time, so it is shown as a day only.
+ */
+export function formatDateTime(value: string | null | undefined): string {
+  if (!value) return ""
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) return formatIsoDay(value)
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+
+  const pad = (part: number) => String(part).padStart(2, "0")
+  return (
+    `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ` +
+    `${pad(date.getHours())}:${pad(date.getMinutes())}`
+  )
+}
+
+/** `21/10/2026` for a timestamp, in the viewer's time zone. */
+export function formatTimestampDay(value: string | null | undefined): string {
+  if (!value) return ""
+  return formatDateTime(value).split(" ")[0]
+}

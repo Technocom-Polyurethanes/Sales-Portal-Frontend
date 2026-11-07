@@ -12,6 +12,7 @@ import { useTranslation } from "../../../i18n/I18nProvider"
 import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatNumber } from "../../../lib/formatters/number"
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
+import { usePermissions } from "../../account/hooks/usePermissions"
 import { settingsApi } from "../../settings/api"
 import { productsApi } from "../api"
 import MaterialDialog from "../components/MaterialDialog"
@@ -19,6 +20,9 @@ import type { Product } from "../types"
 
 export default function ProductsPage() {
   const { t, language } = useTranslation()
+  const { can } = usePermissions()
+  const canCreate = can("catalog.create")
+  const canEdit = can("catalog.edit")
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("")
   const [page, setPage] = useState(1)
@@ -134,6 +138,10 @@ export default function ProductsPage() {
   )
 
   const hasFilters = search.trim() !== "" || category !== ""
+  // A role that may create but not edit (Sales) sees no Edit button.
+  const visibleColumns = canEdit
+    ? columns
+    : columns.filter((column) => column.key !== "actions")
 
   return (
     <>
@@ -141,13 +149,15 @@ export default function ProductsPage() {
         title={t("products.title")}
         subtitle={t("products.subtitle")}
         action={
-          <Button
-            variant="primary"
-            icon={<Icon name="plus" size={18} />}
-            onClick={openNew}
-          >
-            {t("products.addMaterial")}
-          </Button>
+          canCreate ? (
+            <Button
+              variant="primary"
+              icon={<Icon name="plus" size={18} />}
+              onClick={openNew}
+            >
+              {t("products.addMaterial")}
+            </Button>
+          ) : undefined
         }
       />
 
@@ -182,7 +192,7 @@ export default function ProductsPage() {
         data={data}
         loading={loading}
         error={error}
-        columns={columns}
+        columns={visibleColumns}
         rowKey={(product) => product.id}
         onPageChange={setPage}
         onRetry={reload}
@@ -196,10 +206,10 @@ export default function ProductsPage() {
           setPage(1)
         }}
         hasFilters={hasFilters}
-        createLabel={t("products.addMaterial")}
-        onCreate={openNew}
+        createLabel={canCreate ? t("products.addMaterial") : undefined}
+        onCreate={canCreate ? openNew : undefined}
         emptyTitle={t("products.empty")}
-        skeletonColumns={7}
+        skeletonColumns={visibleColumns.length}
       />
 
       {dialogOpen && (
