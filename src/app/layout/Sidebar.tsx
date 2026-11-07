@@ -1,10 +1,11 @@
 import { NavLink } from "react-router-dom"
 
-import { NAV_ITEMS } from "../navigation"
+import { NAV_ITEMS, visibleNavItems } from "../navigation"
 import { useTranslation } from "../../i18n/I18nProvider"
 import Icon from "../../components/ui/Icon"
 import Wordmark from "../../components/ui/Wordmark"
 import Button from "../../components/ui/Button"
+import { usePermissions } from "../../features/account/hooks/usePermissions"
 import { useSession } from "../../features/account/hooks/useSession"
 
 export type SidebarProps = {
@@ -19,7 +20,8 @@ export default function Sidebar({
   offersCount,
 }: SidebarProps) {
   const { t } = useTranslation()
-  const { user, signOut } = useSession()
+  const { user } = useSession()
+  const { role, can } = usePermissions()
 
   return (
     <aside className="flex h-full w-60 flex-col border-e border-line bg-surface">
@@ -32,7 +34,7 @@ export default function Sidebar({
       </p>
 
       <nav className="flex flex-col gap-0.5 px-3">
-        {NAV_ITEMS.map((item) => (
+        {visibleNavItems(NAV_ITEMS, can).map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
@@ -70,7 +72,7 @@ export default function Sidebar({
               {user?.name ?? ""}
             </span>
             <span className="block truncate text-xs text-muted">
-              {t("shell.salesTeam")}
+              {role ? t(`users.role.${role}`) : t("shell.salesTeam")}
             </span>
           </span>
           <Icon name="chevron" size={16} className="text-muted" />

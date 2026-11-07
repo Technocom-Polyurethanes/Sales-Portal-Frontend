@@ -47,6 +47,7 @@ const specs: OfferSpec[] = [
   },
   {
     sequence: 3088,
+    createdByName: "Youssef Ali",
     customerIndex: 1,
     issueDate: "2026-10-20",
     status: "draft",
@@ -61,6 +62,7 @@ const specs: OfferSpec[] = [
   },
   {
     sequence: 3087,
+    createdByName: "Youssef Ali",
     customerIndex: 2,
     issueDate: "2026-10-18",
     status: "accepted",
@@ -103,6 +105,7 @@ const specs: OfferSpec[] = [
   },
   {
     sequence: 3084,
+    createdByName: "Youssef Ali",
     customerIndex: 5,
     issueDate: "2026-10-10",
     status: "accepted",
@@ -145,6 +148,7 @@ const specs: OfferSpec[] = [
   },
   {
     sequence: 3081,
+    createdByName: "Youssef Ali",
     customerIndex: 8,
     issueDate: "2026-10-02",
     status: "accepted",

@@ -7,7 +7,7 @@ import Button from "../../../components/ui/Button"
 import type { Column } from "../../../components/ui/DataTable"
 import Icon from "../../../components/ui/Icon"
 import SearchField from "../../../components/ui/SearchField"
-import { useSession } from "../../account/hooks/useSession"
+import { usePermissions } from "../../account/hooks/usePermissions"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
 import type { BankAccount } from "../../settings/types"
@@ -16,8 +16,9 @@ import BankDialog from "../components/BankDialog"
 
 export default function BanksPage() {
   const { t } = useTranslation()
-  const { user } = useSession()
-  const isAdmin = user?.role === "Admin"
+  const { can } = usePermissions()
+  const canCreate = can("catalog.create")
+  const canEdit = can("catalog.edit")
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -75,7 +76,7 @@ export default function BanksPage() {
       },
     ]
 
-    if (isAdmin) {
+    if (canEdit) {
       list.push({
         key: "actions",
         header: t("common.actions"),
@@ -90,7 +91,7 @@ export default function BanksPage() {
     }
 
     return list
-  }, [t, isAdmin])
+  }, [t, canEdit])
 
   return (
     <>
@@ -98,7 +99,7 @@ export default function BanksPage() {
         title={t("banks.title")}
         subtitle={t("banks.subtitle")}
         action={
-          isAdmin ? (
+          canCreate ? (
             <Button
               variant="primary"
               icon={<Icon name="plus" size={18} />}
@@ -135,10 +136,10 @@ export default function BanksPage() {
           setPage(1)
         }}
         hasFilters={search.trim() !== ""}
-        createLabel={isAdmin ? t("banks.newBank") : undefined}
-        onCreate={isAdmin ? openNew : undefined}
+        createLabel={canCreate ? t("banks.newBank") : undefined}
+        onCreate={canCreate ? openNew : undefined}
         emptyTitle={t("banks.empty")}
-        skeletonColumns={isAdmin ? 6 : 5}
+        skeletonColumns={canEdit ? 6 : 5}
       />
 
       {dialogOpen && (

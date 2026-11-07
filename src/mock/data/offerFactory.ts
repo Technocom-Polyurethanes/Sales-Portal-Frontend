@@ -35,6 +35,8 @@ export type DeliverySpec = {
 
 export type OfferSpec = {
   sequence: number
+  /** Who created the offer; defaults to the first workspace user. */
+  createdByName?: string
   customerIndex: number
   issueDate: string
   status: OfferStatus
@@ -159,6 +161,7 @@ export function buildOffer(spec: OfferSpec): Offer {
     attention: customer.contactPerson ?? "",
     totals,
     documentLanguage: spec.documentLanguage ?? "en",
-    createdAt: spec.issueDate,
+    createdByName: spec.createdByName ?? "Amgad Anwar",
+    createdAt: `${spec.issueDate}T09:30:00Z`,
   }
 }

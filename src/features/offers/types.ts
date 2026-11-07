@@ -136,7 +136,12 @@ export type Offer = {
   rootOfferId?: string
   totals: Totals
   documentLanguage: DocumentLanguage
+  /** Who created the offer and when: set by the server, never typed. */
+  createdByName?: string | null
   createdAt: string
+  /** Who saved the offer last (a new version, a status change) and when. */
+  updatedByName?: string | null
+  updatedAt?: string
 }
 
 export type OfferListItem = {
@@ -157,6 +162,8 @@ export type OfferListItem = {
   createdByName: string | null
   createdAt: string
   updatedAt: string
+  lastModifiedByName?: string | null
+  lastModifiedAt?: string
 }
 
 export type OfferListPage = {

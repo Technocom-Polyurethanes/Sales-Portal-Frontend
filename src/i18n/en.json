@@ -64,7 +64,8 @@
     "import": "Data Import",
     "settings": "Settings",
     "account": "My Account",
-    "workspace": "WORKSPACE"
+    "workspace": "WORKSPACE",
+    "users": "Users"
   },
   "shell": {
     "searchPlaceholder": "Search offers or customers…",
@@ -119,7 +120,11 @@
       "open": "Open",
       "empty": "No offers found. Try another search.",
       "create": "Create new offer",
-      "count": "{count} offers"
+      "count": "{count} offers",
+      "createdBy": "Created by",
+      "createdAt": "Created",
+      "updatedAt": "Last modified",
+      "unknownUser": "Unknown user"
     },
     "status": {
       "draft": "Draft",
@@ -277,7 +282,11 @@
       "versions": "Version history",
       "noVersions": "This offer has no other versions yet.",
       "versionCount": "{{count}} versions",
-      "newVersion": "New version"
+      "newVersion": "New version",
+      "createdBy": "Created by",
+      "createdAt": "Created on",
+      "lastModifiedBy": "Last modified by",
+      "lastModifiedAt": "Last modified on"
     }
   },
   "customers": {
@@ -494,5 +503,63 @@
     "title": "Page not found",
     "subtitle": "The page you are looking for does not exist or was moved.",
     "backHome": "Back to home"
+  },
+  "forbidden": {
+    "title": "You don't have access to this page",
+    "subtitle": "Your role does not include this area. Ask an administrator if you need it."
+  },
+  "users": {
+    "title": "Users",
+    "subtitle": "Create accounts, choose each person's role and manage their access.",
+    "newUser": "New user",
+    "editUser": "Edit user",
+    "search": "Search name, username or email",
+    "empty": "No users yet.",
+    "allRoles": "All roles",
+    "allStatuses": "All statuses",
+    "active": "Active",
+    "inactive": "Inactive",
+    "you": "You",
+    "created": "User created",
+    "updated": "User updated",
+    "passwordReset": "Password reset",
+    "requiredFields": "Fill in the highlighted fields.",
+    "resetPassword": "Reset password",
+    "resetTitle": "Reset password for {name}",
+    "resetHint": "Choose a new password and share it with the user. Their current password stops working.",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "createdOn": "Added",
+    "fields": {
+      "username": "Username",
+      "fullName": "Full name",
+      "initials": "Initials",
+      "email": "Email",
+      "role": "Role",
+      "roleTitle": "Job title",
+      "roleTitleAr": "Job title (Arabic)",
+      "team": "Team",
+      "teamAr": "Team (Arabic)",
+      "password": "Password",
+      "newPassword": "New password",
+      "active": "Account active"
+    },
+    "hints": {
+      "username": "Used to sign in. It cannot be changed later.",
+      "initials": "Printed in offer references, for example Loc/42/YL/JD.",
+      "password": "At least 8 characters. Share it with the user securely.",
+      "active": "Inactive users cannot sign in, and are signed out on their next action.",
+      "self": "You cannot change your own role or deactivate your own account."
+    },
+    "role": {
+      "Admin": "Admin",
+      "Sales": "Sales",
+      "Accountant": "Accountant"
+    },
+    "roleHint": {
+      "Admin": "Full access to everything, including Users.",
+      "Sales": "Creates offers. Views and creates customers, materials and bank accounts.",
+      "Accountant": "Uses data import and the catalogue. Offers are read only."
+    }
   }
 }
