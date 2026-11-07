@@ -51,7 +51,7 @@
     "copy": "Copy",
     "download": "Download",
     "rightsReserved": "All rights reserved.",
-    "madeForWork": "Made for your everyday work.",
+    "version": "Version {version}",
     "more": "More",
     "menu": "Menu"
   },
