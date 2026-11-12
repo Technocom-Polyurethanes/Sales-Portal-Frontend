@@ -28,10 +28,10 @@ import type { OfferStatus } from "../../types"
 import type { OfferDraft } from "../../types"
 import BankAccountsStep from "./BankAccountsStep"
 import BuilderStepper from "./BuilderStepper"
-import DeliveryScheduleEditor from "./DeliveryScheduleEditor"
 import LivePreview from "./LivePreview"
 import ReviewDialog from "./ReviewDialog"
 import StepBasics from "./StepBasics"
+import StepDelivery from "./StepDelivery"
 import StepNotes from "./StepNotes"
 import StepPackaging from "./StepPackaging"
 import StepTaxes from "./StepTaxes"
@@ -117,6 +117,10 @@ export default function BuilderWorkspace({
           otherTaxAmount: calculations.totals.otherTaxAmount,
           total: calculations.totals.total,
           delivery: draft.delivery,
+          deliveryMode: draft.deliveryMode,
+          deliveryText: draft.deliveryText,
+          deliveryPlace: draft.deliveryPlace,
+          paymentTermsText: draft.paymentTermsText,
           notes: draft.notes,
         },
         {
@@ -337,7 +341,9 @@ export default function BuilderWorkspace({
           )}
 
           {controller.step === 3 && (
-            <DeliveryScheduleEditor
+            <StepDelivery
+              onChange={controller.setDraft}
+              errors={fieldErrors}
               draft={draft}
               calculations={calculations}
               packageTypes={catalog.packageTypes}

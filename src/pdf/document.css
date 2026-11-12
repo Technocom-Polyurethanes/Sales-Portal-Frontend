@@ -459,10 +459,27 @@
   color: var(--doc-primary);
 }
 
-.offer-document .doc-notes p {
+.offer-document .doc-notes p,
+.offer-document .doc-text p {
   font-size: 8.5pt;
   line-height: 1.8;
   white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/* The selected payment term leads, the typed conditions follow. */
+.offer-document .doc-payment-terms__term {
+  font-weight: 700;
+}
+
+.offer-document .doc-terms ol {
+  margin: 0;
+  padding-inline-start: 5mm;
+}
+
+.offer-document .doc-terms li {
+  font-size: 8.5pt;
+  line-height: 1.8;
 }
 
 /* Preview ----------------------------------------------------------------- */

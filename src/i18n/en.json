@@ -151,7 +151,7 @@
         "basics": "Customer & basics",
         "packaging": "Materials & packaging",
         "taxes": "Taxes & totals",
-        "delivery": "Delivery schedule",
+        "delivery": "Delivery",
         "notes": "Notes"
       },
       "basics": {
@@ -175,7 +175,10 @@
         "sectionCustomer": "Customer & offer",
         "sectionTerms": "Dates & terms",
         "customerPlaceholder": "Select customer…",
-        "customerChange": "Change"
+        "customerChange": "Change",
+        "paymentTermsText": "Payment conditions",
+        "paymentTermsTextHint": "Optional. Printed under the payment term in a block of its own, so it can run to several lines.",
+        "paymentTermsTextPlaceholder": "Bank transfer on receipt to the company account, with the transfer receipt sent to us."
       },
       "packaging": {
         "type": "Package type",
@@ -210,11 +213,22 @@
         "unit": "packages",
         "fullyScheduled": "Fully scheduled",
         "remaining": "{scheduled} scheduled · {remaining} of {total} still open",
-        "addBatch": "Add delivery batch"
+        "addBatch": "Add delivery batch",
+        "modeLabel": "How to describe the delivery",
+        "modeBatches": "Delivery schedule",
+        "modeBatchesHint": "Dated batches built from the ordered packages.",
+        "modeText": "Custom delivery terms",
+        "modeTextHint": "Free wording, for conditions a schedule cannot express.",
+        "textLabel": "Delivery terms",
+        "textHint": "Printed instead of the delivery schedule.",
+        "textPlaceholder": "Ready stock, delivered once the purchase order is confirmed and paid.",
+        "placeLabel": "Delivery place",
+        "placeHint": "Printed in its own block. Leave empty to hide it.",
+        "placePlaceholder": "Our factories in Badr City."
       },
       "notes": {
         "label": "Notes",
-        "hint": "Free text printed under the offer. The terms and conditions are not printed.",
+        "hint": "Free text printed under the offer. The fixed terms and conditions are always printed after it.",
         "placeholder": "Prices are valid for 7 days…"
       },
       "banks": {
@@ -264,7 +278,8 @@
         "taxPercent": "VAT must be between 0 and 100.",
         "discountPercent": "The discount must be between 0 and 100.",
         "batchDate": "Delivery batch {number}: choose a delivery date.",
-        "summaryTitle": "Complete these before continuing:"
+        "summaryTitle": "Complete these before continuing:",
+        "deliveryText": "Write the delivery terms, or switch back to the delivery schedule."
       },
       "stepsLabel": "Offer steps",
       "stepLocked": "Complete the current step first"

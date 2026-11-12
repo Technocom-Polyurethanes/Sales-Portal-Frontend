@@ -257,15 +257,10 @@ describe("offer document", () => {
       expect(total?.textContent).toBe("Total")
     })
 
-    it("prints the offer validity right under the payment terms", () => {
+    it("prints the offer validity right under the date", () => {
       renderWith("en", { validityDays: 7 })
 
-      expect(referenceLabels()).toEqual([
-        "Reference",
-        "Date",
-        "Payment Terms",
-        "Offer Validity",
-      ])
+      expect(referenceLabels()).toEqual(["Reference", "Date", "Offer Validity"])
       expect(referenceValue("Offer Validity")).toBe("7 days — until 28/10/2026")
     })
 
@@ -287,6 +282,76 @@ describe("offer document", () => {
 
       renderWith("en", {})
       expect(referenceLabels()).not.toContain("Offer Validity")
+    })
+
+    describe("payment terms, delivery and terms and conditions blocks", () => {
+      const block = (selector: string) => container.querySelector(selector)
+
+      it("prints the payment terms in a block of their own, not in the reference table", () => {
+        renderWith("en", { paymentTermsText: "Bank transfer on receipt.\nSend us the receipt." })
+
+        expect(referenceLabels()).not.toContain("Payment Terms")
+        const terms = block(".doc-payment-terms")
+        expect(terms?.querySelector("h3")?.textContent).toBe("Payment Terms")
+        expect(terms?.textContent).toContain("Cheque — 30 days")
+        expect(terms?.textContent).toContain("Bank transfer on receipt.")
+        expect(terms?.textContent).toContain("Send us the receipt.")
+      })
+
+      it("prints the selected payment term alone when no conditions were typed", () => {
+        renderWith("ar", {})
+
+        const terms = block(".doc-payment-terms")
+        expect(terms?.querySelector("h3")?.textContent).toBe("شروط الدفع")
+        expect(terms?.querySelectorAll("p")).toHaveLength(1)
+        expect(terms?.textContent).toContain("شيك — ٣٠ يوم")
+      })
+
+      it("prints the delivery schedule in batches mode and never the leftover text", () => {
+        renderWith("en", { deliveryMode: "batches", deliveryText: "Should not print." })
+
+        expect(block(".doc-schedule")).not.toBeNull()
+        expect(container.textContent).not.toContain("Should not print.")
+      })
+
+      it("prints the delivery text instead of the schedule in text mode", () => {
+        renderWith("en", { deliveryMode: "text", deliveryText: "Ready stock, on payment." })
+
+        expect(block(".doc-schedule")).toBeNull()
+        const delivery = Array.from(container.querySelectorAll(".doc-text")).find(
+          (section) => section.querySelector("h3")?.textContent === "Delivery",
+        )
+        expect(delivery?.textContent).toContain("Ready stock, on payment.")
+      })
+
+      it("prints the delivery place in its own block and hides it when empty", () => {
+        renderWith("en", { deliveryPlace: "Our factories in Badr City." })
+        const place = Array.from(container.querySelectorAll(".doc-text")).find(
+          (section) => section.querySelector("h3")?.textContent === "Delivery Place",
+        )
+        expect(place?.textContent).toContain("Our factories in Badr City.")
+
+        renderWith("en", { deliveryPlace: "  " })
+        expect(container.textContent).not.toContain("Delivery Place")
+      })
+
+      it("prints the fixed terms and conditions on every offer, in its language", () => {
+        renderWith("en", {})
+        const english = Array.from(container.querySelectorAll(".doc-terms li")).map(
+          (item) => item.textContent,
+        )
+        expect(container.querySelector(".doc-terms h3")?.textContent).toBe("Terms and Conditions")
+        expect(english).toHaveLength(2)
+        expect(english[1]).toContain("Force majeure")
+
+        renderWith("ar", {})
+        const arabic = Array.from(container.querySelectorAll(".doc-terms li")).map(
+          (item) => item.textContent,
+        )
+        expect(container.querySelector(".doc-terms h3")?.textContent).toBe("الشروط والأحكام")
+        expect(arabic).toHaveLength(2)
+        expect(arabic[1]).toContain("القوى القهرية")
+      })
     })
 
     it("prints the attention name of the document language", () => {

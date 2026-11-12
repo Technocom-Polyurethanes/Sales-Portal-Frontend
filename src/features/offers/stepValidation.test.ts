@@ -121,3 +121,41 @@ describe("step validation", () => {
     expect(furthestOpenStep(validateAllSteps(filled(), ctx))).toBe(4)
   })
 })
+
+describe("delivery step validation", () => {
+  it("asks for the wording when the delivery is described as text", () => {
+    const draft = filled({ deliveryMode: "text", deliveryText: "   " })
+
+    expect(validateStep(3, draft, ctx).map((issue) => issue.field)).toEqual([
+      "offer-delivery-text",
+    ])
+    expect(validateStep(3, { ...draft, deliveryText: "Ready stock." }, ctx)).toEqual([])
+  })
+
+  it("does not check the batches of an offer that uses text delivery", () => {
+    const draft = filled({
+      deliveryMode: "text",
+      deliveryText: "Ready stock.",
+      delivery: [{ id: "b1", batchNumber: 1, date: "", allocations: [] }],
+    })
+
+    expect(validateStep(3, draft, ctx)).toEqual([])
+  })
+
+  it("still needs a date on every batch in batches mode", () => {
+    const draft = filled({
+      deliveryMode: "batches",
+      delivery: [{ id: "b1", batchNumber: 1, date: "", allocations: [] }],
+    })
+
+    expect(validateStep(3, draft, ctx).map((issue) => issue.message)).toEqual([
+      "offers.builder.validation.batchDate",
+    ])
+  })
+
+  it("never blocks saving a draft over the delivery text", () => {
+    const draft = filled({ deliveryMode: "text", deliveryText: "" })
+
+    expect(validateStep(3, draft, ctx).some((issue) => issue.blocksDraft)).toBe(false)
+  })
+})

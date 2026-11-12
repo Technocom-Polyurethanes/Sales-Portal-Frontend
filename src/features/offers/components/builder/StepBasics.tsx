@@ -3,6 +3,7 @@ import Field from "../../../../components/ui/Field"
 import Icon from "../../../../components/ui/Icon"
 import Input from "../../../../components/ui/Input"
 import Select from "../../../../components/ui/Select"
+import Textarea from "../../../../components/ui/Textarea"
 import { useTranslation } from "../../../../i18n/I18nProvider"
 import {
   expiryDateFrom,
@@ -15,7 +16,7 @@ import { localeForLanguage } from "../../../../lib/formatters/locale"
 import CustomerPickerModal from "../../../../components/pickers/CustomerPickerModal"
 import type { Customer } from "../../../customers/types"
 import type { TranslationKey } from "../../../../i18n/types"
-import type { OfferDraft } from "../../types"
+import { TEXT_LIMITS, type OfferDraft } from "../../types"
 
 export type StepBasicsProps = {
   draft: OfferDraft
@@ -286,6 +287,25 @@ export default function StepBasics({
               ))}
             </Select>
           </Field>
+
+          <div className="sm:col-span-2">
+            <Field
+              label={t("offers.builder.basics.paymentTermsText")}
+              htmlFor="offer-payment-terms-text"
+              hint={t("offers.builder.basics.paymentTermsTextHint")}
+            >
+              <Textarea
+                id="offer-payment-terms-text"
+                rows={3}
+                maxLength={TEXT_LIMITS.paymentTermsText}
+                value={draft.paymentTermsText}
+                placeholder={t("offers.builder.basics.paymentTermsTextPlaceholder")}
+                onChange={(event) =>
+                  onChange({ paymentTermsText: event.target.value })
+                }
+              />
+            </Field>
+          </div>
 
           <Field
             label={t("offers.builder.basics.validity")}

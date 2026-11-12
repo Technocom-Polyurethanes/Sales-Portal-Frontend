@@ -35,4 +35,11 @@ export const englishTemplate: OfferTemplate = {
   iban: "IBAN",
   currency: "Currency",
   notes: "Notes",
+  delivery: "Delivery",
+  deliveryPlace: "Delivery Place",
+  termsAndConditionsHeading: "Terms and Conditions",
+  termsAndConditions: [
+    "Please send your representative, holding an authorised and stamped letter, to our factories in Badr City to collect the materials on the agreed dates.",
+    "Force majeure conditions apply to this offer.",
+  ],
 }
