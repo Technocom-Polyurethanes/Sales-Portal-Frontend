@@ -247,7 +247,14 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
           </div>
 
           <div data-doc-unit>
-            <TotalsBlock rows={totalsRows} />
+            <div className="doc-summary-row">
+              <PaymentTermsBlock
+                heading={template.terms}
+                term={data.paymentTerm}
+                conditions={data.paymentTermsText}
+              />
+              <TotalsBlock rows={totalsRows} />
+            </div>
           </div>
 
           <div data-doc-unit data-doc-keep>
@@ -283,14 +290,6 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
 
           <div data-doc-unit>
             <TextBlock heading={template.deliveryPlace} text={data.deliveryPlace} />
-          </div>
-
-          <div data-doc-unit>
-            <PaymentTermsBlock
-              heading={template.terms}
-              term={data.paymentTerm}
-              conditions={data.paymentTermsText}
-            />
           </div>
 
           <div data-doc-unit data-doc-keep>
