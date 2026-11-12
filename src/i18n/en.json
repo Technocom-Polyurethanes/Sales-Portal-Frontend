@@ -201,7 +201,7 @@
         "orderDiscount": "Order discount",
         "tax": "(VAT)",
         "taxHint": "Percentage added on top of the subtotal.",
-        "otherTax": "Other tax (deduction)",
+        "otherTax": "Commercial and industrial profit tax (1%)",
         "otherTaxHint": "Applies a fixed 1% of the subtotal as a deduction.",
         "total": "Total"
       },

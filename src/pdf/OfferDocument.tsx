@@ -239,7 +239,7 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
               weightUnit={weightUnit}
               formatNumber={(value) =>
                 (value ?? 0).toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
+                  minimumFractionDigits: 0,
                   maximumFractionDigits: 2,
                 })
               }
