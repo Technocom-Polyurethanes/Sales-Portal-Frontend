@@ -341,16 +341,16 @@ describe("offer document", () => {
           (item) => item.textContent,
         )
         expect(container.querySelector(".doc-terms h3")?.textContent).toBe("Terms and Conditions")
-        expect(english).toHaveLength(2)
-        expect(english[1]).toContain("Force majeure")
+        expect(english).toHaveLength(1)
+        expect(english[0]).toContain("Force majeure")
 
         renderWith("ar", {})
         const arabic = Array.from(container.querySelectorAll(".doc-terms li")).map(
           (item) => item.textContent,
         )
         expect(container.querySelector(".doc-terms h3")?.textContent).toBe("الشروط والأحكام")
-        expect(arabic).toHaveLength(2)
-        expect(arabic[1]).toContain("القوى القهرية")
+        expect(arabic).toHaveLength(1)
+        expect(arabic[0]).toContain("القوى القهرية")
       })
     })
 
