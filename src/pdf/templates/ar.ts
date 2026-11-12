@@ -39,7 +39,6 @@ export const arabicTemplate: OfferTemplate = {
   deliveryPlace: "مكان التسليم",
   termsAndConditionsHeading: "الشروط والأحكام",
   termsAndConditions: [
-    "برجاء إرسال مندوبكم بتفويض معتمد ومختوم لمصانعنا بمدينة بدر لإستلام الخامات فى المواعيد المحددة.",
     "تنطبق شروط القوى القهرية على العرض بعاليه.",
   ],
 }
