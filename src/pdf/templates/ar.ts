@@ -35,4 +35,10 @@ export const arabicTemplate: OfferTemplate = {
   iban: "آيبان",
   currency: "العملة",
   notes: "ملاحظات",
+  delivery: "التوريد",
+  deliveryPlace: "مكان التسليم",
+  termsAndConditionsHeading: "الشروط والأحكام",
+  termsAndConditions: [
+    "تنطبق شروط القوى القهرية على العرض بعاليه.",
+  ],
 }

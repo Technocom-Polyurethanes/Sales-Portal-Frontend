@@ -28,7 +28,21 @@ function formatPackagingSummary(packaging: any[] = []) {
     .join(", ")
 }
 
-/** Materials, delivery schedule and notes of a stored offer. */
+/** A titled block of free text, printed only when it has some. */
+function TextSection({ title, text }: { title: string; text?: string }) {
+  if (!(text ?? "").trim()) return null
+
+  return (
+    <section>
+      <h3 className="mb-2 text-sm font-semibold text-ink">{title}</h3>
+      <p className="rounded-md border border-line-soft bg-page/50 px-3 py-2.5 text-sm leading-relaxed whitespace-pre-line text-ink">
+        {text}
+      </p>
+    </section>
+  )
+}
+
+/** Materials, delivery, payment conditions and notes of a stored offer. */
 export default function OfferSummary({ offer }: { offer: Offer }) {
   const { t } = useTranslation()
 
@@ -130,7 +144,12 @@ export default function OfferSummary({ offer }: { offer: Offer }) {
         </div>
       </section>
 
-      {(offer.delivery ?? (offer as any).deliveryBatches ?? []).length > 0 && (
+      {offer.deliveryMode === "text" ? (
+        <TextSection
+          title={t("offers.builder.steps.delivery")}
+          text={offer.deliveryText}
+        />
+      ) : (offer.delivery ?? (offer as any).deliveryBatches ?? []).length > 0 && (
         <section>
           <h3 className="mb-2 text-sm font-semibold text-ink">
             {t("offers.builder.steps.delivery")}
@@ -201,6 +220,16 @@ export default function OfferSummary({ offer }: { offer: Offer }) {
           </ul>
         </section>
       )}
+
+      <TextSection
+        title={t("offers.builder.delivery.placeLabel")}
+        text={offer.deliveryPlace}
+      />
+
+      <TextSection
+        title={t("offers.builder.basics.paymentTermsText")}
+        text={offer.paymentTermsText}
+      />
 
       {(offer.notes || "").trim() && (
         <section>

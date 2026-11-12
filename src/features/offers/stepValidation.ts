@@ -156,6 +156,18 @@ function taxes(draft: OfferDraft): StepIssue[] {
 }
 
 function delivery(draft: OfferDraft): StepIssue[] {
+  // Text delivery has no schedule, it only needs its wording.
+  if (draft.deliveryMode === "text") {
+    return draft.deliveryText.trim()
+      ? []
+      : [
+          {
+            field: "offer-delivery-text",
+            message: "offers.builder.validation.deliveryText",
+          },
+        ]
+  }
+
   // The schedule itself is optional; a batch that exists needs a date.
   return draft.delivery
     .filter((batch) => !batch.date)

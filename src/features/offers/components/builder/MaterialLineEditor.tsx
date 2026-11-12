@@ -57,7 +57,7 @@ export default function MaterialLineEditor({
         <label className="flex flex-col gap-1 text-[13px] font-medium text-ink">
           {t("offers.builder.packaging.rate")}
           <DecimalInput
-            value={line.ratePerKg}
+            value={0}
             onValueChange={(ratePerKg) => onChange({ ratePerKg })}
           />
         </label>

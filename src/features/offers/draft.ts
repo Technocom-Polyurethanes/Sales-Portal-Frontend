@@ -72,7 +72,11 @@ export function createEmptyDraft(
     otherTaxPercent: 0,
     bankAccountIds: activeBankIds(banks),
     orderDiscountPercent: 0,
+    deliveryMode: "batches",
     delivery: [],
+    deliveryText: "",
+    deliveryPlace: "",
+    paymentTermsText: "",
     notes: "",
     documentLanguage: "en",
     ...overrides,
@@ -106,6 +110,10 @@ export function draftToPayload(
     currency: draft.currency,
     documentLanguage: draft.documentLanguage === "ar" ? "Ar" : "En",
     notes: draft.notes,
+    deliveryMode: draft.deliveryMode === "text" ? "Text" : "Batches",
+    deliveryText: draft.deliveryMode === "text" ? draft.deliveryText.trim() : "",
+    deliveryPlace: draft.deliveryPlace.trim(),
+    paymentTermsText: draft.paymentTermsText.trim(),
     orderDiscountPercent: draft.orderDiscountPercent,
     taxPercent: draft.taxPercent,
     otherTaxEnabled: draft.otherTaxEnabled,
@@ -125,7 +133,8 @@ export function draftToPayload(
         packages: row.packages,
       })),
     })),
-    deliveryBatches: draft.delivery.map((batch) => ({
+    // Text delivery has no schedule: the batches are never sent, whatever is left in the draft.
+    deliveryBatches: (draft.deliveryMode === "text" ? [] : draft.delivery).map((batch) => ({
       id: batch.id,
       batchNumber: batch.batchNumber,
       deliveryDate: batch.date,
@@ -248,6 +257,10 @@ export function offerToDraft(
           : allocation.packagingRowId,
       })),
     })),
+    deliveryMode: offer.deliveryMode ?? "batches",
+    deliveryText: offer.deliveryText ?? "",
+    deliveryPlace: offer.deliveryPlace ?? "",
+    paymentTermsText: offer.paymentTermsText ?? "",
     notes: offer.notes,
     documentLanguage: offer.documentLanguage,
   }

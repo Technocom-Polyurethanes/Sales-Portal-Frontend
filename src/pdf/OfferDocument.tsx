@@ -20,7 +20,10 @@ import DocumentFooter from "./sections/DocumentFooter"
 import DocumentHeader from "./sections/DocumentHeader"
 import ItemsTable from "./sections/ItemsTable"
 import NotesBlock from "./sections/NotesBlock"
+import PaymentTermsBlock from "./sections/PaymentTermsBlock"
 import ReferenceTable from "./sections/ReferenceTable"
+import TermsAndConditions from "./sections/TermsAndConditions"
+import TextBlock from "./sections/TextBlock"
 import TotalsBlock from "./sections/TotalsBlock"
 import { paginate } from "./paginate"
 import { getTemplate } from "./templates"
@@ -60,7 +63,6 @@ function buildReferenceRows(
       value: formatDocumentDate(data.issueDate),
       ltr: true,
     },
-    { label: template.terms, value: data.paymentTerm },
     ...validity,
   ]
 }
@@ -237,7 +239,7 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
               weightUnit={weightUnit}
               formatNumber={(value) =>
                 (value ?? 0).toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
+                  minimumFractionDigits: 0,
                   maximumFractionDigits: 2,
                 })
               }
@@ -245,7 +247,14 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
           </div>
 
           <div data-doc-unit>
-            <TotalsBlock rows={totalsRows} />
+            <div className="doc-summary-row">
+              <PaymentTermsBlock
+                heading={template.terms}
+                term={data.paymentTerm}
+                conditions={data.paymentTermsText}
+              />
+              <TotalsBlock rows={totalsRows} />
+            </div>
           </div>
 
           <div data-doc-unit data-doc-keep>
@@ -273,6 +282,16 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
             />
           </div>
 
+          {data.deliveryMode === "text" && (
+            <div data-doc-unit>
+              <TextBlock heading={template.delivery} text={data.deliveryText} />
+            </div>
+          )}
+
+          <div data-doc-unit>
+            <TextBlock heading={template.deliveryPlace} text={data.deliveryPlace} />
+          </div>
+
           <div data-doc-unit data-doc-keep>
             <BankAccountsTable
               heading={template.bankDetails}
@@ -291,6 +310,13 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
 
           <div data-doc-unit>
             <NotesBlock heading={template.notes} notes={data.notes} />
+          </div>
+
+          <div data-doc-unit data-doc-keep>
+            <TermsAndConditions
+              heading={template.termsAndConditionsHeading}
+              terms={template.termsAndConditions}
+            />
           </div>
         </>,
         source,

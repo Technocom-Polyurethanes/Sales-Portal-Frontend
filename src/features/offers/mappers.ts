@@ -35,6 +35,14 @@ export function mapOfferDetail(raw: any): Offer {
   if (mapped.documentLanguage && typeof mapped.documentLanguage === "string") {
     mapped.documentLanguage = mapped.documentLanguage.toLowerCase()
   }
+  // The API sends the delivery mode as "Batches" / "Text"; offers saved before it existed have none.
+  mapped.deliveryMode =
+    typeof mapped.deliveryMode === "string" && mapped.deliveryMode.toLowerCase() === "text"
+      ? "text"
+      : "batches"
+  mapped.deliveryText = mapped.deliveryText ?? ""
+  mapped.deliveryPlace = mapped.deliveryPlace ?? ""
+  mapped.paymentTermsText = mapped.paymentTermsText ?? ""
   // Handle backend field names if different
   if (mapped.netAfterDiscount !== undefined && mapped.netBeforeTax === undefined) {
     mapped.netBeforeTax = mapped.netAfterDiscount

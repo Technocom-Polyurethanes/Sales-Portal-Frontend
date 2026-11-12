@@ -16,7 +16,7 @@ import type {
   CompanySettings,
   PackageType,
 } from "../settings/types"
-import type { DeliveryBatch, Offer } from "./types"
+import type { DeliveryBatch, DeliveryMode, Offer } from "./types"
 
 /** The parts of an offer the printed document needs. */
 export type DocumentSource = {
@@ -54,6 +54,11 @@ export type DocumentSource = {
   otherTaxAmount: number
   total: number
   delivery: DeliveryBatch[]
+  /** Missing means batches. */
+  deliveryMode?: DeliveryMode
+  deliveryText?: string
+  deliveryPlace?: string
+  paymentTermsText?: string
   notes: string
 }
 
@@ -101,7 +106,8 @@ export function buildDocumentData(source: DocumentSource,
     categories.set(line.productId, line.category)
   }
 
-  const delivery: OfferDocumentBatch[] = (source.delivery ?? []).map((batch) => {
+  const scheduledBatches = source.deliveryMode === "text" ? [] : (source.delivery ?? [])
+  const delivery: OfferDocumentBatch[] = scheduledBatches.map((batch) => {
     const allocations = (batch.allocations ?? [])
       .filter((allocation: any) => categories.has(allocation.productId || allocation.materialId))
       .map((allocation: any) => {
@@ -167,6 +173,11 @@ export function buildDocumentData(source: DocumentSource,
     issueDate: source.issueDate,
     dueDate: source.dueDate,
     paymentTerm: options.paymentTermLabel,
+    paymentTermsText: (source.paymentTermsText ?? "").trim(),
+    deliveryMode: source.deliveryMode ?? "batches",
+    deliveryText:
+      source.deliveryMode === "text" ? (source.deliveryText ?? "").trim() : "",
+    deliveryPlace: (source.deliveryPlace ?? "").trim(),
     validityDays: normalizeValidityDays(source.validityDays),
     expiryDate: expiryDateFrom(source.issueDate, source.validityDays ?? 0),
     currency: source.currency,
@@ -265,6 +276,10 @@ export function offerToDocumentSource(offer: Offer): DocumentSource {
         packages: alloc.packages ?? 0,
       })),
     })),
+    deliveryMode: offer.deliveryMode ?? "batches",
+    deliveryText: offer.deliveryText ?? "",
+    deliveryPlace: offer.deliveryPlace ?? "",
+    paymentTermsText: offer.paymentTermsText ?? "",
     notes: offer.notes ?? "",
     attention: offer.attention ?? "",
     attentionAr: offer.attentionAr,

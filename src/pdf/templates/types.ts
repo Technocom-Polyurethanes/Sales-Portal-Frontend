@@ -34,6 +34,12 @@ export type OfferTemplate = {
   iban: string
   currency: string
   notes: string
+  /** Heading of the free delivery text. */
+  delivery: string
+  deliveryPlace: string
+  termsAndConditionsHeading: string
+  /** The terms and conditions printed on every offer. They are fixed, an offer cannot change them. */
+  termsAndConditions: string[]
 }
 
 /** Everything the document needs, already calculated by the feature layer. */
@@ -83,6 +89,14 @@ export type OfferDocumentData = {
   issueDate: string
   dueDate: string
   paymentTerm: string
+  /** Extra payment conditions (2-4 lines), printed under the payment term. */
+  paymentTermsText?: string
+  /** Missing means batches. */
+  deliveryMode?: "batches" | "text"
+  /** Free delivery wording, printed instead of the schedule when the mode is text. */
+  deliveryText?: string
+  /** Where the goods are handed over. Empty hides the block. */
+  deliveryPlace?: string
   /** Days the offer stays valid, 0 or missing hides the validity row. */
   validityDays?: number
   /** Day the offer expires (ISO). */

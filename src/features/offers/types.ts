@@ -42,6 +42,16 @@ export type OfferDraftLine = {
 
 export type OfferType = "Loc" | "Int"
 
+/** How delivery is described: dated batches built from the packages, or free text. */
+export type DeliveryMode = "batches" | "text"
+
+/** Longest free text the API accepts for each block (mirrors OfferTextLimits in the backend). */
+export const TEXT_LIMITS = {
+  deliveryText: 1000,
+  deliveryPlace: 300,
+  paymentTermsText: 800,
+} as const
+
 /** The state of the offer while it is being built. */
 export type OfferDraft = {
   /** Local or International offer type. */
@@ -71,7 +81,15 @@ export type OfferDraft = {
   bankAccountIds: string[]
   /** Order discount percentage applied to the subtotal. */
   orderDiscountPercent: number
+  /** Batches uses `delivery`, text uses `deliveryText` instead. */
+  deliveryMode: DeliveryMode
   delivery: DeliveryBatch[]
+  /** Free delivery wording, printed only when the delivery mode is text. */
+  deliveryText: string
+  /** Where the goods are handed over. Empty hides the block. */
+  deliveryPlace: string
+  /** Extra payment conditions printed under the selected payment term. */
+  paymentTermsText: string
   notes: string
   documentLanguage: DocumentLanguage
 }
@@ -115,7 +133,12 @@ export type Offer = {
   /** Days the offer stays valid from the issue date. */
   validityDays?: number
   lines: OfferLine[]
+  /** Missing on offers saved before the delivery modes existed, which means batches. */
+  deliveryMode?: DeliveryMode
   delivery: DeliveryBatch[]
+  deliveryText?: string
+  deliveryPlace?: string
+  paymentTermsText?: string
   taxPercent: number
   otherTaxEnabled: boolean
   otherTaxName: string
