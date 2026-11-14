@@ -10,8 +10,28 @@ on:
       - master
       - main
 
-  # Optional: Allows triggering a deploy manually from the GitHub Actions tab
+  # Manual run from the GitHub Actions tab. Bumps the version (or skips the bump
+  # with "none") and then deploys the branch it was started from.
   workflow_dispatch:
+    inputs:
+      bump:
+        description: Version increment to apply before deploying
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - none
+
+# Runs for the same ref are queued, never run side by side and never cancelled midway,
+# so two quick merges cannot race each other while bumping the version or deploying.
+concurrency:
+  group: frontend-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
   # ---------------------------------------------------------------------------
@@ -52,12 +72,93 @@ jobs:
         run: pnpm run build
 
   # ---------------------------------------------------------------------------
-  # Job 2: Deploy to Vercel Production (ONLY on push to master/main)
+  # Job 2: Bump the version on the branch itself (ONLY on push/manual run on master/main)
+  #
+  # Runs after the merge and commits straight to the branch, so there is no extra
+  # branch and no second pull request. The commit message contains [skip ci], so it
+  # does not start another run, and the deploy job below picks the commit up.
+  #   feat/* or feature/* branches -> minor, everything else -> patch.
+  # ---------------------------------------------------------------------------
+  version:
+    name: Bump version
+    needs: verify
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Bump version and push
+        id: bump
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          REF_NAME: ${{ github.ref_name }}
+          EVENT: ${{ github.event_name }}
+          INPUT_BUMP: ${{ inputs.bump }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT" == "workflow_dispatch" ]]; then
+            level="$INPUT_BUMP"
+          else
+            # Name of the pull request branch that produced this commit (empty for direct pushes).
+            branch=$(gh api "repos/$REPO/commits/$SHA/pulls" --jq '.[0].head.ref // ""' || true)
+            case "$branch" in
+              feat/*|feature/*) level=minor ;;
+              *)                level=patch ;;
+            esac
+          fi
+          echo "Version increment: $level"
+
+          if [[ "$level" == "none" ]]; then
+            echo "version=$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          npm version "$level" --no-git-tag-version
+          version=$(jq -r .version package.json)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore(release): v${version} [skip ci]"
+
+          # Another merge may have landed since checkout, so rebase and retry the push.
+          for attempt in 1 2 3; do
+            git pull --rebase origin "$REF_NAME"
+            if git push origin "HEAD:$REF_NAME"; then
+              echo "Pushed v${version} to $REF_NAME"
+              exit 0
+            fi
+            echo "Push attempt $attempt failed, retrying..."
+            sleep 5
+          done
+          echo "::error::Could not push the version bump. If $REF_NAME is protected, allow the GitHub Actions app to bypass the ruleset."
+          exit 1
+
+  # ---------------------------------------------------------------------------
+  # Job 3: Deploy to Vercel Production (ONLY on push/manual run on master/main)
   # ---------------------------------------------------------------------------
   deploy-production:
     name: Deploy to Vercel Production
-    needs: verify
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
+    needs: [verify, version]
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
 
     env:
@@ -68,8 +169,11 @@ jobs:
       name: Production
 
     steps:
+      # Check out the branch tip, not the triggering commit, so the version bump is included.
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -101,4 +205,4 @@ jobs:
           echo "url=$url" >> $GITHUB_OUTPUT
 
       - name: Output Production URL
-        run: echo "Deployed to ${{ steps.deploy.outputs.url }}"
+        run: echo "Deployed v${{ needs.version.outputs.version }} to ${{ steps.deploy.outputs.url }}"
