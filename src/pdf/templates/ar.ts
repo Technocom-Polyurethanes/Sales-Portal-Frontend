@@ -11,7 +11,7 @@ export const arabicTemplate: OfferTemplate = {
   terms: "شروط الدفع",
   validity: "صلاحية العرض",
   dueDate: "تاريخ الاستحقاق",
-  item: "الخامة والوصف",
+  item: "الصنف",
   quantity: "الكمية (كجم)",
   rate: "سعر الوحدة",
   amount: "المبلغ",

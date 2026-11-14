@@ -11,7 +11,7 @@ export const englishTemplate: OfferTemplate = {
   terms: "Payment Terms",
   validity: "Offer Validity",
   dueDate: "Due Date",
-  item: "Material & Description",
+  item: "Item",
   quantity: "Qty (kg)",
   rate: "Unit Price",
   amount: "Amount",
