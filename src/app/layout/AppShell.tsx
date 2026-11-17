@@ -1,29 +1,14 @@
 import { useState } from "react"
-import { Outlet, useNavigate } from "react-router-dom"
+import { Outlet } from "react-router-dom"
 
 import Button from "../../components/ui/Button"
 import Dialog from "../../components/ui/Dialog"
 import Icon from "../../components/ui/Icon"
-import { usePermissions } from "../../features/account/hooks/usePermissions"
-import type { Permission } from "../../features/account/permissions"
 import { useTranslation } from "../../i18n/I18nProvider"
 import type { TranslationKey } from "../../i18n/types"
 import AppFooter from "./AppFooter"
-import BottomNav from "./BottomNav"
 import Sidebar from "./Sidebar"
 import Topbar from "./Topbar"
-
-const MORE_LINKS: {
-  to: string
-  labelKey: TranslationKey
-  permission?: Permission
-}[] = [
-  { to: "/banks", labelKey: "nav.banks" },
-  { to: "/import", labelKey: "nav.import", permission: "import.use" },
-  { to: "/users", labelKey: "nav.users", permission: "users.manage" },
-  { to: "/settings", labelKey: "nav.settings" },
-  { to: "/account", labelKey: "nav.account" },
-]
 
 const HELP_TIPS: TranslationKey[] = [
   "dashboard.createNewOffer",
@@ -34,11 +19,8 @@ const HELP_TIPS: TranslationKey[] = [
 
 export default function AppShell() {
   const { t } = useTranslation()
-  const navigate = useNavigate()
-  const { can } = usePermissions()
   const [menuOpen, setMenuOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
-  const [moreOpen, setMoreOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-page">
@@ -70,13 +52,11 @@ export default function AppShell() {
           onOpenMenu={() => setMenuOpen(true)}
           onOpenHelp={() => setHelpOpen(true)}
         />
-        <main className="flex-1 px-4 py-6 pb-24 lg:px-8 lg:py-8 lg:pb-10">
+        <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 lg:pb-10">
           <Outlet />
         </main>
         <AppFooter />
       </div>
-
-      <BottomNav onOpenMore={() => setMoreOpen(true)} />
 
       <Dialog
         open={helpOpen}
@@ -99,29 +79,6 @@ export default function AppShell() {
             </li>
           ))}
         </ul>
-      </Dialog>
-
-      <Dialog
-        open={moreOpen}
-        title={t("common.more")}
-        onClose={() => setMoreOpen(false)}
-      >
-        <div className="flex flex-col gap-1">
-          {MORE_LINKS.filter((link) => !link.permission || can(link.permission)).map((link) => (
-            <button
-              key={link.to}
-              type="button"
-              onClick={() => {
-                setMoreOpen(false)
-                navigate(link.to)
-              }}
-              className="flex items-center justify-between rounded-md px-3 py-2.5 text-sm text-ink transition-colors hover:bg-page"
-            >
-              {t(link.labelKey)}
-              <Icon name="chevron" size={16} className="text-muted" />
-            </button>
-          ))}
-        </div>
       </Dialog>
     </div>
   )

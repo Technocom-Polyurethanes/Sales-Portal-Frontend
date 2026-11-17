@@ -61,6 +61,22 @@ export default function CustomersPage() {
         ),
       },
       {
+        key: "city",
+        header: t("customers.cityEn"),
+        secondary: true,
+        render: (customer) => (
+          <span className="text-muted">{customer.city || "—"}</span>
+        ),
+      },
+      {
+        key: "cityAr",
+        header: t("customers.cityAr"),
+        secondary: true,
+        render: (customer) => (
+          <span className="text-muted">{customer.cityAr || "—"}</span>
+        ),
+      },
+      {
         key: "contact",
         header: t("customers.contact"),
         secondary: true,

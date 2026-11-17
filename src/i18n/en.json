@@ -52,7 +52,6 @@
     "download": "Download",
     "rightsReserved": "All rights reserved.",
     "version": "Version {version}",
-    "more": "More",
     "menu": "Menu"
   },
   "nav": {
@@ -222,6 +221,9 @@
         "textLabel": "Delivery terms",
         "textHint": "Printed instead of the delivery schedule.",
         "textPlaceholder": "Ready stock, delivered once the purchase order is confirmed and paid.",
+        "presetLabel": "Delivery preset",
+        "presetPlaceholder": "Choose a preset…",
+        "presetCustom": "Custom text",
         "placeLabel": "Delivery place",
         "placeHint": "Printed in its own block. Leave empty to hide it.",
         "placePlaceholder": "Our factories in Badr City."
@@ -320,6 +322,8 @@
     "nameAr": "Customer (Arabic)",
     "taxId": "Tax ID",
     "city": "City",
+    "cityEn": "City (English)",
+    "cityAr": "City (Arabic)",
     "email": "Email",
     "phone": "Phone",
     "address": "Address",

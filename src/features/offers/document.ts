@@ -16,6 +16,7 @@ import type {
   CompanySettings,
   PackageType,
 } from "../settings/types"
+import { deliveryTextIn } from "./deliveryPresets"
 import type { DeliveryBatch, DeliveryMode, Offer } from "./types"
 
 /** The parts of an offer the printed document needs. */
@@ -157,6 +158,8 @@ export function buildDocumentData(source: DocumentSource,
     customerNameAr: options.customer?.nameAr ?? "",
     customerAddress: options.customer?.address ?? "",
     customerAddressAr: options.customer?.addressAr ?? "",
+    customerCity: options.customer?.city || options.customer?.cityAr || "",
+    customerCityAr: options.customer?.cityAr || options.customer?.city || "",
     attention:
       source.attention === undefined
         ? (options.customer?.contactPerson ?? "").trim()
@@ -176,7 +179,9 @@ export function buildDocumentData(source: DocumentSource,
     paymentTermsText: (source.paymentTermsText ?? "").trim(),
     deliveryMode: source.deliveryMode ?? "batches",
     deliveryText:
-      source.deliveryMode === "text" ? (source.deliveryText ?? "").trim() : "",
+      source.deliveryMode === "text"
+        ? deliveryTextIn(source.deliveryText, options.language)
+        : "",
     deliveryPlace: (source.deliveryPlace ?? "").trim(),
     validityDays: normalizeValidityDays(source.validityDays),
     expiryDate: expiryDateFrom(source.issueDate, source.validityDays ?? 0),
@@ -201,7 +206,7 @@ export function buildDocumentData(source: DocumentSource,
       iban: bank.iban,
       currency: bank.currency,
     })),
-    notes: source.notes,
+    notes: source.notes ?? "",
   }
 }
 

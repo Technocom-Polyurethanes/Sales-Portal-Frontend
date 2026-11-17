@@ -30,9 +30,6 @@ export function visibleNavItems(
   return items.filter((item) => !item.permission || can(item.permission))
 }
 
-/** Items shown in the mobile bottom bar. */
-export const BOTTOM_NAV_ITEMS: NavItem[] = NAV_ITEMS.slice(0, 4)
-
 type PathLabel = {
   prefix: string
   labelKey: TranslationKey

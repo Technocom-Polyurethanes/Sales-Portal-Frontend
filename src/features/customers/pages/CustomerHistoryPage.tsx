@@ -165,7 +165,8 @@ export default function CustomerHistoryPage() {
           />
           <Detail label={t("customers.email")} value={customer.email} />
           <Detail label={t("customers.phone")} value={customer.phone} />
-          <Detail label={t("customers.city")} value={customer.city} />
+          <Detail label={t("customers.cityEn")} value={customer.city} />
+          <Detail label={t("customers.cityAr")} value={customer.cityAr} />
           <div className="sm:col-span-2">
             <Detail label={t("customers.address")} value={customer.address} />
           </div>

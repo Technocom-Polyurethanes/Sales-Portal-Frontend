@@ -8,6 +8,8 @@ import { useLookupPage } from "./useLookupPage"
 import { useTranslation } from "../../i18n/I18nProvider"
 import { queryCustomers } from "../../lib/api/lookup"
 import { useFitRowsPageSize } from "../../hooks/useFitRowsPageSize"
+import { usePermissions } from "../../features/account/hooks/usePermissions"
+import CustomerDialog from "../../features/customers/components/CustomerDialog"
 import type { Customer } from "../../features/customers/types"
 
 export type CustomerPickerModalProps = {
@@ -25,10 +27,14 @@ export default function CustomerPickerModal({
   onSelect,
   onClose,
 }: CustomerPickerModalProps) {
-  const { language } = useTranslation()
+  const { language, t } = useTranslation()
+  const { can } = usePermissions()
+  const canCreate = can("catalog.create")
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
   const [highlight, setHighlight] = useState(0)
+  const [creating, setCreating] = useState(false)
+  const [created, setCreated] = useState<Customer[]>([])
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const pageSize = useFitRowsPageSize(containerRef, 44, 48, 0, open)
@@ -60,9 +66,9 @@ export default function CustomerPickerModal({
   const fallback = useMemo(
     () =>
       lookup.failed
-        ? queryCustomers(customers, { search, page, pageSize: pageSize || FALLBACK_ROWS })
+        ? queryCustomers([...created, ...customers], { search, page, pageSize: pageSize || FALLBACK_ROWS })
         : null,
-    [lookup.failed, customers, search, page, pageSize],
+    [lookup.failed, created, customers, search, page, pageSize],
   )
 
   const current = fallback ?? lookup.data
@@ -124,9 +130,16 @@ export default function CustomerPickerModal({
           <h2 className="text-base font-semibold text-ink">
             {language === "ar" ? "اختر العميل" : "Select customer"}
           </h2>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <Icon name="close" size={16} />
-          </Button>
+          <div className="flex items-center gap-2">
+            {canCreate && (
+              <Button variant="secondary" size="sm" onClick={() => setCreating(true)}>
+                {t("customers.newCustomer")}
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              <Icon name="close" size={16} />
+            </Button>
+          </div>
         </div>
         <div className="border-b border-slate-200 px-4 py-2">
           <div className="relative">
@@ -158,14 +171,20 @@ export default function CustomerPickerModal({
                 <th className="border-b border-line px-4 text-start text-xs font-semibold uppercase tracking-wide text-muted">
                   {language === "ar" ? "اسم العميل" : "Customer Name"}
                 </th>
+                <th className="w-48 border-b border-line px-4 text-start text-xs font-semibold uppercase tracking-wide text-muted">
+                  {language === "ar" ? "المدينة" : "City"}
+                </th>
               </tr>
             </thead>
             <tbody className={lookup.loading && lookup.previous ? "opacity-60 transition-opacity" : ""}>
-              {showSkeleton && <TableSkeleton asRows rows={rows} columns={2} />}
+              {showSkeleton && <TableSkeleton asRows rows={rows} columns={3} />}
               {!showSkeleton &&
                 items.map((customer, index) => {
                   const code = customer.customerCode ?? customer.erpNextId ?? customer.code
                   const name = language === "ar" && customer.nameAr ? customer.nameAr : customer.name
+                  const city = language === "ar"
+                    ? customer.cityAr ?? customer.city
+                    : customer.city ?? customer.cityAr
                   return (
                     <tr
                       key={customer.id}
@@ -175,6 +194,7 @@ export default function CustomerPickerModal({
                     >
                       <td className="truncate whitespace-nowrap px-4 font-mono text-sm text-slate-700">{code}</td>
                       <td className="truncate whitespace-nowrap px-4 text-sm text-ink">{name}</td>
+                      <td className="truncate whitespace-nowrap px-4 text-sm text-muted">{city || "—"}</td>
                     </tr>
                   )
                 })}
@@ -190,6 +210,17 @@ export default function CustomerPickerModal({
           totalCount={totalCount}
           pending={totals === null}
           onPage={setPage}
+        />
+        <CustomerDialog
+          open={creating}
+          onClose={() => setCreating(false)}
+          onSaved={() => {}}
+          onCreated={(customer) => {
+            setCreated((rows) => [customer, ...rows])
+            setCreating(false)
+            onSelect(customer)
+            onClose()
+          }}
         />
       </div>
     </div>

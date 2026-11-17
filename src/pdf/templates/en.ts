@@ -39,6 +39,6 @@ export const englishTemplate: OfferTemplate = {
   deliveryPlace: "Delivery Place",
   termsAndConditionsHeading: "Terms and Conditions",
   termsAndConditions: [
-    "Force Majeur conditions applies to above Offer ( CBE foreign currencies rate, availability, Quantities, prices, deliveries plan .….etc )",
+    "Force majeure conditions applies to above Offer ( CBE foreign currencies rate, availability, Quantities, prices, deliveries plan .….etc )",
   ],
 }
