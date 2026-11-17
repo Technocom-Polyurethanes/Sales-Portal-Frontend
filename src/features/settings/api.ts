@@ -1,15 +1,24 @@
 import { api } from "../../lib/api/client"
 import { cached, invalidate } from "../../lib/cache/queryCache"
+import { normalizeSettings } from "./normalize"
 import type { PackageType, WorkspaceSettings, BankAccount } from "./types"
 
 export const settingsApi = {
-  /** Cached: opening an offer reads the company, bank and packaging settings every time. */
+  /**
+   * Cached: opening an offer reads the company, bank and packaging settings every time.
+   * The server splits these across `/settings` and `/catalog/bootstrap`, so both are read
+   * and merged into one answer where `banks` and `packageTypes` are always arrays.
+   */
   load(): Promise<WorkspaceSettings> {
-    return cached("settings:load", ["catalog"], () =>
-      api
-        .get<WorkspaceSettings>("/settings")
-        .catch(() => api.get<WorkspaceSettings>("/catalog/settings")),
-    )
+    return cached("settings:load", ["catalog"], async () => {
+      const [settings, bootstrap] = await Promise.all([
+        api
+          .get<any>("/settings")
+          .catch(() => api.get<any>("/catalog/settings").catch(() => undefined)),
+        api.get<any>("/catalog/bootstrap").catch(() => undefined),
+      ])
+      return normalizeSettings(settings, bootstrap)
+    })
   },
   /** Package types live in the catalog bootstrap; the old settings answer is the fallback. */
   async packageTypes(): Promise<PackageType[]> {
