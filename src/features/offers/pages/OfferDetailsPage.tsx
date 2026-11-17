@@ -12,11 +12,13 @@ import { formatDateTime, formatIsoDay } from "../../../lib/formatters/date"
 import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatCurrency } from "../../../lib/formatters/number"
 import OfferDocumentPreview from "../../../pdf/OfferDocumentPreview"
+import type { DocumentLanguage } from "../../../pdf/PdfLanguageProvider"
 import { usePrintOffer } from "../../../pdf/PrintProvider"
 import { usePermissions } from "../../account/hooks/usePermissions"
 import { offersApi } from "../api"
 import { banksForOffer } from "../bankSelection"
 import DetailsSkeleton from "../components/DetailsSkeleton"
+import DocumentLanguageToggle from "../components/DocumentLanguageToggle"
 import OfferSummary from "../components/OfferSummary"
 import StatusDialog from "../components/StatusDialog"
 import VersionHistory from "../components/VersionHistory"
@@ -35,22 +37,30 @@ export default function OfferDetailsPage() {
   const { print } = usePrintOffer()
   const [statusOpen, setStatusOpen] = useState(false)
   const [saving, setSaving] = useState(false)
+  // The document opens in the language the offer was saved in. Switching it here only changes
+  // what is shown and printed, the saved language stays as it was.
+  const [languageChoice, setLanguageChoice] = useState<
+    { offerId: string | undefined; language: DocumentLanguage } | undefined
+  >()
+  const documentLanguage: DocumentLanguage =
+    languageChoice && languageChoice.offerId === id
+      ? languageChoice.language
+      : (data?.offer.documentLanguage ?? "en")
 
   const documentData = useMemo(() => {
     if (!data) return undefined
 
     const term = getPaymentTerm(data.offer.paymentTermId)
-    const language = data.offer.documentLanguage
 
     return buildDocumentData(offerToDocumentSource(data.offer), {
       customer: data.customer,
       company: data.company,
       banks: banksForOffer(data.banks, data.offer.bankAccountIds),
       packageTypes: data.packageTypes,
-      language,
-      paymentTermLabel: language === "ar" ? term.labelAr : term.label,
+      language: documentLanguage,
+      paymentTermLabel: documentLanguage === "ar" ? term.labelAr : term.label,
     })
-  }, [data])
+  }, [data, documentLanguage])
 
   const changeStatus = async (status: OfferStatus) => {
     if (!data) return
@@ -114,7 +124,7 @@ export default function OfferDetailsPage() {
               icon={<Icon name="print" size={16} />}
               onClick={() =>
                 documentData &&
-                print({ data: documentData, language: offer.documentLanguage })
+                print({ data: documentData, language: documentLanguage })
               }
             >
               {t("common.print")}
@@ -229,14 +239,22 @@ export default function OfferDetailsPage() {
         </div>
 
         <aside className="lg:sticky lg:top-20">
-          <h2 className="mb-2 text-sm font-semibold text-ink">
-            {t("offers.builder.preview.title")}
-          </h2>
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold text-ink">
+              {t("offers.builder.preview.title")}
+            </h2>
+            <DocumentLanguageToggle
+              language={documentLanguage}
+              onChange={(next) =>
+                setLanguageChoice({ offerId: id, language: next })
+              }
+            />
+          </div>
           <div className="max-h-[calc(100vh-8rem)] overflow-auto rounded-md border border-line p-3">
             {documentData && (
               <OfferDocumentPreview
                 data={documentData}
-                language={offer.documentLanguage}
+                language={documentLanguage}
               />
             )}
           </div>

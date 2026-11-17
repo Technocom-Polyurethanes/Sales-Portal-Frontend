@@ -2,6 +2,7 @@ import { useTranslation } from "../../../../i18n/I18nProvider"
 import OfferDocumentPreview from "../../../../pdf/OfferDocumentPreview"
 import type { DocumentLanguage } from "../../../../pdf/PdfLanguageProvider"
 import type { OfferDocumentData } from "../../../../pdf/templates/types"
+import DocumentLanguageToggle from "../DocumentLanguageToggle"
 
 export type LivePreviewProps = {
   data: OfferDocumentData
@@ -24,27 +25,10 @@ export default function LivePreview({
           {t("offers.builder.preview.title")}
         </h2>
 
-        <div
-          role="group"
-          aria-label={t("offers.builder.pdfLanguage")}
-          className="flex overflow-hidden rounded-md border border-line"
-        >
-          {(["en", "ar"] as DocumentLanguage[]).map((option) => (
-            <button
-              key={option}
-              type="button"
-              onClick={() => onLanguageChange(option)}
-              aria-pressed={language === option}
-              className={`px-2.5 py-1 text-xs font-medium transition-colors ${
-                language === option
-                  ? "bg-primary text-white"
-                  : "bg-surface text-muted hover:text-ink"
-              }`}
-            >
-              {option === "en" ? t("common.english") : t("common.arabic")}
-            </button>
-          ))}
-        </div>
+        <DocumentLanguageToggle
+          language={language}
+          onChange={onLanguageChange}
+        />
       </div>
 
       <p className="mb-2 text-xs text-muted">

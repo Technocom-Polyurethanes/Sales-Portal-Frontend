@@ -113,6 +113,21 @@ export type DeliveryBatch = {
   allocations: DeliveryAllocation[]
 }
 
+/**
+ * One line of the stored document snapshot. The API sends a stored offer's lines without
+ * names, category or amounts; those are only here.
+ */
+export type OfferSnapshotItem = {
+  offerLineId?: string
+  materialId?: string
+  materialName?: string
+  materialCode?: string
+  category?: string
+  quantityKg?: number
+  amount?: number
+  packaging?: { packageTypeId?: string; packageTypeName?: string }[]
+}
+
 export type Offer = {
   id: string
   reference: string
@@ -159,6 +174,8 @@ export type Offer = {
   rootOfferId?: string
   totals: Totals
   documentLanguage: DocumentLanguage
+  /** The stored document snapshot, it carries the names the line DTOs do not. */
+  document?: { items?: OfferSnapshotItem[] }
   /** Who created the offer and when: set by the server, never typed. */
   createdByName?: string | null
   createdAt: string
