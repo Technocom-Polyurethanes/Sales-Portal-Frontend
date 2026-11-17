@@ -207,27 +207,58 @@ export function reconcileDelivery(
   }))
 }
 
-/** Turns a stored offer back into an editable draft. */
+/** What the builder already loaded, used to name the lines of a stored offer. */
+export type DraftLookup = {
+  products?: Product[]
+  packageTypes?: PackageType[]
+}
+
+/**
+ * Turns a stored offer back into an editable draft.
+ *
+ * The API sends a stored offer's lines as draft lines: material and package type ids, but no
+ * names. They are resolved from the catalogue, then from the stored document snapshot, so a
+ * new version or a duplicate never starts with blank item names.
+ */
 export function offerToDraft(
   offer: Offer,
   banks: BankAccount[] = [],
+  lookup: DraftLookup = {},
 ): OfferDraft {
   const rowIds = new Map<string, string>()
+  const snapshot = offer.document?.items ?? []
 
-  const lines = offer.lines.map((line) => ({
-    id: draftId("line"),
-    productId: line.productId,
-    materialName: line.materialName,
-    materialCode: line.materialCode,
-    category: line.category,
-    ratePerKg: line.ratePerKg,
-    discountPercent: line.discountPercent,
-    packaging: line.packaging.map((row) => {
-      const id = draftId("pack")
-      rowIds.set(row.id, id)
-      return { ...row, id }
-    }),
-  }))
+  const lines = (offer.lines ?? []).map((line) => {
+    const productId = line.productId ?? line.materialId
+    const item =
+      snapshot.find((entry) => entry.offerLineId === line.id) ??
+      snapshot.find((entry) => entry.materialId === productId)
+    const product = lookup.products?.find((entry) => entry.id === productId)
+
+    return {
+      id: draftId("line"),
+      productId,
+      materialName: line.materialName ?? product?.name ?? item?.materialName ?? "",
+      materialCode: line.materialCode ?? product?.code ?? item?.materialCode ?? "",
+      category: line.category ?? product?.category ?? item?.category ?? "",
+      ratePerKg: line.ratePerKg,
+      discountPercent: line.discountPercent,
+      packaging: (line.packaging ?? []).map((row) => {
+        const id = draftId("pack")
+        rowIds.set(row.id, id)
+        const type = lookup.packageTypes?.find((entry) => entry.id === row.packageTypeId)
+        const stored = item?.packaging?.find(
+          (entry) => entry.packageTypeId === row.packageTypeId,
+        )
+        return {
+          ...row,
+          id,
+          packageTypeName:
+            row.packageTypeName ?? type?.name ?? stored?.packageTypeName ?? "",
+        }
+      }),
+    }
+  })
 
   return {
     reference: offer.reference,
@@ -247,15 +278,22 @@ export function offerToDraft(
     orderDiscountPercent: offer.orderDiscountPercent ?? 0,
     offerType: (offer.offerType ?? "Loc") as OfferType,
     sequence: referenceSequence(offer.reference) ?? 0,
-    delivery: offer.delivery.map((batch) => ({
+    delivery: (offer.delivery ?? []).map((batch) => ({
       ...batch,
       id: draftId("batch"),
-      allocations: batch.allocations.map((allocation) => ({
-        ...allocation,
-        packagingRowId: allocation.packagingRowId
-          ? rowIds.get(allocation.packagingRowId) ?? allocation.packagingRowId
-          : allocation.packagingRowId,
-      })),
+      allocations: (batch.allocations ?? []).map((allocation) => {
+        // The API names the link `offerLinePackagingId` and the material `materialId`.
+        const storedRowId =
+          allocation.packagingRowId ??
+          (allocation as { offerLinePackagingId?: string }).offerLinePackagingId
+        return {
+          ...allocation,
+          productId: allocation.productId ?? allocation.materialId,
+          packagingRowId: storedRowId
+            ? (rowIds.get(storedRowId) ?? storedRowId)
+            : storedRowId,
+        }
+      }),
     })),
     deliveryMode: offer.deliveryMode ?? "batches",
     deliveryText: offer.deliveryText ?? "",

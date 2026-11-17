@@ -53,9 +53,9 @@ export function useOfferDetails(id: string | undefined) {
       offer,
       versions: sortedVersions,
       customer,
-      company: settings.company,
-      banks: settings.banks,
-      packageTypes: settings.packageTypes,
+      company: settings.company ?? ({} as CompanySettings),
+      banks: settings.banks ?? [],
+      packageTypes: settings.packageTypes ?? [],
     }
   }, [id])
 }

@@ -14,12 +14,13 @@ export function activeBankIds(banks: BankAccount[]): string[] {
 
 /** The accounts printed on an offer; null means every account in the catalog. */
 export function banksForOffer(
-  banks: BankAccount[],
+  banks: BankAccount[] | null | undefined,
   ids: string[] | null | undefined,
 ): BankAccount[] {
-  if (ids == null) return banks
+  const catalog = banks ?? []
+  if (ids == null) return catalog
   const selected = new Set(ids)
-  return banks.filter((bank) => selected.has(bank.id))
+  return catalog.filter((bank) => selected.has(bank.id))
 }
 
 export function toggleBank(ids: string[], id: string): string[] {
