@@ -176,7 +176,7 @@
         "customerPlaceholder": "Select customer…",
         "customerChange": "Change",
         "paymentTermsText": "Payment conditions",
-        "paymentTermsTextHint": "Optional. Printed under the payment term in a block of its own, so it can run to several lines.",
+        "paymentTermsTextHint": "Starts from the selected payment term and can be edited for this offer only.",
         "paymentTermsTextPlaceholder": "Bank transfer on receipt to the company account, with the transfer receipt sent to us.",
         "paymentTermAdd": "Add custom term"
       },

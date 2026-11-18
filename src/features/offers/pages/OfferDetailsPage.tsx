@@ -47,21 +47,37 @@ export default function OfferDetailsPage() {
       ? languageChoice.language
       : (data?.offer.documentLanguage ?? "en")
 
-  const documentData = useMemo(() => {
+  const viewOffer = useMemo(() => {
     if (!data) return undefined
 
     const term = findPaymentTerm(data.paymentTerms, data.offer.paymentTermId)
+    const savedText = (data.offer.paymentTermsText ?? "").trim()
+    const savedDefault = paymentTermConditions(term, data.offer.documentLanguage)
 
-    return buildDocumentData(offerToDocumentSource(data.offer), {
+    return {
+      term,
+      offer: {
+        ...data.offer,
+        paymentTermsText:
+          savedText !== "" && savedText === savedDefault
+            ? paymentTermConditions(term, documentLanguage)
+            : data.offer.paymentTermsText,
+      },
+    }
+  }, [data, documentLanguage])
+
+  const documentData = useMemo(() => {
+    if (!data || !viewOffer) return undefined
+
+    return buildDocumentData(offerToDocumentSource(viewOffer.offer), {
       customer: data.customer,
       company: data.company,
       banks: banksForOffer(data.banks, data.offer.bankAccountIds),
       packageTypes: data.packageTypes,
       language: documentLanguage,
-      paymentTermLabel: paymentTermLabel(term, documentLanguage),
-      paymentConditions: paymentTermConditions(term, documentLanguage),
+      paymentTermLabel: paymentTermLabel(viewOffer.term, documentLanguage),
     })
-  }, [data, documentLanguage])
+  }, [data, documentLanguage, viewOffer])
 
   const changeStatus = async (status: OfferStatus) => {
     if (!data) return
@@ -231,7 +247,7 @@ export default function OfferDetailsPage() {
               </div>
             </dl>
 
-            <OfferSummary offer={offer} />
+            <OfferSummary offer={viewOffer?.offer ?? offer} />
           </Card>
 
           <Card title={t("offers.details.versions")}>
