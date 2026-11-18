@@ -23,3 +23,25 @@ export function paymentTermConditions(term: PaymentTerm, language: Language): st
   const text = language === "ar" ? term.conditionsAr || term.conditions : term.conditions
   return (text ?? "").trim().split("{days}").join(String(term.days ?? 0))
 }
+
+/**
+ * Replaces the offer's payment conditions with the new term's default only while the text is still
+ * the unedited default of the previous term; a custom wording typed for the offer is kept.
+ */
+export function nextPaymentTermsText(options: {
+  current: string
+  previousTerm?: PaymentTerm
+  previousLanguage: Language
+  nextTerm: PaymentTerm
+  nextLanguage: Language
+}): string {
+  const current = options.current.trim()
+  const unedited =
+    !options.previousTerm ||
+    current === paymentTermConditions(options.previousTerm, options.previousLanguage) ||
+    current === paymentTermConditions(options.previousTerm, "en") ||
+    current === paymentTermConditions(options.previousTerm, "ar")
+  return unedited
+    ? paymentTermConditions(options.nextTerm, options.nextLanguage)
+    : options.current
+}
