@@ -7,7 +7,8 @@ import Icon from "../../../../components/ui/Icon"
 import { useToast } from "../../../../components/ui/ToastProvider"
 import { useTranslation } from "../../../../i18n/I18nProvider"
 import { ApiError } from "../../../../lib/api/types"
-import { getPaymentTerm } from "../../../../lib/calculations/dueDate"
+import { findPaymentTerm, paymentTermConditions, paymentTermLabel } from "../../paymentTerm"
+import { settingsApi } from "../../../settings/api"
 import { usePdfLanguage } from "../../../../pdf/PdfLanguageProvider"
 import { usePrintOffer } from "../../../../pdf/PrintProvider"
 import { offersApi } from "../../api"
@@ -59,6 +60,17 @@ export default function BuilderWorkspace({
   const { print } = usePrintOffer()
   const [saving, setSaving] = useState<OfferStatus | null>(null)
   const [reviewOpen, setReviewOpen] = useState(false)
+  // Terms created while building this offer; the catalogue lists them after the next load.
+  const [createdTerms, setCreatedTerms] = useState<PaymentTerm[]>([])
+  const paymentTerms = useMemo(
+    () => [...catalog.paymentTerms, ...createdTerms.filter((term) => !catalog.paymentTerms.some((item) => item.id === term.id))],
+    [catalog.paymentTerms, createdTerms],
+  )
+  const createPaymentTerm = async (term: Omit<PaymentTerm, "id" | "code">) => {
+    const created = await settingsApi.paymentTerms.create(term)
+    setCreatedTerms((current) => [...current, created])
+    return created
+  }
   const [error, setError] = useState<string | undefined>(undefined)
 
   const controller = useOfferBuilder({
@@ -130,14 +142,17 @@ export default function BuilderWorkspace({
           packageTypes: catalog.packageTypes,
           language: draft.documentLanguage,
           paymentTermLabel: paymentTermLabel(
-            catalog.paymentTerms,
-            draft.paymentTermId,
+            findPaymentTerm(paymentTerms, draft.paymentTermId),
+            draft.documentLanguage,
+          ),
+          paymentConditions: paymentTermConditions(
+            findPaymentTerm(paymentTerms, draft.paymentTermId),
             draft.documentLanguage,
           ),
         },
       )
     },
-    [calculations, serverCalculations, draft, customer, catalog],
+    [calculations, serverCalculations, draft, customer, catalog, paymentTerms],
   )
 
   const steps = [
@@ -315,7 +330,8 @@ export default function BuilderWorkspace({
             <StepBasics
               draft={draft}
               customers={catalog.customers}
-              paymentTerms={catalog.paymentTerms}
+              paymentTerms={paymentTerms}
+              onCreatePaymentTerm={createPaymentTerm}
               dueDate={serverCalculations?.dueDate || calculations.dueDate}
               onChange={controller.setDraft}
               errors={fieldErrors}
@@ -443,16 +459,6 @@ export default function BuilderWorkspace({
       />
     </div>
   )
-}
-
-// The backend term ids are GUIDs, so look the term up in the catalog first.
-function paymentTermLabel(
-  terms: PaymentTerm[],
-  termId: string,
-  language: "en" | "ar",
-): string {
-  const term = terms.find((item) => item.id === termId) ?? getPaymentTerm(termId)
-  return language === "ar" ? term.labelAr || term.label : term.label
 }
 
 function apiMessage(e: unknown, fallback: string): string {

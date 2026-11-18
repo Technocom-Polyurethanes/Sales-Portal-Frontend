@@ -47,6 +47,10 @@ export type PaymentTerm = {
   label: string
   labelAr: string
   days: number
+  isActive?: boolean
+  /** Optional wording printed with the term; `{days}` stands for the term's days. */
+  conditions?: string | null
+  conditionsAr?: string | null
 }
 
 export type WorkspaceSettings = {

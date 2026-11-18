@@ -252,6 +252,7 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
               <PaymentTermsBlock
                 heading={template.terms}
                 term={data.paymentTerm}
+                termConditions={data.paymentConditions}
                 conditions={data.paymentTermsText}
               />
               <TotalsBlock rows={totalsRows} />

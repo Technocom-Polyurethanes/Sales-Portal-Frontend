@@ -177,7 +177,20 @@
         "customerChange": "Change",
         "paymentTermsText": "Payment conditions",
         "paymentTermsTextHint": "Optional. Printed under the payment term in a block of its own, so it can run to several lines.",
-        "paymentTermsTextPlaceholder": "Bank transfer on receipt to the company account, with the transfer receipt sent to us."
+        "paymentTermsTextPlaceholder": "Bank transfer on receipt to the company account, with the transfer receipt sent to us.",
+        "paymentTermAdd": "Add custom term"
+      },
+      "paymentTermDialog": {
+        "title": "Add a payment term",
+        "label": "Name (English)",
+        "labelAr": "Name (Arabic)",
+        "days": "Days until due",
+        "daysHint": "0 means due on the issue date.",
+        "conditions": "Conditions (English)",
+        "conditionsAr": "Conditions (Arabic)",
+        "conditionsHint": "Optional. Printed with the term. Write {days} where the number of days belongs.",
+        "namesRequired": "Enter the name in both English and Arabic.",
+        "failed": "The payment term could not be saved."
       },
       "packaging": {
         "type": "Package type",

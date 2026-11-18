@@ -1,7 +1,7 @@
 import { api } from "../../lib/api/client"
 import { cached, invalidate } from "../../lib/cache/queryCache"
 import { normalizeSettings } from "./normalize"
-import type { PackageType, WorkspaceSettings, BankAccount } from "./types"
+import type { PackageType, PaymentTerm, WorkspaceSettings, BankAccount } from "./types"
 
 export const settingsApi = {
   /**
@@ -32,6 +32,14 @@ export const settingsApi = {
         .catch(() => ({ packageTypes: undefined }))
       return settings.packageTypes ?? []
     })
+  },
+  paymentTerms: {
+    /** Adds a term with its English and Arabic wording; every offer can then pick it. */
+    async create(term: Omit<PaymentTerm, "id" | "code">): Promise<PaymentTerm> {
+      const created = await api.post<PaymentTerm>("/catalog/payment-terms", term)
+      invalidate("catalog")
+      return created
+    },
   },
   banks: {
     list(): Promise<BankAccount[]> {

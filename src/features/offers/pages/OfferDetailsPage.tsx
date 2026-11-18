@@ -7,7 +7,7 @@ import Button from "../../../components/ui/Button"
 import Card from "../../../components/ui/Card"
 import Icon from "../../../components/ui/Icon"
 import { useTranslation } from "../../../i18n/I18nProvider"
-import { getPaymentTerm } from "../../../lib/calculations/dueDate"
+import { findPaymentTerm, paymentTermConditions, paymentTermLabel } from "../paymentTerm"
 import { formatDateTime, formatIsoDay } from "../../../lib/formatters/date"
 import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatCurrency } from "../../../lib/formatters/number"
@@ -50,7 +50,7 @@ export default function OfferDetailsPage() {
   const documentData = useMemo(() => {
     if (!data) return undefined
 
-    const term = getPaymentTerm(data.offer.paymentTermId)
+    const term = findPaymentTerm(data.paymentTerms, data.offer.paymentTermId)
 
     return buildDocumentData(offerToDocumentSource(data.offer), {
       customer: data.customer,
@@ -58,7 +58,8 @@ export default function OfferDetailsPage() {
       banks: banksForOffer(data.banks, data.offer.bankAccountIds),
       packageTypes: data.packageTypes,
       language: documentLanguage,
-      paymentTermLabel: documentLanguage === "ar" ? term.labelAr : term.label,
+      paymentTermLabel: paymentTermLabel(term, documentLanguage),
+      paymentConditions: paymentTermConditions(term, documentLanguage),
     })
   }, [data, documentLanguage])
 

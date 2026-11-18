@@ -6,6 +6,7 @@ import type {
   BankAccount,
   CompanySettings,
   PackageType,
+  PaymentTerm,
 } from "../../settings/types"
 import { offersApi } from "../api"
 import type { Offer, OfferListItem } from "../types"
@@ -17,6 +18,7 @@ export type OfferDetailsData = {
   company: CompanySettings
   banks: BankAccount[]
   packageTypes: PackageType[]
+  paymentTerms: PaymentTerm[]
 }
 
 /** Loads an offer with its versions, customer and document settings. */
@@ -36,6 +38,7 @@ export function useOfferDetails(id: string | undefined) {
         company: {} as CompanySettings,
         banks: [] as BankAccount[],
         packageTypes: [] as PackageType[],
+        paymentTerms: [] as PaymentTerm[],
       })),
     ])
 
@@ -56,6 +59,7 @@ export function useOfferDetails(id: string | undefined) {
       company: settings.company ?? ({} as CompanySettings),
       banks: settings.banks ?? [],
       packageTypes: settings.packageTypes ?? [],
+      paymentTerms: settings.paymentTerms ?? [],
     }
   }, [id])
 }

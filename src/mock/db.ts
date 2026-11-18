@@ -7,6 +7,7 @@ import type {
   BankAccount,
   CompanySettings,
   PackageType,
+  PaymentTerm,
   WorkspaceSettings,
 } from "../features/settings/types"
 import { accounts, type MockSession } from "./data/accounts"
@@ -14,6 +15,7 @@ import { banks, company } from "./data/company"
 import { customers } from "./data/customers"
 import { offers } from "./data/offers"
 import { packageTypes } from "./data/packageTypes"
+import { paymentTerms } from "./data/paymentTerms"
 import { products } from "./data/products"
 import { currentUser, workspaceUsers } from "./data/users"
 
@@ -25,6 +27,7 @@ export type Database = {
   offers: Offer[]
   banks: BankAccount[]
   packageTypes: PackageType[]
+  paymentTerms: PaymentTerm[]
   company: CompanySettings
   users: typeof workspaceUsers
   currentUser: typeof currentUser
@@ -40,6 +43,7 @@ export const db: Database = {
   offers: clone(offers),
   banks: clone(banks),
   packageTypes: clone(packageTypes),
+  paymentTerms: clone(paymentTerms),
   company: clone(company),
   users: clone(workspaceUsers),
   currentUser: clone(currentUser),

@@ -106,4 +106,10 @@ describe("offerToDraft for a new version", () => {
     expect(allocation.packagingRowId).toBe(draft.lines[0].packaging[0].id)
     expect(allocation.packagingRowId).not.toBe("row-1")
   })
+
+  it("keeps the price per kg of every line", () => {
+    const draft = offerToDraft(apiOffer())
+
+    expect(draft.lines[0].ratePerKg).toBe(168)
+  })
 })

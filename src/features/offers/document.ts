@@ -72,6 +72,8 @@ export function buildDocumentData(source: DocumentSource,
     packageTypes: PackageType[]
     language: DocumentLanguage
     paymentTermLabel: string
+    /** Conditions of the selected payment term, already in the document language. */
+    paymentConditions?: string
   },
 ): OfferDocumentData {
   const arabic = options.language === "ar"
@@ -176,6 +178,7 @@ export function buildDocumentData(source: DocumentSource,
     issueDate: source.issueDate,
     dueDate: source.dueDate,
     paymentTerm: options.paymentTermLabel,
+    paymentConditions: (options.paymentConditions ?? "").trim(),
     paymentTermsText: (source.paymentTermsText ?? "").trim(),
     deliveryMode: source.deliveryMode ?? "batches",
     deliveryText:
