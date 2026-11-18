@@ -7,6 +7,10 @@ import { I18nProvider } from "../../../../i18n/I18nProvider"
 import { createEmptyDraft } from "../../draft"
 import StepBasics from "./StepBasics"
 
+vi.mock("../../../account/hooks/usePermissions", () => ({
+  usePermissions: () => ({ can: () => true }),
+}))
+
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
 
 let container: HTMLDivElement | null = null

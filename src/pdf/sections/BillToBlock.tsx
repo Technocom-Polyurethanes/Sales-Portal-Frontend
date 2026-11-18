@@ -2,6 +2,7 @@ export type BillToBlockProps = {
   heading: string
   customerName: string
   address: string
+  city?: string
   attention: string
   attentionLabel: string
   taxId?: string
@@ -13,6 +14,7 @@ export default function BillToBlock({
   heading,
   customerName,
   address,
+  city,
   attention,
   attentionLabel,
   taxId,
@@ -23,6 +25,7 @@ export default function BillToBlock({
       <p className="doc-block-title">{heading}</p>
       <strong>{customerName}</strong>
       <p>{address}</p>
+      {city && <p>{city}</p>}
       {taxId && (
         <p>
           {taxIdLabel}: {taxId}

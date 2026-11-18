@@ -3,7 +3,7 @@ import type { OfferTemplate } from "./types"
 export const englishTemplate: OfferTemplate = {
   language: "en",
   title: "Offer",
-  billTo: "Bill To / Ship To",
+  billTo: "Customer Information",
   attention: "Attention",
   taxId: "Tax Registration Number",
   reference: "Reference",
@@ -19,7 +19,7 @@ export const englishTemplate: OfferTemplate = {
   subtotal: "Subtotal",
   discount: "Discount",
   tax: "(VAT)",
-  otherTax: "Commercial and industrial profit tax (1%)",
+  otherTax: "Commercial and industrial profit tax (Withholding Tax - 1%)",
   itemsTotalLabel: "Total",
   deliveryTotalLabel: "Total",
   schedule: "Delivery Schedule",
@@ -39,6 +39,6 @@ export const englishTemplate: OfferTemplate = {
   deliveryPlace: "Delivery Place",
   termsAndConditionsHeading: "Terms and Conditions",
   termsAndConditions: [
-    "Force majeure conditions apply to this offer.",
+    "Force majeure conditions applies to above Offer ( CBE foreign currencies rate, availability, Quantities, prices, deliveries plan .….etc )",
   ],
 }

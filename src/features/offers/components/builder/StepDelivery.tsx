@@ -1,7 +1,9 @@
 import Field from "../../../../components/ui/Field"
+import Select from "../../../../components/ui/Select"
 import Textarea from "../../../../components/ui/Textarea"
 import { useTranslation } from "../../../../i18n/I18nProvider"
 import type { TranslationKey } from "../../../../i18n/types"
+import { DELIVERY_PRESETS, presetFor } from "../../deliveryPresets"
 import { TEXT_LIMITS, type DeliveryMode, type OfferDraft } from "../../types"
 import DeliveryScheduleEditor, {
   type DeliveryScheduleEditorProps,
@@ -39,8 +41,9 @@ export default function StepDelivery({
   errors = {},
   ...schedule
 }: StepDeliveryProps) {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
   const { draft } = schedule
+  const preset = presetFor(draft.deliveryText)
 
   return (
     <div className="space-y-6">
@@ -78,22 +81,48 @@ export default function StepDelivery({
       </div>
 
       {draft.deliveryMode === "text" ? (
-        <Field
-          label={t("offers.builder.delivery.textLabel")}
-          hint={t("offers.builder.delivery.textHint")}
-          htmlFor="offer-delivery-text"
-          error={errors["offer-delivery-text"]}
-          required
-        >
-          <Textarea
-            id="offer-delivery-text"
-            rows={4}
-            maxLength={TEXT_LIMITS.deliveryText}
-            value={draft.deliveryText}
-            placeholder={t("offers.builder.delivery.textPlaceholder")}
-            onChange={(event) => onChange({ deliveryText: event.target.value })}
-          />
-        </Field>
+        <>
+          <Field
+            label={t("offers.builder.delivery.presetLabel")}
+            htmlFor="offer-delivery-preset"
+          >
+            <Select
+              id="offer-delivery-preset"
+              value={preset?.id ?? ""}
+              onChange={(event) => {
+                const chosen = DELIVERY_PRESETS.find((item) => item.id === event.target.value)
+                if (chosen) onChange({ deliveryText: chosen[language] })
+              }}
+            >
+              <option value="">
+                {draft.deliveryText && !preset
+                  ? t("offers.builder.delivery.presetCustom")
+                  : t("offers.builder.delivery.presetPlaceholder")}
+              </option>
+              {DELIVERY_PRESETS.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item[language]}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field
+            label={t("offers.builder.delivery.textLabel")}
+            hint={t("offers.builder.delivery.textHint")}
+            htmlFor="offer-delivery-text"
+            error={errors["offer-delivery-text"]}
+            required
+          >
+            <Textarea
+              id="offer-delivery-text"
+              rows={4}
+              maxLength={TEXT_LIMITS.deliveryText}
+              value={draft.deliveryText}
+              placeholder={t("offers.builder.delivery.textPlaceholder")}
+              onChange={(event) => onChange({ deliveryText: event.target.value })}
+            />
+          </Field>
+        </>
       ) : (
         <DeliveryScheduleEditor {...schedule} />
       )}

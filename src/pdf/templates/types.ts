@@ -82,6 +82,8 @@ export type OfferDocumentData = {
   customerNameAr?: string
   customerAddress: string
   customerAddressAr?: string
+  customerCity?: string
+  customerCityAr?: string
   attention: string
   attentionAr?: string
   taxId?: string

@@ -163,8 +163,8 @@ export default function OfferDetailsPage() {
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
-        <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
+        <div className="min-w-0 space-y-4">
           <Card title={t("offers.details.summary")}>
             <dl className="mb-4 grid gap-3 rounded-md border border-line-soft bg-page/50 p-4 text-sm sm:grid-cols-4">
               <div>

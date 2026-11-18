@@ -215,6 +215,7 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
                   heading={template.billTo}
                   customerName={arabic ? (data.customerNameAr ?? data.customerName) : data.customerName}
                   address={arabic ? (data.customerAddressAr ?? data.customerAddress) : data.customerAddress}
+                  city={arabic ? data.customerCityAr : data.customerCity}
                   taxId={data.taxId}
                   taxIdLabel={template.taxId}
                   attention={arabic ? (data.attentionAr ?? data.attention) : data.attention}

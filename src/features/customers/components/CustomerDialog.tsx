@@ -14,6 +14,8 @@ export type CustomerDialogProps = {
   customer?: Customer
   onClose: () => void
   onSaved: () => void
+  /** Receives the created customer so a picker can select it immediately. */
+  onCreated?: (customer: Customer) => void
 }
 
 const EMPTY = {
@@ -24,6 +26,7 @@ const EMPTY = {
   email: "",
   phone: "",
   city: "",
+  cityAr: "",
   address: "",
   taxId: "",
 }
@@ -34,6 +37,7 @@ export default function CustomerDialog({
   customer,
   onClose,
   onSaved,
+  onCreated,
 }: CustomerDialogProps) {
   const { t } = useTranslation()
   const { notify } = useToast()
@@ -47,6 +51,7 @@ export default function CustomerDialog({
           email: customer.email,
           phone: customer.phone,
           city: customer.city,
+          cityAr: customer.cityAr ?? "",
           address: customer.address,
           taxId: customer.taxId ?? "",
         }
@@ -75,12 +80,16 @@ export default function CustomerDialog({
         contactPerson: form.contactPerson.trim(),
         email: form.email.trim(),
         phone: form.phone.trim(),
-        city: form.city.trim(),
+        city: form.city.trim() || undefined,
+        cityAr: form.cityAr.trim() || undefined,
         address: form.address.trim(),
         taxId: form.taxId.trim() || undefined,
       }
       if (customer) await customersApi.update(customer.id, body)
-      else await customersApi.create(body)
+      else {
+        const created = await customersApi.create(body)
+        onCreated?.(created)
+      }
       notify(t(customer ? "customers.updated" : "customers.created"))
       onSaved()
       onClose()
@@ -154,11 +163,18 @@ export default function CustomerDialog({
             onChange={(event) => set("phone", event.target.value)}
           />
         </Field>
-        <Field label={t("customers.city")} htmlFor="customer-city">
+        <Field label={t("customers.cityEn")} htmlFor="customer-city">
           <Input
             id="customer-city"
             value={form.city}
             onChange={(event) => set("city", event.target.value)}
+          />
+        </Field>
+        <Field label={t("customers.cityAr")} htmlFor="customer-city-ar">
+          <Input
+            id="customer-city-ar"
+            value={form.cityAr}
+            onChange={(event) => set("cityAr", event.target.value)}
           />
         </Field>
         <Field label={t("customers.taxId")} htmlFor="customer-tax">

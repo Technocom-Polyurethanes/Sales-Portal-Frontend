@@ -56,22 +56,20 @@ export default function UserCard({
         <RoleBadge role={user.role} />
       </header>
 
-      <dl className="flex flex-col gap-1 text-sm">
+      <dl className="flex flex-row justify-between text-sm">
         {subtitle && <dd className="truncate text-ink">{subtitle}</dd>}
         <dd dir="ltr" className="truncate text-start text-muted">
-          {user.email || "—"}
+          {user.email || ""}
         </dd>
+        <span className="text-[12px] text-muted">
+          {t("users.createdOn")} {formatTimestampDay(user.createdAt)}
+        </span>
       </dl>
 
       <footer className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-line-soft pt-3">
-        <div className="flex flex-col gap-1">
-          <Badge variant={user.isActive ? "accepted" : "neutral"}>
+          <Badge variant={user.isActive ? "accepted" : "rejected"}>
             {t(user.isActive ? "users.active" : "users.inactive")}
           </Badge>
-          <span className="text-[11px] text-muted">
-            {t("users.createdOn")} {formatTimestampDay(user.createdAt)}
-          </span>
-        </div>
         <div className="flex flex-wrap items-center gap-1">
           <Button variant="ghost" size="sm" onClick={() => onEdit(user)}>
             {t("common.edit")}

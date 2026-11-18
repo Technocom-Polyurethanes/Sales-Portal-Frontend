@@ -8,6 +8,14 @@ import { api } from "../../lib/api/client"
 import { clearCache } from "../../lib/cache/queryCache"
 import CustomerPickerModal from "./CustomerPickerModal"
 
+vi.mock("../../features/account/hooks/usePermissions", () => ({
+  usePermissions: () => ({ can: () => true }),
+}))
+
+vi.mock("../ui/ToastProvider", () => ({
+  useToast: () => ({ notify: () => {} }),
+}))
+
 type Query = { search?: string; page: number; pageSize: number }
 
 const TOTAL = 25
