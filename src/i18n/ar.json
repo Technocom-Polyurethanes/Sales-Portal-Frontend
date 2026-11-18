@@ -176,7 +176,7 @@
         "customerPlaceholder": "اختر العميل…",
         "customerChange": "تغيير",
         "paymentTermsText": "شروط السداد التفصيلية",
-        "paymentTermsTextHint": "اختياري. يُطبع أسفل شروط الدفع في خانة مستقلة، فيمكن أن يمتد لعدة أسطر.",
+        "paymentTermsTextHint": "يبدأ من شرط السداد المختار ويمكن تعديله لهذا العرض فقط.",
         "paymentTermsTextPlaceholder": "تحويل بنكي عند الاستلام لحساب الشركة، وموافاتنا بصورة التحويل.",
         "paymentTermAdd": "إضافة شرط سداد مخصص"
       },
