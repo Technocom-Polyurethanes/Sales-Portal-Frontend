@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act } from "react"
 import { createRoot, type Root } from "react-dom/client"
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import "@/mock"
 import App from "../../../app/App"
@@ -32,14 +32,23 @@ if (!("ResizeObserver" in globalThis)) {
   } as unknown as typeof ResizeObserver)
 }
 
+// React only batches updates inside act() when this flag is set.
+;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+
 const pause = (ms: number) =>
   act(async () => {
     await new Promise((resolve) => setTimeout(resolve, ms))
   })
 
+const instalment40En =
+  "40% of the total offer value as a down payment with the purchase order, and the remaining 60% by a cheque issued to Technocom, due 30 days after receipt."
+const instalment40Ar =
+  "40% من إجمالي قيمة العرض دفعة مقدمة مع أمر التوريد و60% المتبقية بموجب شيك صادر لشركة تيكنوكوم ويستحق الاستلام بعد 30 يوم"
+
 describe("offer view document language", () => {
   let container: HTMLDivElement
   let root: Root | undefined
+  let errors: unknown[][]
 
   const open = async (offerId: string) => {
     db.session.userId = "acct-admin"
@@ -67,8 +76,25 @@ describe("offer view document language", () => {
       ),
     ).find((button) => button.textContent === label)
 
+  const previewConditions = () =>
+    container.querySelector(".doc-payment-terms p:not(.doc-payment-terms__term)")
+      ?.textContent ?? ""
+
+  const summaryConditions = () => {
+    const heading = Array.from(container.querySelectorAll("h3")).find(
+      (item) =>
+        item.textContent === "Payment conditions" &&
+        !item.closest(".doc-payment-terms"),
+    )
+    return heading?.parentElement?.querySelector("p")?.textContent ?? ""
+  }
+
   beforeEach(() => {
     clearCache()
+    errors = []
+    vi.spyOn(console, "error").mockImplementation((...args) => {
+      errors.push(args)
+    })
     localStorage.setItem("technocom.session", "active")
     localStorage.setItem("sales_portal_jwt", "test-token")
     container = document.createElement("div")
@@ -80,6 +106,7 @@ describe("offer view document language", () => {
     container.remove()
     localStorage.clear()
     window.history.pushState({}, "", "/")
+    vi.restoreAllMocks()
   })
 
   it("opens in the language the offer was saved in", async () => {
@@ -105,5 +132,49 @@ describe("offer view document language", () => {
     expect(documentLanguage()).toBe("en")
     expect(languageButton("English")?.getAttribute("aria-pressed")).toBe("true")
     expect(offer.documentLanguage).toBe("ar")
+    expect(errors).toEqual([])
+  })
+
+  it("shows unedited payment conditions in the displayed language", async () => {
+    const offer = db.offers[0]
+    offer.paymentTermId = "instalment-40-60"
+    offer.documentLanguage = "en"
+    offer.paymentTermsText = instalment40En
+
+    await open(offer.id)
+
+    expect(previewConditions()).toBe(instalment40En)
+    expect(summaryConditions()).toBe(instalment40En)
+
+    await act(async () => {
+      languageButton("العربية")?.click()
+    })
+    await pause(50)
+
+    expect(documentLanguage()).toBe("ar")
+    expect(previewConditions()).toBe(instalment40Ar)
+    expect(summaryConditions()).toBe(instalment40Ar)
+    expect(offer.paymentTermsText).toBe(instalment40En)
+    expect(offer.documentLanguage).toBe("en")
+    expect(errors).toEqual([])
+  })
+
+  it("keeps edited payment conditions as they are", async () => {
+    const offer = db.offers[0]
+    const custom = "Custom split payment\nSecond line"
+    offer.paymentTermId = "instalment-40-60"
+    offer.documentLanguage = "en"
+    offer.paymentTermsText = custom
+
+    await open(offer.id)
+    await act(async () => {
+      languageButton("العربية")?.click()
+    })
+    await pause(50)
+
+    expect(previewConditions()).toBe(custom)
+    expect(summaryConditions()).toBe(custom)
+    expect(offer.paymentTermsText).toBe(custom)
+    expect(errors).toEqual([])
   })
 })
