@@ -7,7 +7,11 @@ import Icon from "../../../../components/ui/Icon"
 import { useToast } from "../../../../components/ui/ToastProvider"
 import { useTranslation } from "../../../../i18n/I18nProvider"
 import { ApiError } from "../../../../lib/api/types"
-import { findPaymentTerm, paymentTermConditions, paymentTermLabel } from "../../paymentTerm"
+import {
+  findPaymentTerm,
+  nextPaymentTermsText,
+  paymentTermLabel,
+} from "../../paymentTerm"
 import { settingsApi } from "../../../settings/api"
 import { usePdfLanguage } from "../../../../pdf/PdfLanguageProvider"
 import { usePrintOffer } from "../../../../pdf/PrintProvider"
@@ -142,10 +146,6 @@ export default function BuilderWorkspace({
           packageTypes: catalog.packageTypes,
           language: draft.documentLanguage,
           paymentTermLabel: paymentTermLabel(
-            findPaymentTerm(paymentTerms, draft.paymentTermId),
-            draft.documentLanguage,
-          ),
-          paymentConditions: paymentTermConditions(
             findPaymentTerm(paymentTerms, draft.paymentTermId),
             draft.documentLanguage,
           ),
@@ -439,7 +439,16 @@ export default function BuilderWorkspace({
         data={documentData}
         language={draft.documentLanguage}
         onLanguageChange={(documentLanguage) =>
-          controller.setDraft({ documentLanguage })
+          controller.setDraft({
+            documentLanguage,
+            paymentTermsText: nextPaymentTermsText({
+              current: draft.paymentTermsText,
+              previousTerm: findPaymentTerm(paymentTerms, draft.paymentTermId),
+              previousLanguage: draft.documentLanguage,
+              nextTerm: findPaymentTerm(paymentTerms, draft.paymentTermId),
+              nextLanguage: documentLanguage,
+            }),
+          })
         }
       />
 
