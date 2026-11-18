@@ -89,6 +89,8 @@ export type OfferDocumentData = {
   issueDate: string
   dueDate: string
   paymentTerm: string
+  /** Conditions that belong to the selected payment term, printed before the offer's own conditions. */
+  paymentConditions?: string
   /** Extra payment conditions (2-4 lines), printed under the payment term. */
   paymentTermsText?: string
   /** Missing means batches. */

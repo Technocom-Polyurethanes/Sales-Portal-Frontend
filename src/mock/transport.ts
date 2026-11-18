@@ -108,6 +108,28 @@ const routes: Route[] = [
   },
   {
     method: "POST",
+    segments: ["catalog", "payment-terms"],
+    handle: ({ body }) => {
+      const input = body as any
+      if (!input?.label?.trim() || !input?.labelAr?.trim()) {
+        throw new ApiError("Payment term names are required.", 400)
+      }
+      const term = {
+        id: `term-${Date.now()}`,
+        code: `custom-${Date.now()}`,
+        label: input.label.trim(),
+        labelAr: input.labelAr.trim(),
+        days: Number(input.days) || 0,
+        isActive: true,
+        conditions: input.conditions || null,
+        conditionsAr: input.conditionsAr || null,
+      }
+      db.paymentTerms.push(term)
+      return term
+    },
+  },
+  {
+    method: "POST",
     segments: ["customers"],
     handle: ({ body }) => {
       const input = body as any
@@ -383,7 +405,7 @@ const routes: Route[] = [
     method: "GET",
     segments: ["catalog", "bootstrap"],
     handle: () => ({
-      paymentTerms: [],
+      paymentTerms: db.paymentTerms,
       packageTypes: db.packageTypes,
       bankAccounts: db.banks,
       companySettings: db.company,

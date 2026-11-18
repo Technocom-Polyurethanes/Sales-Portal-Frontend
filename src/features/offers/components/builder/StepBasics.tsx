@@ -13,6 +13,9 @@ import {
 import { formatCurrencyLabel } from "../../../../lib/formatters/currency"
 import { formatIsoDay } from "../../../../lib/formatters/date"
 import { localeForLanguage } from "../../../../lib/formatters/locale"
+import PaymentTermDialog, { type NewPaymentTerm } from "./PaymentTermDialog"
+import type { PaymentTerm } from "../../../settings/types"
+import { findPaymentTerm, paymentTermConditions } from "../../paymentTerm"
 import CustomerPickerModal from "../../../../components/pickers/CustomerPickerModal"
 import type { Customer } from "../../../customers/types"
 import type { TranslationKey } from "../../../../i18n/types"
@@ -22,6 +25,8 @@ export type StepBasicsProps = {
   draft: OfferDraft
   customers: Customer[]
   paymentTerms?: any[]
+  /** Saves a custom payment term; without it the add button is hidden. */
+  onCreatePaymentTerm?: (term: NewPaymentTerm) => Promise<PaymentTerm>
   dueDate: string
   onChange: (patch: Partial<OfferDraft>) => void
   /** Messages of the fields that failed validation, keyed by field id. */
@@ -44,6 +49,7 @@ export default function StepBasics({
   draft,
   customers,
   paymentTerms = [],
+  onCreatePaymentTerm,
   onChange,
   errors = {},
   nextSequence = 1,
@@ -52,6 +58,11 @@ export default function StepBasics({
   const { t, language } = useTranslation()
   const locale = localeForLanguage(language)
   const [open, setOpen] = useState(false)
+  const [termDialogOpen, setTermDialogOpen] = useState(false)
+  const termConditions = paymentTermConditions(
+    findPaymentTerm(paymentTerms, draft.paymentTermId),
+    draft.documentLanguage === "ar" ? "ar" : "en",
+  )
   const selected = customers.find((customer) => customer.id === draft.customerId)
 
   // The attention field edits the name printed on the document language that
@@ -290,6 +301,18 @@ export default function StepBasics({
                 </option>
               ))}
             </Select>
+            {onCreatePaymentTerm && (
+              <button
+                type="button"
+                className="mt-1 text-xs font-medium text-primary hover:underline"
+                onClick={() => setTermDialogOpen(true)}
+              >
+                {t("offers.builder.basics.paymentTermAdd")}
+              </button>
+            )}
+            {draft.paymentTermId && termConditions && (
+              <p className="mt-1 text-xs text-muted">{termConditions}</p>
+            )}
           </Field>
 
           {/* offer validity */}
@@ -342,6 +365,14 @@ export default function StepBasics({
           </div>
         </div>
       </section>
+      {onCreatePaymentTerm && (
+        <PaymentTermDialog
+          open={termDialogOpen}
+          onClose={() => setTermDialogOpen(false)}
+          onCreate={onCreatePaymentTerm}
+          onCreated={(term) => onChange({ paymentTermId: term.id })}
+        />
+      )}
     </div>
   )
 }

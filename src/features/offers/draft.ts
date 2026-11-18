@@ -241,8 +241,8 @@ export function offerToDraft(
       materialName: line.materialName ?? product?.name ?? item?.materialName ?? "",
       materialCode: line.materialCode ?? product?.code ?? item?.materialCode ?? "",
       category: line.category ?? product?.category ?? item?.category ?? "",
-      ratePerKg: line.ratePerKg,
-      discountPercent: line.discountPercent,
+      ratePerKg: line.ratePerKg ?? 0,
+      discountPercent: line.discountPercent ?? 0,
       packaging: (line.packaging ?? []).map((row) => {
         const id = draftId("pack")
         rowIds.set(row.id, id)
