@@ -15,7 +15,7 @@ import { formatIsoDay } from "../../../../lib/formatters/date"
 import { localeForLanguage } from "../../../../lib/formatters/locale"
 import PaymentTermDialog, { type NewPaymentTerm } from "./PaymentTermDialog"
 import type { PaymentTerm } from "../../../settings/types"
-import { findPaymentTerm, paymentTermConditions } from "../../paymentTerm"
+import { findPaymentTerm, nextPaymentTermsText } from "../../paymentTerm"
 import CustomerPickerModal from "../../../../components/pickers/CustomerPickerModal"
 import type { Customer } from "../../../customers/types"
 import type { TranslationKey } from "../../../../i18n/types"
@@ -24,7 +24,7 @@ import { TEXT_LIMITS, type OfferDraft } from "../../types"
 export type StepBasicsProps = {
   draft: OfferDraft
   customers: Customer[]
-  paymentTerms?: any[]
+  paymentTerms?: PaymentTerm[]
   /** Saves a custom payment term; without it the add button is hidden. */
   onCreatePaymentTerm?: (term: NewPaymentTerm) => Promise<PaymentTerm>
   dueDate: string
@@ -59,11 +59,19 @@ export default function StepBasics({
   const locale = localeForLanguage(language)
   const [open, setOpen] = useState(false)
   const [termDialogOpen, setTermDialogOpen] = useState(false)
-  const termConditions = paymentTermConditions(
-    findPaymentTerm(paymentTerms, draft.paymentTermId),
-    draft.documentLanguage === "ar" ? "ar" : "en",
-  )
+  const currentTerm = findPaymentTerm(paymentTerms, draft.paymentTermId)
   const selected = customers.find((customer) => customer.id === draft.customerId)
+
+  const selectTerm = (term: PaymentTerm, paymentTermId = term.id): Partial<OfferDraft> => ({
+    paymentTermId,
+    paymentTermsText: nextPaymentTermsText({
+      current: draft.paymentTermsText,
+      previousTerm: currentTerm,
+      previousLanguage: draft.documentLanguage,
+      nextTerm: term,
+      nextLanguage: draft.documentLanguage,
+    }),
+  })
 
   // The attention field edits the name printed on the document language that
   // is selected: the Arabic name on the Arabic document, the English name on
@@ -136,13 +144,14 @@ export default function StepBasics({
             open={open}
             customers={customers}
             onSelect={(customer) => {
+              const nextTermId = customer.paymentTermId ?? draft.paymentTermId
               onChange({
                 customerId: customer.id,
                 attention: customer.contactPerson ?? "",
                 attentionAr:
                   customer.contactPersonAr || customer.contactPerson || "",
                 taxId: customer.taxId ?? "",
-                paymentTermId: customer.paymentTermId ?? draft.paymentTermId,
+                ...selectTerm(findPaymentTerm(paymentTerms, nextTermId), nextTermId),
               })
               setOpen(false)
             }}
@@ -293,9 +302,16 @@ export default function StepBasics({
             <Select
               id="offer-term"
               value={draft.paymentTermId}
-              onChange={(event) => onChange({ paymentTermId: event.target.value })}
+              onChange={(event) =>
+                onChange(
+                  selectTerm(
+                    findPaymentTerm(paymentTerms, event.target.value),
+                    event.target.value,
+                  ),
+                )
+              }
             >
-              {paymentTerms.map((term: any) => (
+              {paymentTerms.map((term) => (
                 <option key={term.id} value={term.id}>
                   {language === "ar" ? term.labelAr || term.label : term.label}
                 </option>
@@ -309,9 +325,6 @@ export default function StepBasics({
               >
                 {t("offers.builder.basics.paymentTermAdd")}
               </button>
-            )}
-            {draft.paymentTermId && termConditions && (
-              <p className="mt-1 text-xs text-muted">{termConditions}</p>
             )}
           </Field>
 
@@ -370,7 +383,7 @@ export default function StepBasics({
           open={termDialogOpen}
           onClose={() => setTermDialogOpen(false)}
           onCreate={onCreatePaymentTerm}
-          onCreated={(term) => onChange({ paymentTermId: term.id })}
+          onCreated={(term) => onChange(selectTerm(term))}
         />
       )}
     </div>
