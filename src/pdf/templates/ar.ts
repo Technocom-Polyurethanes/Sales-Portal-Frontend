@@ -3,7 +3,7 @@ import type { OfferTemplate } from "./types"
 export const arabicTemplate: OfferTemplate = {
   language: "ar",
   title: "عرض سعر",
-  billTo: "السادة / عنوان الشحن",
+  billTo: "السادة",
   attention: "عناية",
   taxId: "رقم التسجيل الضريبي",
   reference: "المرجع",
