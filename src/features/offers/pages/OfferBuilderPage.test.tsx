@@ -37,6 +37,11 @@ const pause = (ms: number) =>
     await new Promise((resolve) => setTimeout(resolve, ms))
   })
 
+const instalment40En =
+  "40% of the total offer value as a down payment with the purchase order, and the remaining 60% by a cheque issued to Technocom, due 30 days after receipt."
+const instalment40Ar =
+  "40% من إجمالي قيمة العرض دفعة مقدمة مع أمر التوريد و60% المتبقية بموجب شيك صادر لشركة تيكنوكوم ويستحق الاستلام بعد 30 يوم"
+
 function setValue(element: HTMLInputElement | HTMLTextAreaElement, value: string) {
   const proto = element instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype
   Object.getOwnPropertyDescriptor(proto, "value")!.set!.call(element, value)
@@ -68,6 +73,28 @@ describe("offer builder", () => {
       (item) => item.textContent?.trim() === label,
     )
   const dialog = () => document.body.querySelector('[role="dialog"]')
+  const paymentTermsText = () =>
+    container.querySelector<HTMLTextAreaElement>("#offer-payment-terms-text")!
+  const languageButton = (label: string) =>
+    Array.from(
+      container.querySelectorAll<HTMLButtonElement>(
+        '[role="group"][aria-label="PDF language:"] button',
+      ),
+    ).find((item) => item.textContent === label)
+  const selectTerm = async (labelPrefix: string) => {
+    const select = container.querySelector<HTMLSelectElement>("#offer-term")!
+    const option = Array.from(select.options).find((item) =>
+      item.text.startsWith(labelPrefix),
+    )!
+    await act(async () => {
+      select.value = option.value
+      select.dispatchEvent(new Event("change", { bubbles: true }))
+    })
+  }
+  const switchDocumentLanguage = async (label: string) => {
+    await act(async () => languageButton(label)?.click())
+    await pause(50)
+  }
 
   beforeEach(() => {
     clearCache()
@@ -129,23 +156,70 @@ describe("offer builder", () => {
 
     const select = container.querySelector<HTMLSelectElement>("#offer-term")!
     expect(select.options[select.selectedIndex].text).toBe("Net 45 custom")
-    expect(container.textContent).toContain("Due in 45 days")
+    expect(paymentTermsText().value).toBe("Due in 45 days")
     expect(db.paymentTerms.some((term) => term.label === "Net 45 custom")).toBe(true)
     expect(errors).toEqual([])
   })
 
-  it("shows the conditions of an instalment term", async () => {
+  it("fills the payment conditions from an instalment term", async () => {
     await open("/offers/new")
 
-    const select = container.querySelector<HTMLSelectElement>("#offer-term")!
-    const term = Array.from(select.options).find((item) => item.text.startsWith("40%"))!
-    await act(async () => {
-      select.value = term.value
-      select.dispatchEvent(new Event("change", { bubbles: true }))
-    })
+    await selectTerm("40%")
 
-    expect(container.textContent).toContain("40% of the total offer value")
-    expect(container.textContent).toContain("due 30 days after receipt")
+    expect(paymentTermsText().value).toBe(instalment40En)
+    expect(errors).toEqual([])
+  })
+
+  it("translates unedited payment conditions when the document language changes", async () => {
+    await open("/offers/new")
+    await selectTerm("40%")
+
+    expect(paymentTermsText().value).toBe(instalment40En)
+
+    await switchDocumentLanguage("العربية")
+
+    expect(paymentTermsText().value).toBe(instalment40Ar)
+    expect(errors).toEqual([])
+  })
+
+  it("keeps custom payment conditions when the language or term changes", async () => {
+    await open("/offers/new")
+    await selectTerm("40%")
+
+    const custom = "Custom split payment for this offer"
+    await act(async () => setValue(paymentTermsText(), custom))
+
+    await switchDocumentLanguage("العربية")
+    expect(paymentTermsText().value).toBe(custom)
+
+    await selectTerm("Bank transfer")
+    expect(paymentTermsText().value).toBe(custom)
+
+    await switchDocumentLanguage("English")
+    expect(paymentTermsText().value).toBe(custom)
+    expect(errors).toEqual([])
+  })
+
+  it("clears an unedited default when selecting a term with no conditions", async () => {
+    await open("/offers/new")
+    await selectTerm("40%")
+
+    expect(paymentTermsText().value).toBe(instalment40En)
+
+    await selectTerm("Bank transfer")
+
+    expect(paymentTermsText().value).toBe("")
+    expect(errors).toEqual([])
+  })
+
+  it("keeps stored payment conditions when opening a new version", async () => {
+    const offer = db.offers[0]
+    const saved = "Stored custom conditions\nSecond line"
+    offer.paymentTermsText = saved
+
+    await open(`/offers/new?from=${offer.id}`)
+
+    expect(paymentTermsText().value).toBe(saved)
     expect(errors).toEqual([])
   })
 })
