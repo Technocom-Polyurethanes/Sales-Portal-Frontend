@@ -25,7 +25,6 @@ export default function BillToBlock({
       <p className="doc-block-title">{heading}</p>
       <strong>{customerName}</strong>
       <p>{address}</p>
-      {city && <p>{city}</p>}
       {taxId && (
         <p>
           {taxIdLabel}: {taxId}
