@@ -60,9 +60,9 @@ export default function OfferCard({ offer, onOpen }: OfferCardProps) {
       </header>
 
       <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-        <div>
-          <dt className="text-xs text-muted">{t("offers.list.issueDate")}</dt>
-          <dd className="text-ink">{formatIsoDay(offer.issueDate)}</dd>
+        <div className="min-w-0">
+          <dt className="text-xs text-muted">{t("offers.list.createdBy")}</dt>
+          <dd className="truncate text-ink">{creator}</dd>
         </div>
         <div>
           <dt className="text-xs text-muted">{t("offers.list.total")}</dt>
@@ -70,9 +70,11 @@ export default function OfferCard({ offer, onOpen }: OfferCardProps) {
             {formatCurrency(offer.total, offer.currency, locale)}
           </dd>
         </div>
-        <div className="min-w-0">
-          <dt className="text-xs text-muted">{t("offers.list.createdBy")}</dt>
-          <dd className="truncate text-ink">{creator}</dd>
+        <div>
+          <dt className="text-xs text-muted">{t("offers.list.createdAt")}</dt>
+          <dd dir="ltr" className="text-start text-ink tabular-nums">
+            {formatDateTime(offer.createdAt)}
+          </dd>
         </div>
         <div>
           <dt className="text-xs text-muted">{t("offers.list.createdAt")}</dt>
