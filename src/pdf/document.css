@@ -220,6 +220,11 @@
   white-space: nowrap;
 }
 
+.offer-document .doc-footer__email a {
+  color: inherit;
+  text-decoration: none;
+}
+
 .offer-document .doc-footer__col--ar {
   text-align: right;
   font-family: "Cairo", sans-serif;

@@ -17,7 +17,12 @@ export default function DocumentFooter() {
         </div>
 
         <div className="doc-footer__col doc-footer__col--center">
-          <p className="doc-footer__email">E-mail : sales@technocom.org</p>
+          <p className="doc-footer__email">
+            E-mail : <a href="mailto:sales@technocom.org">sales@technocom.org</a>
+          </p>
+          <p className="doc-footer__email">
+            Website : <a href="https://site.technocomegypt.com">site.technocomegypt.com</a>
+          </p>
         </div>
 
         <div className="doc-footer__col doc-footer__col--ar" dir="rtl">
