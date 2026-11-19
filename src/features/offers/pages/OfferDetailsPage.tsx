@@ -236,13 +236,11 @@ export default function OfferDetailsPage() {
                   {t("offers.details.lastModifiedBy")}
                 </dt>
                 <dd className="font-medium text-ink">
-                  {offer.updatedByName ||
-                    offer.createdByName ||
-                    t("offers.list.unknownUser")}
+                  {offer.updatedByName || t("offers.list.unknownUser")}
                 </dd>
                 <dd dir="ltr" className="text-start text-xs text-muted tabular-nums">
                   {t("offers.details.lastModifiedAt")}{" "}
-                  {formatDateTime(offer.updatedAt ?? offer.createdAt)}
+                  {offer.updatedAt ? formatDateTime(offer.updatedAt) : "—"}
                 </dd>
               </div>
             </dl>

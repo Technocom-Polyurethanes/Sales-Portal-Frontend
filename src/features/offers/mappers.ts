@@ -35,6 +35,10 @@ export function mapOfferDetail(raw: any): Offer {
   if (mapped.documentLanguage && typeof mapped.documentLanguage === "string") {
     mapped.documentLanguage = mapped.documentLanguage.toLowerCase()
   }
+  // The list calls the last editor "lastModified*", the detail "updated*": accept both, and never
+  // borrow the creator for a missing editor, that is what made the two look identical.
+  mapped.updatedByName = mapped.updatedByName ?? mapped.lastModifiedByName ?? null
+  mapped.updatedAt = mapped.updatedAt ?? mapped.lastModifiedAt ?? undefined
   // The API sends the delivery mode as "Batches" / "Text"; offers saved before it existed have none.
   mapped.deliveryMode =
     typeof mapped.deliveryMode === "string" && mapped.deliveryMode.toLowerCase() === "text"

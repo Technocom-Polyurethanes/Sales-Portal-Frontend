@@ -2,7 +2,7 @@ import Badge from "../../../components/ui/Badge"
 import Icon from "../../../components/ui/Icon"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import { formatCurrency } from "../../../lib/formatters"
-import { formatDateTime, formatIsoDay } from "../../../lib/formatters/date"
+import { formatDateTime } from "../../../lib/formatters/date"
 import { localeForLanguage } from "../../../lib/formatters/locale"
 import type { OfferListItem } from "../types"
 
@@ -17,13 +17,8 @@ export default function OfferCard({ offer, onOpen }: OfferCardProps) {
   const locale = localeForLanguage(language)
   const creator = offer.createdByName || t("offers.list.unknownUser")
 
-  // Only worth a line of its own when someone else changed it, or it changed after creation.
   const modifiedBy = offer.lastModifiedByName
-  const modifiedAt = offer.lastModifiedAt
-  const wasModified =
-    Boolean(modifiedAt) &&
-    (formatDateTime(modifiedAt) !== formatDateTime(offer.createdAt) ||
-      (modifiedBy && modifiedBy !== offer.createdByName))
+  const modifiedAt = offer.lastModifiedAt ?? offer.updatedAt
 
   return (
     <article
@@ -77,18 +72,16 @@ export default function OfferCard({ offer, onOpen }: OfferCardProps) {
           </dd>
         </div>
         <div>
-          <dt className="text-xs text-muted">{t("offers.list.createdAt")}</dt>
+          <dt className="text-xs text-muted">{t("offers.list.updatedAt")}</dt>
           <dd dir="ltr" className="text-start text-ink tabular-nums">
-            {formatDateTime(offer.createdAt)}
+            {modifiedAt ? formatDateTime(modifiedAt) : "—"}
           </dd>
         </div>
       </dl>
 
       <footer className="mt-auto flex items-center justify-between gap-3 border-t border-line-soft pt-3 text-xs text-muted">
         <span className="min-w-0 truncate">
-          {wasModified
-            ? `${t("offers.list.updatedAt")}: ${modifiedBy ?? creator} · ${formatDateTime(modifiedAt)}`
-            : ""}
+          {modifiedBy ? `${t("offers.details.lastModifiedBy")}: ${modifiedBy}` : ""}
         </span>
         <span className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-primary">
           {t("offers.list.open")}
