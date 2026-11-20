@@ -126,6 +126,11 @@ describe("Users screen", () => {
     const created = db.accounts.find((user) => user.username === "mona")
     expect(created?.role).toBe("Accountant")
     expect(created?.initials).toBe("MS")
+    // The list refreshes in the background (no skeleton), so wait for the card to appear.
+    for (let tries = 0; tries < 30; tries += 1) {
+      if (document.body.textContent?.includes("Mona Said")) break
+      await pause(100)
+    }
     expect(document.body.textContent).toContain("Mona Said")
     expect(document.getElementById("user-full-name")).toBeNull()
   })

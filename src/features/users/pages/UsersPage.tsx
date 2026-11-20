@@ -29,7 +29,7 @@ export default function UsersPage() {
   const [editing, setEditing] = useState<UserRecord | "new" | undefined>()
   const [resetting, setResetting] = useState<UserRecord | undefined>()
   const [busyId, setBusyId] = useState<string | undefined>()
-  const { data, loading, error, reload } = useAsyncData(
+  const { data, loading, error, reload, refresh, mutate } = useAsyncData(
     () => usersApi.list({ search, role, status, page }),
     [search, role, status, page],
   )
@@ -44,14 +44,22 @@ export default function UsersPage() {
 
   const toggleActive = async (user: UserRecord) => {
     setBusyId(user.id)
+    // Optimistic: flip the card now, roll back if the server refuses.
+    const rollback = mutate((current) => ({
+      ...current,
+      items: current.items.map((item) =>
+        item.id === user.id ? { ...item, isActive: !user.isActive } : item,
+      ),
+    }))
     try {
       await usersApi.update(user.id, {
         ...userToFormValues(user),
         isActive: !user.isActive,
       })
       notify(t("users.updated"))
-      reload()
+      refresh()
     } catch (cause) {
+      rollback()
       notify(
         cause instanceof Error ? cause.message : t("common.somethingWrong"),
         "error",
@@ -155,7 +163,7 @@ export default function UsersPage() {
           user={editing === "new" ? undefined : editing}
           isSelf={editing !== "new" && editing.id === me?.id}
           onClose={() => setEditing(undefined)}
-          onSaved={reload}
+          onSaved={refresh}
         />
       )}
 
