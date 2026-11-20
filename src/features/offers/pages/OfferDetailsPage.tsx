@@ -6,6 +6,7 @@ import Badge from "../../../components/ui/Badge"
 import Button from "../../../components/ui/Button"
 import Card from "../../../components/ui/Card"
 import Icon from "../../../components/ui/Icon"
+import { useToast } from "../../../components/ui/ToastProvider"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import { findPaymentTerm, paymentTermConditions, paymentTermLabel } from "../paymentTerm"
 import { formatDateTime, formatIsoDay } from "../../../lib/formatters/date"
@@ -24,6 +25,7 @@ import StatusDialog from "../components/StatusDialog"
 import VersionHistory from "../components/VersionHistory"
 import { buildDocumentData, offerToDocumentSource } from "../document"
 import { useOfferDetails } from "../hooks/useOfferDetails"
+import { withOfferStatus } from "../optimisticStatus"
 import type { OfferStatus } from "../types"
 
 export default function OfferDetailsPage() {
@@ -33,7 +35,8 @@ export default function OfferDetailsPage() {
   const navigate = useNavigate()
   const { can } = usePermissions()
   const canWrite = can("offers.write")
-  const { data, loading, error, reload } = useOfferDetails(id)
+  const { data, loading, error, reload, refresh, mutate } = useOfferDetails(id)
+  const { notify } = useToast()
   const { print } = usePrintOffer()
   const [statusOpen, setStatusOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -82,11 +85,19 @@ export default function OfferDetailsPage() {
   const changeStatus = async (status: OfferStatus) => {
     if (!data) return
 
+    // Optimistic: show the new status and close the dialog at once, roll back on failure.
+    const rollback = mutate((current) => withOfferStatus(current, status))
+    setStatusOpen(false)
     setSaving(true)
     try {
       await offersApi.setStatus(data.offer.id, status)
-      setStatusOpen(false)
-      reload()
+      refresh()
+    } catch (cause) {
+      rollback()
+      notify(
+        cause instanceof Error ? cause.message : t("common.somethingWrong"),
+        "error",
+      )
     } finally {
       setSaving(false)
     }

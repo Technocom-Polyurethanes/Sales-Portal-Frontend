@@ -23,7 +23,7 @@ export default function BanksPage() {
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<BankAccount | undefined>()
-  const { data, loading, error, reload } = useAsyncData(
+  const { data, loading, error, reload, refresh } = useAsyncData(
     () => banksApi.listPage(search, page),
     [search, page],
   )
@@ -148,7 +148,7 @@ export default function BanksPage() {
           open
           bank={editing}
           onClose={() => setDialogOpen(false)}
-          onSaved={reload}
+          onSaved={refresh}
         />
       )}
     </>

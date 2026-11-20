@@ -1,4 +1,5 @@
 import { api } from "../../lib/api/client"
+import { invalidate } from "../../lib/cache/queryCache"
 import type { Offer, OfferStatus, OfferListItem, OfferListPage, OfferListParams } from "./types"
 import { mapListItem, mapListPage, mapOfferDetail, type RawOfferListItem, type RawOfferListPage } from "./mappers"
 
@@ -40,13 +41,25 @@ export const offersApi = {
     return mapOfferDetail(raw)
   },
   create(offer: any): Promise<Offer> {
-    return api.post<any>("/offers", offer).then((res) => mapOfferDetail(res))
+    return api.post<any>("/offers", offer).then((res) => {
+        // Customer directory aggregates (offers count, total value, last offer) just changed.
+        invalidate("customers")
+        return mapOfferDetail(res)
+      })
   },
   update(id: string, offer: any): Promise<Offer> {
-    return api.put<any>(`/offers/${id}`, offer).then((res) => mapOfferDetail(res))
+    return api.put<any>(`/offers/${id}`, offer).then((res) => {
+        // Customer directory aggregates (offers count, total value, last offer) just changed.
+        invalidate("customers")
+        return mapOfferDetail(res)
+      })
   },
   revise(id: string, data?: any): Promise<Offer> {
-    return api.post<any>(`/offers/${id}/revise`, data).then((res) => mapOfferDetail(res))
+    return api.post<any>(`/offers/${id}/revise`, data).then((res) => {
+        // Customer directory aggregates (offers count, total value, last offer) just changed.
+        invalidate("customers")
+        return mapOfferDetail(res)
+      })
   },
   setStatus(id: string, status: OfferStatus): Promise<Offer> {
     return api

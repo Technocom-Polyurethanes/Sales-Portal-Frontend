@@ -27,7 +27,7 @@ export default function CustomersPage() {
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<Customer | undefined>()
-  const { data, loading, error, reload } = useAsyncData(
+  const { data, loading, error, reload, refresh } = useAsyncData(
     () => customersApi.listPage(search, page),
     [search, page],
   )
@@ -197,7 +197,7 @@ export default function CustomersPage() {
           open
           customer={editing}
           onClose={() => setDialogOpen(false)}
-          onSaved={reload}
+          onSaved={refresh}
         />
       )}
     </>
