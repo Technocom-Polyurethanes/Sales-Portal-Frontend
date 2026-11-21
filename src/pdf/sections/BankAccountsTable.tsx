@@ -30,7 +30,7 @@ export default function BankAccountsTable({
   return (
     <section className="doc-section">
       <h3>{heading}</h3>
-      <table className="doc-table doc-banks">
+      <table className="doc-table doc-banks" data-latin>
         <thead>
           <tr>
             <th scope="col">{headings.bank}</th>

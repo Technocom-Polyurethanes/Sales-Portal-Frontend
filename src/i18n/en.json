@@ -231,6 +231,8 @@
         "modeBatchesHint": "Dated batches built from the ordered packages.",
         "modeText": "Custom delivery terms",
         "modeTextHint": "Free wording, for conditions a schedule cannot express.",
+        "lockedByBatches": "Remove the delivery batches first to switch.",
+        "lockedByText": "Clear the delivery terms text first to switch.",
         "textLabel": "Delivery terms",
         "textHint": "Printed instead of the delivery schedule.",
         "textPlaceholder": "Ready stock, delivered once the purchase order is confirmed and paid.",

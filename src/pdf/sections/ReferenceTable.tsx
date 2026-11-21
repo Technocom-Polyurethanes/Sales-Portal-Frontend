@@ -3,6 +3,8 @@ export type ReferenceRow = {
   value: string
   /** Keeps the value left to right, used by the reference number. */
   ltr?: boolean
+  /** Keeps Latin digits in the Arabic document (the reference number). */
+  keepLatin?: boolean
 }
 
 export type ReferenceTableProps = {
@@ -20,7 +22,10 @@ export default function ReferenceTable({ rows }: ReferenceTableProps) {
               {index === 0 ? (
                 <div className="flex w-full items-center justify-between gap-2">
                   <span>{row.label}</span>
-                  <span className="doc-ltr font-mono text-[10px] font-normal text-slate-500">
+                  <span
+                    className="doc-ltr font-mono text-[10px] font-normal text-slate-500"
+                    data-latin
+                  >
                     TF-06-01
                   </span>
                 </div>
@@ -30,7 +35,9 @@ export default function ReferenceTable({ rows }: ReferenceTableProps) {
             </th>
             <td>
               {row.ltr ? (
-                <span className="doc-ltr">{row.value}</span>
+                <span className="doc-ltr" data-latin={row.keepLatin ? "" : undefined}>
+                  {row.value}
+                </span>
               ) : (
                 row.value
               )}

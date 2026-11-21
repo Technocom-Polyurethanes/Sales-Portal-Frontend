@@ -85,4 +85,24 @@ describe("StepDelivery", () => {
     expect(document.getElementById("offer-delivery-text")?.getAttribute("maxlength")).toBe("1000")
     expect(document.getElementById("offer-delivery-place")?.getAttribute("maxlength")).toBe("300")
   })
+
+  it("locks the text option once batches exist, and the schedule option once text exists", () => {
+    mount({
+      deliveryMode: "batches",
+      delivery: [{ id: "b1", date: "2026-12-01", allocations: [] }] as never,
+    })
+    expect((radios()[1] as HTMLButtonElement).disabled).toBe(true)
+    expect((radios()[0] as HTMLButtonElement).disabled).toBe(false)
+  })
+
+  it("locks the schedule option while custom text is written", () => {
+    mount({ deliveryMode: "text", deliveryText: "Ready stock." })
+    expect((radios()[0] as HTMLButtonElement).disabled).toBe(true)
+    expect((radios()[1] as HTMLButtonElement).disabled).toBe(false)
+  })
+
+  it("keeps both options open while nothing is entered", () => {
+    mount({ deliveryMode: "batches" })
+    expect(radios().every((radio) => !(radio as HTMLButtonElement).disabled)).toBe(true)
+  })
 })

@@ -63,7 +63,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
               <button
                 type="button"
                 onClick={() => setShowPassword((current) => !current)}
-                className="absolute inset-y-0 end-2 px-2 text-xs font-medium text-primary"
+                className="absolute inset-y-0 inset-e-2 px-2 text-xs font-medium text-primary"
               >
                 {showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
               </button>

@@ -3,6 +3,7 @@ import Select from "../../../../components/ui/Select"
 import Textarea from "../../../../components/ui/Textarea"
 import { useTranslation } from "../../../../i18n/I18nProvider"
 import type { TranslationKey } from "../../../../i18n/types"
+import { lockedDeliveryMode } from "../../deliveryLock"
 import { DELIVERY_PRESETS, presetFor } from "../../deliveryPresets"
 import { TEXT_LIMITS, type DeliveryMode, type OfferDraft } from "../../types"
 import DeliveryScheduleEditor, {
@@ -34,7 +35,7 @@ const MODES: {
 /**
  * Step 4: how the delivery is described. Either the dated batch schedule or free text for
  * conditions a schedule cannot express, plus the place of delivery, which is always free text.
- * Switching the mode keeps what was typed in the other one, so nothing is lost by a misclick.
+ * The two methods exclude each other: once one has content the other is locked until it is cleared.
  */
 export default function StepDelivery({
   onChange,
@@ -44,6 +45,7 @@ export default function StepDelivery({
   const { t, language } = useTranslation()
   const { draft } = schedule
   const preset = presetFor(draft.deliveryText)
+  const locked = lockedDeliveryMode(draft)
 
   return (
     <div className="space-y-6">
@@ -59,21 +61,43 @@ export default function StepDelivery({
         >
           {MODES.map(({ mode, label, hint }) => {
             const selected = draft.deliveryMode === mode
+            const disabled = locked === mode
             return (
               <button
                 key={mode}
                 type="button"
                 role="radio"
                 aria-checked={selected}
+                aria-disabled={disabled}
+                disabled={disabled}
+                title={
+                  disabled
+                    ? t(
+                        mode === "text"
+                          ? "offers.builder.delivery.lockedByBatches"
+                          : "offers.builder.delivery.lockedByText",
+                      )
+                    : undefined
+                }
                 onClick={() => onChange({ deliveryMode: mode })}
                 className={`flex flex-col gap-0.5 rounded-lg border px-4 py-3 text-start transition-colors ${
                   selected
                     ? "border-primary bg-primary-soft text-primary"
-                    : "border-line bg-surface text-ink hover:bg-page"
+                    : disabled
+                      ? "cursor-not-allowed border-line bg-page text-muted opacity-60"
+                      : "border-line bg-surface text-ink hover:bg-page"
                 }`}
               >
                 <span className="text-sm font-medium">{t(label)}</span>
-                <span className="text-xs font-normal text-muted">{t(hint)}</span>
+                <span className="text-xs font-normal text-muted">
+                  {disabled
+                    ? t(
+                        mode === "text"
+                          ? "offers.builder.delivery.lockedByBatches"
+                          : "offers.builder.delivery.lockedByText",
+                      )
+                    : t(hint)}
+                </span>
               </button>
             )
           })}

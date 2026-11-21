@@ -43,7 +43,7 @@ export default function DeliveryScheduleTable({
               const label = typeof column === "string" ? column : column.label
               const key = typeof column === "string" ? column : column.key
               return (
-                <th scope="col" key={key} className="doc-num">
+                <th scope="col" key={key} className="doc-num" data-latin>
                   {categoryOnly(label)}
                 </th>
               )

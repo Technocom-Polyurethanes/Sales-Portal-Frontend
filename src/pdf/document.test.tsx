@@ -97,13 +97,25 @@ describe("offer document", () => {
     expect(container.textContent).toContain("19 Drum × 210 kg")
   })
 
+  it("writes the Arabic numbers in Arabic digits but keeps reference, product and bank details Latin", () => {
+    render("ar")
+    const text = container.textContent ?? ""
+
+    expect(text).toContain("3089/OCT./YL/AA")
+    expect(text).toContain("TF-06-01")
+    expect(text).toContain("DALTORIM EG 26200 - D")
+    expect(text).toContain("EG12 QNBA 0021 4589 0012")
+    expect(text).toContain("٢١/١٠/٢٠٢٦")
+    expect(text).toContain("٣٩٬٩٠٠")
+  })
+
   it("mirrors the Arabic document and translates the packaging", () => {
     render("ar")
 
     const article = container.querySelector(".offer-document")
     expect(article?.getAttribute("dir")).toBe("rtl")
     expect(container.textContent).toContain("عرض سعر")
-    expect(container.textContent).toContain("19 برميل × 210 كجم")
+    expect(container.textContent).toContain("١٩ برميل × ٢١٠ كجم")
   })
 
   it("keeps the reference number left to right in both languages", () => {
@@ -181,7 +193,7 @@ describe("offer document", () => {
   })
 
   it("prints the tax as the VAT in the language of the document", () => {
-    const expected = { en: "(VAT) 14%", ar: "ضريبة القيمه المضافة 14%" }
+    const expected = { en: "(VAT) 14%", ar: "ضريبة القيمه المضافة ١٤٪" }
 
     for (const language of ["en", "ar"] as const) {
       render(language)
@@ -268,7 +280,7 @@ describe("offer document", () => {
       renderWith("ar", { validityDays: 7 })
 
       expect(referenceLabels()).toContain("صلاحية العرض")
-      expect(referenceValue("صلاحية العرض")).toBe("7 أيام — حتى 28/10/2026")
+      expect(referenceValue("صلاحية العرض")).toBe("٧ أيام — حتى ٢٨/١٠/٢٠٢٦")
     })
 
     it("writes a single day in the singular", () => {

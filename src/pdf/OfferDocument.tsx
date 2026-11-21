@@ -12,6 +12,7 @@ import {
   formatDocumentWeekday,
   translateCategory,
 } from "./format"
+import { localizeDigits } from "./arabicDigits"
 import type { DocumentLanguage } from "./PdfLanguageProvider"
 import BankAccountsTable from "./sections/BankAccountsTable"
 import BillToBlock from "./sections/BillToBlock"
@@ -57,7 +58,7 @@ function buildReferenceRows(
       : []
 
   return [
-    { label: template.reference, value: data.reference, ltr: true },
+    { label: template.reference, value: data.reference, ltr: true, keepLatin: true },
     {
       label: template.date,
       value: formatDocumentDate(data.issueDate),
@@ -160,8 +161,16 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
   const pagesRef = useRef<HTMLDivElement>(null)
 
   const layoutPages = useCallback(() => {
-    if (pagesRef.current) paginate(source, pagesRef.current)
-  }, [source])
+    if (!pagesRef.current) return
+    if (!arabic) {
+      paginate(source, pagesRef.current)
+      return
+    }
+    // React owns the nodes of `source`, so the Arabic digits are written into a copy.
+    const localized = source.cloneNode(true) as HTMLElement
+    localizeDigits(localized)
+    paginate(localized, pagesRef.current)
+  }, [source, arabic])
 
   // The source has just been updated by React: lay the pages out again.
   useLayoutEffect(layoutPages)
