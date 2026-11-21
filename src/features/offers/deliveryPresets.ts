@@ -9,7 +9,7 @@ export const DELIVERY_PRESETS = [
   },
   {
     id: "twoDays",
-    ar: "خلال يومين عمل من تاريخ استلام امر التوريد",
+    ar: "خلال يومان عمل من تاريخ استلام امر التوريد",
     en: "Within two working days from the date of receiving the purchase order",
   },
 ] as const
