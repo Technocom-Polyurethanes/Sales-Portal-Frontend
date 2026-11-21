@@ -69,13 +69,13 @@ export default function VersionHistory({
 
               <span className="flex w-full flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted">
                 <span>
-                  {t("offers.list.createdAt")}: {creator} ·{" "}
+                  {t("offers.list.createdAt")}: <bdi>{creator}</bdi> ·{" "}
                   <span dir="ltr" className="tabular-nums">
                     {formatDateTime(version.createdAt)}
                   </span>
                 </span>
                 <span>
-                  {t("offers.list.updatedAt")}: {modifiedBy} ·{" "}
+                  {t("offers.list.updatedAt")}: <bdi>{modifiedBy}</bdi> ·{" "}
                   <span dir="ltr" className="tabular-nums">
                     {modifiedAt ? formatDateTime(modifiedAt) : "—"}
                   </span>
