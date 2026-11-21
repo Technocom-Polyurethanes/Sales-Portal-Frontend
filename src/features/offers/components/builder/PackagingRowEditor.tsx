@@ -21,7 +21,7 @@ export default function PackagingRowEditor({
   onChange,
   onRemove,
 }: PackagingRowEditorProps) {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
 
   return (
     <div className="grid gap-3 rounded-md border border-line-soft bg-page/60 p-3 sm:grid-cols-[1fr_1.4fr_1fr_auto] sm:items-end">
@@ -43,7 +43,7 @@ export default function PackagingRowEditor({
         >
           {packageTypes.map((type) => (
             <option key={type.id} value={type.id}>
-              {type.name}
+              {language === "ar" && type.nameAr ? type.nameAr : type.name}
             </option>
           ))}
         </Select>

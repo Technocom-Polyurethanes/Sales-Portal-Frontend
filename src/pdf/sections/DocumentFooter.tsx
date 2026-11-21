@@ -5,7 +5,7 @@
  */
 export default function DocumentFooter() {
   return (
-    <footer className="doc-footer" dir="ltr">
+    <footer className="doc-footer" dir="ltr" data-latin>
       <div className="doc-footer__letterhead">
         <div className="doc-footer__col doc-footer__col--en">
           <p className="doc-footer__address">

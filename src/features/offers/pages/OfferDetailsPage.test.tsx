@@ -45,6 +45,10 @@ const instalment40En =
 const instalment40Ar =
   "40% من إجمالي قيمة العرض دفعة مقدمة مع أمر التوريد و60% المتبقية بموجب شيك صادر لشركة تيكنوكوم ويستحق الاستلام بعد 30 يوم"
 
+// The printed Arabic document writes its numbers in Arabic-Indic digits.
+const instalment40ArPrinted =
+  "٤٠٪ من إجمالي قيمة العرض دفعة مقدمة مع أمر التوريد و٦٠٪ المتبقية بموجب شيك صادر لشركة تيكنوكوم ويستحق الاستلام بعد ٣٠ يوم"
+
 describe("offer view document language", () => {
   let container: HTMLDivElement
   let root: Root | undefined
@@ -152,7 +156,7 @@ describe("offer view document language", () => {
     await pause(50)
 
     expect(documentLanguage()).toBe("ar")
-    expect(previewConditions()).toBe(instalment40Ar)
+    expect(previewConditions()).toBe(instalment40ArPrinted)
     expect(summaryConditions()).toBe(instalment40Ar)
     expect(offer.paymentTermsText).toBe(instalment40En)
     expect(offer.documentLanguage).toBe("en")

@@ -51,7 +51,9 @@ export default function ItemsTable({
                 <span className="doc-ltr">{index + 1}</span>
               </td>
               <td>
-                <span className="doc-item-name">{line.name}</span>
+                <span className="doc-item-name" data-latin>
+                  {line.name}
+                </span>
               </td>
               <td className="doc-num">
                 <span className="doc-ltr">{Math.round(line.quantityKg).toLocaleString("en-US")}</span>
