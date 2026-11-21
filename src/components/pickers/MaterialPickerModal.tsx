@@ -188,7 +188,7 @@ export default function MaterialPickerModal({
                           </div>
 
                           {exists && (
-                            <span className="shrink-0 rounded bg-danger/10 px-1.5 py-0.5 mr-4 text-xs text-danger">
+                            <span className="shrink-0 rounded bg-danger/10 px-1.5 py-0.5 mx-4 text-xs text-danger">
                               {language === "ar" ? "مضاف بالفعل" : "Already added"}
                             </span>
                           )}
