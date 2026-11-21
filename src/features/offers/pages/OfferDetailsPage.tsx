@@ -238,8 +238,11 @@ export default function OfferDetailsPage() {
                 <dd className="font-medium text-ink">
                   {offer.createdByName || t("offers.list.unknownUser")}
                 </dd>
-                <dd dir="ltr" className="text-start text-xs text-muted tabular-nums">
-                  {t("offers.details.createdAt")} {formatDateTime(offer.createdAt)}
+                <dd className="text-xs text-muted">
+                  {t("offers.details.createdAt")}{" "}
+                  <bdi dir="ltr" className="tabular-nums">
+                    {formatDateTime(offer.createdAt)}
+                  </bdi>
                 </dd>
               </div>
               <div>
@@ -249,9 +252,11 @@ export default function OfferDetailsPage() {
                 <dd className="font-medium text-ink">
                   {offer.updatedByName || t("offers.list.unknownUser")}
                 </dd>
-                <dd dir="ltr" className="text-start text-xs text-muted tabular-nums">
+                <dd className="text-xs text-muted">
                   {t("offers.details.lastModifiedAt")}{" "}
-                  {offer.updatedAt ? formatDateTime(offer.updatedAt) : "—"}
+                  <bdi dir="ltr" className="tabular-nums">
+                    {offer.updatedAt ? formatDateTime(offer.updatedAt) : "—"}
+                  </bdi>
                 </dd>
               </div>
             </dl>
