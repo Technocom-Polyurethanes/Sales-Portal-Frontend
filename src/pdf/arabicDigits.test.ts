@@ -31,4 +31,14 @@ describe("localizeDigits", () => {
     expect(root.querySelector("#iban")?.textContent).toBe("EG12 0003")
     expect(root.querySelector("#item")?.textContent).toBe("Foam 25kg")
   })
+
+  it("wraps each number in a span styled with the letterhead font", () => {
+    const root = document.createElement("div")
+    root.innerHTML = "<p>صلاحية 7 أيام — حتى 28/10/2026</p>"
+    localizeDigits(root)
+
+    const spans = Array.from(root.querySelectorAll(".doc-ar-num")).map((span) => span.textContent)
+    expect(spans).toEqual(["٧", "٢٨/١٠/٢٠٢٦"])
+    expect(root.textContent).toBe("صلاحية ٧ أيام — حتى ٢٨/١٠/٢٠٢٦")
+  })
 })

@@ -21,6 +21,12 @@ export function toArabicDigits(text: string): string {
     .replace(/\d/g, (digit) => ARABIC_DIGITS[Number(digit)])
 }
 
+/** Class of the span wrapped around each number, styled with the letterhead (footer) font. */
+export const ARABIC_NUMBER_CLASS = "doc-ar-num"
+
+/** A number: Arabic-Indic digits with their separators, dates and times included. */
+const NUMBER_RUN = /[٠-٩٪٫٬]+(?:[/:-][٠-٩٪٫٬]+)*/g
+
 /** Rewrites the numbers of every text node under `root`, except under `data-latin` elements. */
 export function localizeDigits(root: HTMLElement): void {
   const doc = root.ownerDocument
@@ -35,6 +41,22 @@ export function localizeDigits(root: HTMLElement): void {
     const value = node.nodeValue ?? ""
     if (!/\d/.test(value)) continue
     if (node.parentElement?.closest(`[${KEEP_LATIN_ATTRIBUTE}]`)) continue
-    node.nodeValue = toArabicDigits(value)
+
+    const text = toArabicDigits(value)
+    const fragment = doc.createDocumentFragment()
+    let last = 0
+
+    for (const match of text.matchAll(NUMBER_RUN)) {
+      const start = match.index ?? 0
+      if (start > last) fragment.append(text.slice(last, start))
+      const span = doc.createElement("span")
+      span.className = ARABIC_NUMBER_CLASS
+      span.textContent = match[0]
+      fragment.append(span)
+      last = start + match[0].length
+    }
+    if (last < text.length) fragment.append(text.slice(last))
+
+    node.replaceWith(fragment)
   }
 }
