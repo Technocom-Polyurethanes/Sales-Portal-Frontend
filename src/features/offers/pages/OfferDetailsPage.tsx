@@ -162,16 +162,6 @@ export default function OfferDetailsPage() {
               <>
                 <Button
                   variant="secondary"
-                  icon={<Icon name="copy" size={16} />}
-                  onClick={() =>
-                    navigate(`/offers/new?from=${offer.id}&duplicate=1`)
-                  }
-                >
-                  {t("offers.details.duplicate")}
-                </Button>
-
-                <Button
-                  variant="secondary"
                   icon={<Icon name="edit" size={16} />}
                   onClick={() => navigate(`/offers/new?from=${offer.id}`)}
                 >

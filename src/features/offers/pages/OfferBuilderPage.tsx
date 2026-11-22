@@ -16,7 +16,6 @@ export default function OfferBuilderPage() {
   const { user } = useSession()
   const [searchParams] = useSearchParams()
   const sourceId = searchParams.get("from")
-  const duplicate = searchParams.get("duplicate") === "1"
 
   const { data: catalog, loading, error } = useBuilderCatalog()
   const { data: source, loading: sourceLoading } = useOffer(
@@ -26,20 +25,18 @@ export default function OfferBuilderPage() {
   const initialDraft = useMemo(
     () => {
       if (!source) return undefined
-      const draft = offerToDraft(source, catalog?.banks, {
+      return offerToDraft(source, catalog?.banks, {
         products: catalog?.products,
         packageTypes: catalog?.packageTypes,
       })
-      // A duplicate is a new offer: it takes the next number, not the number of the source.
-      return duplicate ? { ...draft, reference: "", sequence: 0 } : draft
     },
-    [source, catalog, duplicate],
+    [source, catalog],
   )
 
   // The backend numbers a new version itself (highest version of the offer + 1) and keeps it in
   // the chain of parentOfferId even when the reference is changed, this value is only a hint.
-  const version = source ? (duplicate ? 1 : source.version + 1) : 1
-  const parentOfferId = source && !duplicate ? source.id : undefined
+  const version = source ? source.version + 1 : 1
+  const parentOfferId = source?.id
 
   if (loading || (sourceId && sourceLoading)) {
     return (
