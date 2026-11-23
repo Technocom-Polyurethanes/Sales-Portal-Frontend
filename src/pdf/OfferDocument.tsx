@@ -61,7 +61,7 @@ function buildReferenceRows(
     { label: template.reference, value: data.reference, ltr: true, keepLatin: true },
     {
       label: template.date,
-      value: formatDocumentDate(data.issueDate),
+      value: formatDocumentDate(data.issueDate, language),
       ltr: true,
     },
     ...validity,
@@ -78,35 +78,35 @@ function buildTotalsRows(
   const rows: TotalsRow[] = [
     {
       label: template.subtotal,
-      value: formatDocumentNumber(data.subtotal),
+      value: formatDocumentNumber(data.subtotal, language),
     },
   ]
 
   if (data.orderDiscount > 0) {
     rows.push({
       label: template.discount,
-      value: `- ${formatDocumentNumber(data.orderDiscount)}`,
+      value: `- ${formatDocumentNumber(data.orderDiscount, language)}`,
     })
   }
 
   if (data.taxPercent > 0) {
     rows.push({
       label: `${template.tax} ${data.taxPercent}%`,
-      value: formatDocumentNumber(data.taxAmount),
+      value: formatDocumentNumber(data.taxAmount, language),
     })
   }
 
   if (data.otherTaxEnabled && data.otherTaxPercent > 0) {
     rows.push({
       label: template.otherTax,
-      value: `- ${formatDocumentNumber(data.otherTaxAmount)}`,
+      value: `- ${formatDocumentNumber(data.otherTaxAmount, language)}`,
       variant: "deduction",
     })
   }
 
   rows.push({
     label: template.itemsTotalLabel,
-    value: formatDocumentNumber(data.total),
+    value: formatDocumentNumber(data.total, language),
     currency,
     variant: "grand",
   })
@@ -247,12 +247,7 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
               lines={data.lines}
               currency={currency}
               weightUnit={weightUnit}
-              formatNumber={(value) =>
-                (value ?? 0).toLocaleString("en-US", {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 2,
-                })
-              }
+              formatNumber={(value) => formatDocumentNumber(value ?? 0, language)}
             />
           </div>
 
@@ -280,13 +275,8 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
               batches={batches}
               columns={columns}
               weightUnit={weightUnit}
-              formatDate={formatDocumentDate}
-              formatNumber={(value) =>
-                (value ?? 0).toLocaleString("en-US", {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 2,
-                })
-              }
+              formatDate={(value) => formatDocumentDate(value, language)}
+              formatNumber={(value) => formatDocumentNumber(value ?? 0, language)}
               language={language}
               source={data}
             />

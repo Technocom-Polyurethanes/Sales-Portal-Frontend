@@ -20,6 +20,6 @@ describe("currency labels", () => {
 
   it("appends the localized label to an amount", () => {
     expect(formatCurrency(113000, "EGP", "en-US")).toBe("113,000.00 EGP")
-    expect(formatCurrency(113000, "EGP", "ar-EG")).toBe("113,000.00 ج.م")
+    expect(formatCurrency(113000, "EGP", "ar-EG")).toBe("113000.00 ج.م")
   })
 })

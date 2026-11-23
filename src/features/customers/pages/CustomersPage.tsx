@@ -107,9 +107,9 @@ export default function CustomersPage() {
         header: t("customers.lastOffer"),
         secondary: true,
         render: (customer) => (
-          <span className="text-muted">
+          <span className="text-muted" dir="ltr">
             {customer.lastOfferDate
-              ? formatIsoDay(customer.lastOfferDate)
+              ? formatIsoDay(customer.lastOfferDate, locale)
               : "—"}
           </span>
         ),

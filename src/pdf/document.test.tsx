@@ -105,8 +105,9 @@ describe("offer document", () => {
     expect(text).toContain("TF-06-01")
     expect(text).toContain("DALTORIM EG 26200 - D")
     expect(text).toContain("EG12 QNBA 0021 4589 0012")
-    expect(text).toContain("٢١/١٠/٢٠٢٦")
-    expect(text).toContain("٣٩٬٩٠٠")
+    expect(text).toContain("٢٠٢٦/١٠/٢١")
+    expect(text).toContain("٣٩٩٠٠")
+    expect(text).not.toContain("٬")
   })
 
   it("mirrors the Arabic document and translates the packaging", () => {
@@ -280,7 +281,7 @@ describe("offer document", () => {
       renderWith("ar", { validityDays: 7 })
 
       expect(referenceLabels()).toContain("صلاحية العرض")
-      expect(referenceValue("صلاحية العرض")).toBe("٧ أيام — حتى ٢٨/١٠/٢٠٢٦")
+      expect(referenceValue("صلاحية العرض")).toBe("٧ أيام — حتى ٢٠٢٦/١٠/٢٨")
     })
 
     it("writes a single day in the singular", () => {

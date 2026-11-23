@@ -51,7 +51,9 @@ export default function CustomerHistoryPage() {
         key: "issueDate",
         header: t("offers.list.issueDate"),
         render: (offer) => (
-          <span className="text-muted">{formatIsoDay(offer.issueDate)}</span>
+          <span className="text-muted" dir="ltr">
+            {formatIsoDay(offer.issueDate, locale)}
+          </span>
         ),
       },
       {
@@ -151,7 +153,7 @@ export default function CustomerHistoryPage() {
           </p>
           <p className="mt-1 text-2xl font-semibold text-ink">
             {customer.lastOfferDate
-              ? formatIsoDay(customer.lastOfferDate)
+              ? formatIsoDay(customer.lastOfferDate, locale)
               : "—"}
           </p>
         </div>

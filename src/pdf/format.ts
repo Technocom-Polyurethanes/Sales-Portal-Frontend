@@ -1,21 +1,36 @@
 import { formatIsoDay, formatWeekday } from "../lib/formatters/date"
 import { formatCurrencyLabel } from "../lib/formatters/currency"
 import type { PackagingLine } from "../lib/calculations/packaging"
+import type { Locale } from "../lib/formatters/locale"
 import type { DocumentLanguage } from "./PdfLanguageProvider"
 
-const NUMBER_FORMATTER = new Intl.NumberFormat("en-US", {
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 2,
-})
-
-/** Latin digits with two decimals, the same in both document languages. */
-export function formatDocumentNumber(value: number): string {
-  return NUMBER_FORMATTER.format(Number.isFinite(value) ? value : 0)
+const NUMBER_FORMATTERS: Record<Locale, Intl.NumberFormat> = {
+  "en-US": new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }),
+  "ar-EG": new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+    useGrouping: false,
+  }),
 }
 
-/** `21/10/2026` */
-export function formatDocumentDate(value: string): string {
-  return formatIsoDay(value)
+/** Latin digits with up to two decimals; only the English document groups thousands. */
+export function formatDocumentNumber(
+  value: number,
+  language: DocumentLanguage,
+): string {
+  const formatter = NUMBER_FORMATTERS[language === "ar" ? "ar-EG" : "en-US"]
+  return formatter.format(Number.isFinite(value) ? value : 0)
+}
+
+/** `21/10/2026` in English, `2026/10/21` in Arabic. */
+export function formatDocumentDate(
+  value: string,
+  language: DocumentLanguage,
+): string {
+  return formatIsoDay(value, language === "ar" ? "ar-EG" : "en-US")
 }
 
 /**
@@ -27,7 +42,7 @@ export function formatDocumentValidity(
   expiryDate: string,
   language: DocumentLanguage,
 ): string {
-  const until = formatDocumentDate(expiryDate)
+  const until = formatDocumentDate(expiryDate, language)
 
   if (language === "ar") {
     const count =

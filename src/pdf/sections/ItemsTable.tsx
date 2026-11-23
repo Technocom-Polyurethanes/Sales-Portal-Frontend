@@ -56,7 +56,7 @@ export default function ItemsTable({
                 </span>
               </td>
               <td className="doc-num">
-                <span className="doc-ltr">{Math.round(line.quantityKg).toLocaleString("en-US")}</span>
+                <span className="doc-ltr">{formatNumber(line.quantityKg)}</span>
               </td>
               <td className="doc-num">
                 <span className="doc-ltr">{formatNumber(line.ratePerKg)}</span>

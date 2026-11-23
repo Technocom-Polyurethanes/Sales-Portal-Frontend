@@ -3,6 +3,7 @@ import Dialog from "../../../../components/ui/Dialog"
 import { useTranslation } from "../../../../i18n/I18nProvider"
 import type { Totals } from "../../../../lib/calculations/tax"
 import { formatIsoDay } from "../../../../lib/formatters/date"
+import { localeForLanguage } from "../../../../lib/formatters/locale"
 import { formatNumber } from "../../../../lib/formatters/number"
 import type { DocumentLanguage } from "../../../../pdf/PdfLanguageProvider"
 import TotalsSummary from "./TotalsSummary"
@@ -37,7 +38,8 @@ export default function ReviewDialog({
   onConfirm,
   onClose,
 }: ReviewDialogProps) {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
+  const locale = localeForLanguage(language)
 
   return (
     <Dialog
@@ -77,13 +79,17 @@ export default function ReviewDialog({
           <dt className="text-xs text-muted">
             {t("offers.builder.review.issueDate")}
           </dt>
-          <dd className="text-ink">{formatIsoDay(issueDate)}</dd>
+          <dd className="text-ink" dir="ltr">
+            {formatIsoDay(issueDate, locale)}
+          </dd>
         </div>
         <div>
           <dt className="text-xs text-muted">
             {t("offers.builder.review.dueDate")}
           </dt>
-          <dd className="text-ink">{formatIsoDay(dueDate)}</dd>
+          <dd className="text-ink" dir="ltr">
+            {formatIsoDay(dueDate, locale)}
+          </dd>
         </div>
       </dl>
 
