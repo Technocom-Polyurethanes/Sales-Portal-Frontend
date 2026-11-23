@@ -1,5 +1,6 @@
 import type { ApiRequestOptions, Query, Transport } from "../lib/api/types"
 import { ApiError } from "../lib/api/types"
+import { referenceSequence } from "../lib/calculations/reference"
 import { queryCustomers, queryMaterials } from "../lib/api/lookup"
 import type {
   Offer,
@@ -29,7 +30,7 @@ function toListItem(offer: Offer): OfferListItem {
   return {
     id: offer.id,
     reference: offer.reference,
-    serialNumber: Number.parseInt(offer.reference, 10) || 0,
+    serialNumber: referenceSequence(offer.reference) ?? 0,
     version: offer.version,
     customerId: offer.customerId,
     customerName: offer.customerName,
