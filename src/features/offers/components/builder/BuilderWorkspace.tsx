@@ -360,6 +360,7 @@ export default function BuilderWorkspace({
             <StepDelivery
               onChange={controller.setDraft}
               errors={fieldErrors}
+              customer={customer}
               draft={draft}
               calculations={calculations}
               packageTypes={catalog.packageTypes}

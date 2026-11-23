@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { I18nProvider } from "../../../../i18n/I18nProvider"
+import type { Customer } from "../../../customers/types"
 import { calculateDraft } from "../../calculations"
 import { createEmptyDraft } from "../../draft"
 import type { OfferDraft } from "../../types"
@@ -18,7 +19,11 @@ afterEach(() => {
   container = null
 })
 
-function mount(patch: Partial<OfferDraft>, onChange = vi.fn()) {
+function mount(
+  patch: Partial<OfferDraft>,
+  onChange = vi.fn(),
+  customer?: Customer,
+) {
   container = document.createElement("div")
   document.body.append(container)
   const draft = createEmptyDraft(patch)
@@ -26,6 +31,7 @@ function mount(patch: Partial<OfferDraft>, onChange = vi.fn()) {
     createRoot(container!).render(
       <I18nProvider>
         <StepDelivery
+          customer={customer}
           draft={draft}
           calculations={calculateDraft(draft)}
           packageTypes={[]}
@@ -73,17 +79,54 @@ describe("StepDelivery", () => {
   })
 
   it("always offers the delivery place, whatever the mode", () => {
-    mount({ deliveryMode: "text", deliveryPlace: "Badr City" })
-    expect((document.getElementById("offer-delivery-place") as HTMLTextAreaElement).value).toBe(
-      "Badr City",
-    )
+    mount({ deliveryMode: "text" })
+    expect(document.getElementById("offer-delivery-place")).not.toBeNull()
   })
 
-  it("limits the text blocks to what the API accepts", () => {
+  it("offers our factories and the selected customer's city factories", () => {
+    mount({ deliveryMode: "batches" }, vi.fn(), {
+      city: "6th of October",
+      cityAr: "٦ أكتوبر",
+    } as Customer)
+
+    const options = Array.from(
+      (document.getElementById("offer-delivery-place") as HTMLSelectElement).options,
+    ).map((option) => option.value)
+    expect(options).toEqual([
+      "",
+      "مصانعنا بمدينة بدر",
+      "مصانعكم بمدينة ٦ أكتوبر",
+    ])
+  })
+
+  it("keeps a legacy delivery place selected", () => {
+    mount({ deliveryMode: "text", deliveryPlace: "Badr City" })
+    const select = document.getElementById("offer-delivery-place") as HTMLSelectElement
+    expect(select.value).toBe("Badr City")
+    expect(Array.from(select.options).map((option) => option.value)).toContain("Badr City")
+  })
+
+  it("reports the chosen delivery place", () => {
+    const onChange = mount({ deliveryMode: "batches" }, vi.fn(), {
+      city: "Cairo",
+      cityAr: "القاهرة",
+    } as Customer)
+    const select = document.getElementById("offer-delivery-place") as HTMLSelectElement
+
+    act(() => {
+      select.value = "مصانعكم بمدينة القاهرة"
+      select.dispatchEvent(new Event("change", { bubbles: true }))
+    })
+
+    expect(onChange).toHaveBeenCalledWith({
+      deliveryPlace: "مصانعكم بمدينة القاهرة",
+    })
+  })
+
+  it("limits the free text to what the API accepts", () => {
     mount({ deliveryMode: "text" })
 
     expect(document.getElementById("offer-delivery-text")?.getAttribute("maxlength")).toBe("1000")
-    expect(document.getElementById("offer-delivery-place")?.getAttribute("maxlength")).toBe("300")
   })
 
   it("locks the text option once batches exist, and the schedule option once text exists", () => {
