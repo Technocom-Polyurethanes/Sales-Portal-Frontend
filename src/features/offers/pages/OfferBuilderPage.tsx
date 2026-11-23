@@ -28,6 +28,7 @@ export default function OfferBuilderPage() {
       return offerToDraft(source, catalog?.banks, {
         products: catalog?.products,
         packageTypes: catalog?.packageTypes,
+        customers: catalog?.customers,
       })
     },
     [source, catalog],
