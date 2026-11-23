@@ -39,8 +39,9 @@ const MODES: {
 
 /**
  * Step 4: how the delivery is described. Either the dated batch schedule or free text for
- * conditions a schedule cannot express, plus a choice of delivery place. The two methods
- * exclude each other: once one has content the other is locked until it is cleared.
+ * conditions a schedule cannot express, plus a preset dropdown and editable text for the
+ * place of delivery. The two methods exclude each other: once one has content the other is
+ * locked until it is cleared.
  */
 export default function StepDelivery({
   onChange,
@@ -55,10 +56,9 @@ export default function StepDelivery({
 
   const city = customer?.cityAr || customer?.city || ""
   const placeOptions = [OUR_FACTORIES, ...(city ? [customerFactories(city)] : [])]
-  const legacyPlace =
-    draft.deliveryPlace && !placeOptions.includes(draft.deliveryPlace)
-      ? draft.deliveryPlace
-      : ""
+  const placePreset = placeOptions.find(
+    (option) => option === draft.deliveryPlace?.trim(),
+  )
 
   return (
     <div className="space-y-6">
@@ -162,25 +162,39 @@ export default function StepDelivery({
       )}
 
       <Field
-        label={t("offers.builder.delivery.placeLabel")}
-        hint={t("offers.builder.delivery.placeHint")}
-        htmlFor="offer-delivery-place"
+        label={t("offers.builder.delivery.placePresetLabel")}
+        htmlFor="offer-delivery-place-preset"
       >
         <Select
-          id="offer-delivery-place"
-          value={draft.deliveryPlace}
+          id="offer-delivery-place-preset"
+          value={placePreset ?? ""}
           onChange={(event) => onChange({ deliveryPlace: event.target.value })}
         >
           <option value="">
-            {t("offers.builder.delivery.placePlaceholder")}
+            {draft.deliveryPlace && !placePreset
+              ? t("offers.builder.delivery.presetCustom")
+              : t("offers.builder.delivery.presetPlaceholder")}
           </option>
-          {legacyPlace && <option value={legacyPlace}>{legacyPlace}</option>}
           {placeOptions.map((option) => (
             <option key={option} value={option}>
               {option}
             </option>
           ))}
         </Select>
+      </Field>
+      <Field
+        label={t("offers.builder.delivery.placeLabel")}
+        hint={t("offers.builder.delivery.placeHint")}
+        htmlFor="offer-delivery-place"
+      >
+        <Textarea
+          id="offer-delivery-place"
+          rows={2}
+          maxLength={TEXT_LIMITS.deliveryPlace}
+          value={draft.deliveryPlace}
+          placeholder={t("offers.builder.delivery.placePlaceholder")}
+          onChange={(event) => onChange({ deliveryPlace: event.target.value })}
+        />
       </Field>
     </div>
   )

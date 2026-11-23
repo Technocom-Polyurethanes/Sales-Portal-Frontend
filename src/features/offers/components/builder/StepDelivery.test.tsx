@@ -78,8 +78,9 @@ describe("StepDelivery", () => {
     expect(onChange).toHaveBeenCalledWith({ deliveryMode: "text" })
   })
 
-  it("always offers the delivery place, whatever the mode", () => {
+  it("always offers the delivery place dropdown and text box, whatever the mode", () => {
     mount({ deliveryMode: "text" })
+    expect(document.getElementById("offer-delivery-place-preset")).not.toBeNull()
     expect(document.getElementById("offer-delivery-place")).not.toBeNull()
   })
 
@@ -90,7 +91,7 @@ describe("StepDelivery", () => {
     } as Customer)
 
     const options = Array.from(
-      (document.getElementById("offer-delivery-place") as HTMLSelectElement).options,
+      (document.getElementById("offer-delivery-place-preset") as HTMLSelectElement).options,
     ).map((option) => option.value)
     expect(options).toEqual([
       "",
@@ -99,11 +100,12 @@ describe("StepDelivery", () => {
     ])
   })
 
-  it("keeps a legacy delivery place selected", () => {
+  it("keeps a legacy delivery place in the editable text box", () => {
     mount({ deliveryMode: "text", deliveryPlace: "Badr City" })
-    const select = document.getElementById("offer-delivery-place") as HTMLSelectElement
-    expect(select.value).toBe("Badr City")
-    expect(Array.from(select.options).map((option) => option.value)).toContain("Badr City")
+    const textarea = document.getElementById("offer-delivery-place") as HTMLTextAreaElement
+    expect(textarea.value).toBe("Badr City")
+    const select = document.getElementById("offer-delivery-place-preset") as HTMLSelectElement
+    expect(select.value).toBe("")
   })
 
   it("reports the chosen delivery place", () => {
@@ -111,7 +113,7 @@ describe("StepDelivery", () => {
       city: "Cairo",
       cityAr: "القاهرة",
     } as Customer)
-    const select = document.getElementById("offer-delivery-place") as HTMLSelectElement
+    const select = document.getElementById("offer-delivery-place-preset") as HTMLSelectElement
 
     act(() => {
       select.value = "مصانعكم بمدينة القاهرة"
@@ -123,10 +125,26 @@ describe("StepDelivery", () => {
     })
   })
 
+  it("reports edits to the delivery place text box", () => {
+    const onChange = mount({ deliveryMode: "batches" })
+    const textarea = document.getElementById("offer-delivery-place") as HTMLTextAreaElement
+
+    act(() => {
+      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")!.set!.call(
+        textarea,
+        "Edited place",
+      )
+      textarea.dispatchEvent(new Event("input", { bubbles: true }))
+    })
+
+    expect(onChange).toHaveBeenCalledWith({ deliveryPlace: "Edited place" })
+  })
+
   it("limits the free text to what the API accepts", () => {
     mount({ deliveryMode: "text" })
 
     expect(document.getElementById("offer-delivery-text")?.getAttribute("maxlength")).toBe("1000")
+    expect(document.getElementById("offer-delivery-place")?.getAttribute("maxlength")).toBe("300")
   })
 
   it("locks the text option once batches exist, and the schedule option once text exists", () => {

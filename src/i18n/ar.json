@@ -239,6 +239,7 @@
         "presetLabel": "اختر",
         "presetPlaceholder": "اختر إعدادًا…",
         "presetCustom": "نص مخصص",
+        "placePresetLabel": "اختر مكان التوريد",
         "placeLabel": "مكان التوريد",
         "placeHint": "يُطبع في خانة مستقلة. اتركه فارغاً لإخفائه.",
         "placePlaceholder": "مصانعنا بمدينة بدر."
