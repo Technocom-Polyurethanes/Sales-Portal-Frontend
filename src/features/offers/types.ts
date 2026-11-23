@@ -178,7 +178,10 @@ export type Offer = {
   document?: { items?: OfferSnapshotItem[] }
   /** Who created the offer and when: set by the server, never typed. */
   createdByName?: string | null
+  /** When this version was created. Every version has its own date. */
   createdAt: string
+  /** When the first version (v1) was created: the creation date of the offer itself. */
+  rootCreatedAt?: string
   /** Who saved the offer last (a new version, a status change) and when. */
   updatedByName?: string | null
   updatedAt?: string
@@ -200,7 +203,10 @@ export type OfferListItem = {
   status: OfferStatus // lowercased by the mapper below
   total: number
   createdByName: string | null
+  /** When this version was created. Every version has its own date. */
   createdAt: string
+  /** When the first version (v1) was created: the creation date of the offer itself. */
+  rootCreatedAt?: string
   updatedAt: string
   lastModifiedByName?: string | null
   lastModifiedAt?: string

@@ -110,6 +110,11 @@ export function offerVersions(id: string): Offer[] {
     .sort((left, right) => left.version - right.version)
 }
 
+/** When the first version of the offer was created, the same for every version of it. */
+export function offerRootCreatedAt(id: string): string | undefined {
+  return offerVersions(id)[0]?.createdAt
+}
+
 /** The account the mock API treats as signed in. */
 export function sessionAccount(): UserRecord {
   return (

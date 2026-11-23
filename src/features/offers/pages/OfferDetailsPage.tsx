@@ -23,6 +23,7 @@ import DocumentLanguageToggle from "../components/DocumentLanguageToggle"
 import OfferSummary from "../components/OfferSummary"
 import StatusDialog from "../components/StatusDialog"
 import VersionHistory from "../components/VersionHistory"
+import { offerCreatedAt } from "../createdAt"
 import { buildDocumentData, offerToDocumentSource } from "../document"
 import { useOfferDetails } from "../hooks/useOfferDetails"
 import { withOfferStatus } from "../optimisticStatus"
@@ -231,7 +232,7 @@ export default function OfferDetailsPage() {
                 <dd className="text-xs text-muted">
                   {t("offers.details.createdAt")}{" "}
                   <bdi dir="ltr" className="tabular-nums">
-                    {formatDateTime(offer.createdAt)}
+                    {formatDateTime(offerCreatedAt(offer, versions))}
                   </bdi>
                 </dd>
               </div>
