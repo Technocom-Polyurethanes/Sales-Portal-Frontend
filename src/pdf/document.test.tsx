@@ -105,8 +105,9 @@ describe("offer document", () => {
     expect(text).toContain("TF-06-01")
     expect(text).toContain("DALTORIM EG 26200 - D")
     expect(text).toContain("EG12 QNBA 0021 4589 0012")
-    expect(text).toContain("٢١/١٠/٢٠٢٦")
-    expect(text).toContain("٣٩٬٩٠٠")
+    expect(text).toContain("٢٠٢٦/١٠/٢١")
+    expect(text).toContain("٣٩٩٠٠")
+    expect(text).not.toContain("٬")
   })
 
   it("mirrors the Arabic document and translates the packaging", () => {
@@ -168,6 +169,36 @@ describe("offer document", () => {
     expect(last.className).toContain("doc-grand")
     expect(last.textContent).toContain("Total")
     expect(container.textContent).not.toContain("Balance")
+  })
+
+  it("prints prices and totals with two decimals but keeps the quantity compact", () => {
+    render("en")
+
+    const cells = Array.from(
+      container.querySelectorAll(".doc-items tbody tr:first-child td"),
+    ).map((cell) => cell.textContent)
+    expect(cells[2]).toBe("3,990")
+    expect(cells[3]).toBe("10.00")
+    expect(cells[4]).toBe("39,900.00")
+
+    const values = Array.from(container.querySelectorAll(".doc-totals td .doc-ltr")).map(
+      (cell) => cell.textContent,
+    )
+    expect(values).toContain("39,900.00")
+    expect(values).toContain("5,586.00")
+    expect(values).toContain("45,486.00")
+  })
+
+  it("prints Arabic prices and totals with a dot decimal and no separator", () => {
+    render("ar")
+
+    const cells = Array.from(
+      container.querySelectorAll(".doc-items tbody tr:first-child td"),
+    ).map((cell) => cell.textContent)
+    expect(cells[2]).toBe("٣٩٩٠")
+    expect(cells[3]).toBe("١٠٫٠٠")
+    expect(cells[4]).toBe("٣٩٩٠٠٫٠٠")
+    expect(container.textContent).not.toContain("٬")
   })
 
   it("hides the attention line when it is empty", () => {
@@ -280,7 +311,7 @@ describe("offer document", () => {
       renderWith("ar", { validityDays: 7 })
 
       expect(referenceLabels()).toContain("صلاحية العرض")
-      expect(referenceValue("صلاحية العرض")).toBe("٧ أيام — حتى ٢٨/١٠/٢٠٢٦")
+      expect(referenceValue("صلاحية العرض")).toBe("٧ أيام — حتى ٢٠٢٦/١٠/٢٨")
     })
 
     it("writes a single day in the singular", () => {

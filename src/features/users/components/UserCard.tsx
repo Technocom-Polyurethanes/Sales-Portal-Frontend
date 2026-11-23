@@ -1,7 +1,7 @@
 import Badge from "../../../components/ui/Badge"
 import Button from "../../../components/ui/Button"
 import { useTranslation } from "../../../i18n/I18nProvider"
-import { formatTimestampDay } from "../../../lib/formatters"
+import { formatTimestampDay, localeForLanguage } from "../../../lib/formatters"
 import type { UserRecord } from "../types"
 import RoleBadge from "./RoleBadge"
 
@@ -25,6 +25,7 @@ export default function UserCard({
   onToggleActive,
 }: UserCardProps) {
   const { t, language } = useTranslation()
+  const locale = localeForLanguage(language)
   const title =
     language === "ar" ? user.roleTitleAr || user.roleTitle : user.roleTitle
   const team = language === "ar" ? user.teamAr || user.team : user.team
@@ -62,7 +63,8 @@ export default function UserCard({
           {user.email || ""}
         </dd>
         <span className="text-[12px] text-muted">
-          {t("users.createdOn")} {formatTimestampDay(user.createdAt)}
+          {t("users.createdOn")}{" "}
+          <bdi dir="ltr">{formatTimestampDay(user.createdAt, locale)}</bdi>
         </span>
       </dl>
 

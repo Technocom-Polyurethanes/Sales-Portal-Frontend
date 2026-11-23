@@ -191,7 +191,7 @@ export default function OfferDetailsPage() {
                   {t("offers.list.issueDate")}
                 </dt>
                 <dd className="font-medium text-ink">
-                  {formatIsoDay(offer.issueDate)}
+                  {formatIsoDay(offer.issueDate, locale)}
                 </dd>
               </div>
               <div>
@@ -199,7 +199,7 @@ export default function OfferDetailsPage() {
                   {t("offers.builder.basics.dueDate")}
                 </dt>
                 <dd className="font-medium text-ink">
-                  {formatIsoDay(offer.dueDate)}
+                  {formatIsoDay(offer.dueDate, locale)}
                 </dd>
               </div>
               <div>
@@ -232,7 +232,7 @@ export default function OfferDetailsPage() {
                 <dd className="text-xs text-muted">
                   {t("offers.details.createdAt")}{" "}
                   <bdi dir="ltr" className="tabular-nums">
-                    {formatDateTime(offerCreatedAt(offer, versions))}
+                    {formatDateTime(offerCreatedAt(offer, versions), locale)}
                   </bdi>
                 </dd>
               </div>
@@ -246,7 +246,7 @@ export default function OfferDetailsPage() {
                 <dd className="text-xs text-muted">
                   {t("offers.details.lastModifiedAt")}{" "}
                   <bdi dir="ltr" className="tabular-nums">
-                    {offer.updatedAt ? formatDateTime(offer.updatedAt) : "—"}
+                    {offer.updatedAt ? formatDateTime(offer.updatedAt, locale) : "—"}
                   </bdi>
                 </dd>
               </div>

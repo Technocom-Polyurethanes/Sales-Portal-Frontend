@@ -133,7 +133,7 @@ describe("what each role sees", () => {
 
     expect(text).toContain("Created by")
     expect(text).toContain("Amgad Anwar")
-    expect(text).toContain("Loc/3089/YL/AA")
+    expect(text).toContain("Loc/3089-2026/YL/AA")
   })
 
   it("gives sales the New offer button and the accountant none", async () => {
@@ -146,7 +146,7 @@ describe("what each role sees", () => {
 
     const accountant = await open("/offers", ACCOUNTANT)
     expect(accountant).not.toContain("Create new offer")
-    expect(accountant).toContain("Loc/3089/YL/AA")
+    expect(accountant).toContain("Loc/3089-2026/YL/AA")
   })
 
   it("lets sales add a customer but not edit one", async () => {
