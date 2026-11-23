@@ -50,9 +50,6 @@ export default function StepDelivery({
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        <p className="text-[13px] font-medium text-ink">
-          {t("offers.builder.delivery.modeLabel")}
-        </p>
 
         <div
           role="radiogroup"

@@ -236,7 +236,7 @@
         "textLabel": "Delivery terms",
         "textHint": "Printed instead of the delivery schedule.",
         "textPlaceholder": "Ready stock, delivered once the purchase order is confirmed and paid.",
-        "presetLabel": "Delivery preset",
+        "presetLabel": "Delivery term preset",
         "presetPlaceholder": "Choose a preset…",
         "presetCustom": "Custom text",
         "placeLabel": "Delivery place",
