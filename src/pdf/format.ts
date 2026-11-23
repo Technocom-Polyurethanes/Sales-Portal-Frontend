@@ -4,16 +4,21 @@ import type { PackagingLine } from "../lib/calculations/packaging"
 import type { Locale } from "../lib/formatters/locale"
 import type { DocumentLanguage } from "./PdfLanguageProvider"
 
+const makeFormatter = (locale: Locale, minimumFractionDigits: number) =>
+  new Intl.NumberFormat("en-US", {
+    minimumFractionDigits,
+    maximumFractionDigits: 2,
+    useGrouping: locale === "en-US",
+  })
+
 const NUMBER_FORMATTERS: Record<Locale, Intl.NumberFormat> = {
-  "en-US": new Intl.NumberFormat("en-US", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }),
-  "ar-EG": new Intl.NumberFormat("en-US", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-    useGrouping: false,
-  }),
+  "en-US": makeFormatter("en-US", 0),
+  "ar-EG": makeFormatter("ar-EG", 0),
+}
+
+const MONEY_FORMATTERS: Record<Locale, Intl.NumberFormat> = {
+  "en-US": makeFormatter("en-US", 2),
+  "ar-EG": makeFormatter("ar-EG", 2),
 }
 
 /** Latin digits with up to two decimals; only the English document groups thousands. */
@@ -22,6 +27,15 @@ export function formatDocumentNumber(
   language: DocumentLanguage,
 ): string {
   const formatter = NUMBER_FORMATTERS[language === "ar" ? "ar-EG" : "en-US"]
+  return formatter.format(Number.isFinite(value) ? value : 0)
+}
+
+/** Money always shows two decimals, so a whole amount still prints `.00`. */
+export function formatDocumentMoney(
+  value: number,
+  language: DocumentLanguage,
+): string {
+  const formatter = MONEY_FORMATTERS[language === "ar" ? "ar-EG" : "en-US"]
   return formatter.format(Number.isFinite(value) ? value : 0)
 }
 

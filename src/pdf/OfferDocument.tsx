@@ -7,6 +7,7 @@ import { createPortal } from "react-dom"
 import {
   formatDocumentCurrency,
   formatDocumentDate,
+  formatDocumentMoney,
   formatDocumentNumber,
   formatDocumentValidity,
   formatDocumentWeekday,
@@ -78,35 +79,35 @@ function buildTotalsRows(
   const rows: TotalsRow[] = [
     {
       label: template.subtotal,
-      value: formatDocumentNumber(data.subtotal, language),
+      value: formatDocumentMoney(data.subtotal, language),
     },
   ]
 
   if (data.orderDiscount > 0) {
     rows.push({
       label: template.discount,
-      value: `- ${formatDocumentNumber(data.orderDiscount, language)}`,
+      value: `- ${formatDocumentMoney(data.orderDiscount, language)}`,
     })
   }
 
   if (data.taxPercent > 0) {
     rows.push({
       label: `${template.tax} ${data.taxPercent}%`,
-      value: formatDocumentNumber(data.taxAmount, language),
+      value: formatDocumentMoney(data.taxAmount, language),
     })
   }
 
   if (data.otherTaxEnabled && data.otherTaxPercent > 0) {
     rows.push({
       label: template.otherTax,
-      value: `- ${formatDocumentNumber(data.otherTaxAmount, language)}`,
+      value: `- ${formatDocumentMoney(data.otherTaxAmount, language)}`,
       variant: "deduction",
     })
   }
 
   rows.push({
     label: template.itemsTotalLabel,
-    value: formatDocumentNumber(data.total, language),
+    value: formatDocumentMoney(data.total, language),
     currency,
     variant: "grand",
   })
@@ -248,6 +249,7 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
               currency={currency}
               weightUnit={weightUnit}
               formatNumber={(value) => formatDocumentNumber(value ?? 0, language)}
+              formatMoney={(value) => formatDocumentMoney(value ?? 0, language)}
             />
           </div>
 

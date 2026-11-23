@@ -14,6 +14,7 @@ export type ItemsTableProps = {
   currency: string
   weightUnit: string
   formatNumber: (value: number) => string
+  formatMoney: (value: number) => string
 }
 
 /** Priced materials with their packaging breakdown. */
@@ -23,6 +24,7 @@ export default function ItemsTable({
   currency,
   weightUnit,
   formatNumber,
+  formatMoney,
 }: ItemsTableProps) {
   return (
     <table className="doc-table doc-items">
@@ -59,10 +61,10 @@ export default function ItemsTable({
                 <span className="doc-ltr">{formatNumber(line.quantityKg)}</span>
               </td>
               <td className="doc-num">
-                <span className="doc-ltr">{formatNumber(line.ratePerKg)}</span>
+                <span className="doc-ltr">{formatMoney(line.ratePerKg)}</span>
               </td>
               <td className="doc-num">
-                <span className="doc-ltr">{formatNumber(line.amount)}</span>
+                <span className="doc-ltr">{formatMoney(line.amount)}</span>
               </td>
             </tr>
             {line.packagingSummary && (

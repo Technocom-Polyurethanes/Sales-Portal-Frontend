@@ -171,6 +171,36 @@ describe("offer document", () => {
     expect(container.textContent).not.toContain("Balance")
   })
 
+  it("prints prices and totals with two decimals but keeps the quantity compact", () => {
+    render("en")
+
+    const cells = Array.from(
+      container.querySelectorAll(".doc-items tbody tr:first-child td"),
+    ).map((cell) => cell.textContent)
+    expect(cells[2]).toBe("3,990")
+    expect(cells[3]).toBe("10.00")
+    expect(cells[4]).toBe("39,900.00")
+
+    const values = Array.from(container.querySelectorAll(".doc-totals td .doc-ltr")).map(
+      (cell) => cell.textContent,
+    )
+    expect(values).toContain("39,900.00")
+    expect(values).toContain("5,586.00")
+    expect(values).toContain("45,486.00")
+  })
+
+  it("prints Arabic prices and totals with a dot decimal and no separator", () => {
+    render("ar")
+
+    const cells = Array.from(
+      container.querySelectorAll(".doc-items tbody tr:first-child td"),
+    ).map((cell) => cell.textContent)
+    expect(cells[2]).toBe("٣٩٩٠")
+    expect(cells[3]).toBe("١٠٫٠٠")
+    expect(cells[4]).toBe("٣٩٩٠٠٫٠٠")
+    expect(container.textContent).not.toContain("٬")
+  })
+
   it("hides the attention line when it is empty", () => {
     render("en")
     expect(container.textContent).not.toContain("Attention:")
