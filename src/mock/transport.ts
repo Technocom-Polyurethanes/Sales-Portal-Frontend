@@ -15,6 +15,7 @@ import {
   findOffer,
   isFirstOffer,
   nextOfferSequence,
+  offerRootCreatedAt,
   offerVersions,
   sessionAccount,
   updateOfferStatus,
@@ -40,6 +41,7 @@ function toListItem(offer: Offer): OfferListItem {
     total: offer.totals.total,
     createdByName: offer.createdByName ?? null,
     createdAt: offer.createdAt,
+    rootCreatedAt: offerRootCreatedAt(offer.id) ?? offer.createdAt,
     updatedAt: offer.updatedAt ?? offer.createdAt,
     lastModifiedByName: offer.updatedByName ?? offer.createdByName ?? null,
     lastModifiedAt: offer.updatedAt ?? offer.createdAt,
@@ -293,7 +295,7 @@ const routes: Route[] = [
     handle: ({ params }) => {
       const offer = findOffer(params[0])
       if (!offer) throw new ApiError("Offer not found")
-      return offer
+      return { ...offer, rootCreatedAt: offerRootCreatedAt(offer.id) ?? offer.createdAt }
     },
   },
   {

@@ -68,7 +68,7 @@ export default function OfferCard({ offer, onOpen }: OfferCardProps) {
         <div>
           <dt className="text-xs text-muted">{t("offers.list.createdAt")}</dt>
           <dd dir="ltr" className="text-start text-ink tabular-nums">
-            {formatDateTime(offer.createdAt)}
+            {formatDateTime(offer.rootCreatedAt ?? offer.createdAt)}
           </dd>
         </div>
         <div>
