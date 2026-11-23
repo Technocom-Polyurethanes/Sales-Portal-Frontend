@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   buildOfferReference,
   parseReference,
-  referenceSequence,
   resolveInitials,
 } from "../../../lib/calculations/reference"
 import type { PackagingLine } from "../../../lib/calculations/packaging"
@@ -19,7 +18,13 @@ import {
   reconcileDelivery,
 } from "../draft"
 import { offersApi } from "../api"
+import {
+  prepareBuilderDraft,
+  restoreBuilderDraft,
+  type BuilderPersistence,
+} from "../builderInit"
 import { calculateDraft, type DraftCalculations } from "../calculations"
+import { useDraftPersistence } from "./useDraftPersistence"
 import type { DeliveryBatch, OfferDraft, OfferDraftLine } from "../types"
 import type { AccountUser } from "../../account/api"
 
@@ -60,6 +65,17 @@ export type OfferBuilderController = {
   ) => void
   recalculating: boolean
   calculateError: string | null
+  /** The temporary copy kept in the browser until the offer is saved. */
+  saved: {
+    /** When the restored copy was written; undefined when the builder started fresh. */
+    restoredAt: number | undefined
+    /** Throws the restored copy away and goes back to an empty form. */
+    startOver: () => void
+    /** Hides the "restored" notice and keeps the form as it is. */
+    dismissNotice: () => void
+    /** The offer was saved: stop keeping the copy and remove it. */
+    discard: () => void
+  }
 }
 
 export type UseOfferBuilderOptions = {
@@ -68,6 +84,8 @@ export type UseOfferBuilderOptions = {
   packageTypes: PackageType[]
   customers: Customer[]
   user: AccountUser | undefined
+  /** Keeps a temporary copy of the form in the browser; omit to keep nothing. */
+  persistence?: BuilderPersistence
 }
 
 /** State of the five step offer builder. */
@@ -77,34 +95,55 @@ export function useOfferBuilder({
   packageTypes,
   customers,
   user,
+  persistence,
 }: UseOfferBuilderOptions): OfferBuilderController {
-  const [draft, setDraftState] = useState<OfferDraft>(() => {
-    const base = initialDraft ?? createEmptyDraft()
-
-    const existing = base.reference.trim() ? parseReference(base.reference) : null
-    const draftSequence = base.reference.trim()
-      ? (referenceSequence(base.reference) ?? sequence)
-      : sequence
-
+  // Decided once, on the first render: a saved copy wins over the starting draft.
+  const [initial] = useState(() => {
+    const fresh = prepareBuilderDraft(initialDraft ?? createEmptyDraft(), sequence, user)
     return {
-      ...base,
-      sequence: draftSequence,
-      // The reference is automatic: offer type / sequence / YL / user initials.
-      reference: buildOfferReference(
-        base.offerType,
-        draftSequence,
-        existing?.initials ?? resolveInitials(user?.initials, user?.fullName ?? user?.name),
-      ),
-      otherTaxPercent: base.otherTaxEnabled ? 1 : 0,
+      fresh,
+      freshJson: JSON.stringify(fresh),
+      restored: persistence ? restoreBuilderDraft(persistence, sequence, user) : undefined,
     }
   })
-  const [step, setStep] = useState(0)
+  const [draft, setDraftState] = useState<OfferDraft>(
+    initial.restored?.draft ?? initial.fresh,
+  )
+  const [step, setStep] = useState(initial.restored?.step ?? 0)
+  const [restoredAt, setRestoredAt] = useState<number | undefined>(
+    initial.restored?.savedAt,
+  )
   const [serverCalculations, setServerCalculations] =
     useState<ServerCalculations | null>(null)
   const [recalculating, setRecalculating] = useState(false)
   const [calculateError, setCalculateError] = useState<string | null>(null)
 
   const calculations = useMemo(() => calculateDraft(draft), [draft])
+
+  const keeper = useDraftPersistence({
+    storageKey: persistence?.key,
+    draft,
+    step,
+    isPristine: useCallback(
+      (current: OfferDraft) => JSON.stringify(current) === initial.freshJson,
+      [initial],
+    ),
+  })
+
+  const saved = useMemo(
+    () => ({
+      restoredAt,
+      startOver: () => {
+        keeper.reset()
+        setDraftState(initial.fresh)
+        setStep(0)
+        setRestoredAt(undefined)
+      },
+      dismissNotice: () => setRestoredAt(undefined),
+      discard: keeper.discard,
+    }),
+    [restoredAt, keeper, initial],
+  )
 
   const abortControllerRef = useRef<AbortController | null>(null)
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -475,5 +514,6 @@ export function useOfferBuilder({
     removeBatch,
     updateBatch,
     setAllocation,
+    saved,
   }
 }
