@@ -32,7 +32,7 @@
 
 /* Arabic numbers use the font of the letterhead footer. */
 .offer-document .doc-ar-num {
-  font-family: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Firjar", ui-sans-serif, system-ui, sans-serif;
 }
 
 .offer-document .doc-ltr {
@@ -130,7 +130,7 @@
 }
 
 .offer-document .doc-wordmark-ar {
-  font-family: "Cairo", "Traditional Arabic", sans-serif;
+  font-family: "Firjar", "Traditional Arabic", sans-serif;
   font-size: 21pt;
   font-weight: 700;
   line-height: 1.05;
@@ -139,7 +139,7 @@
 
 .offer-document .doc-tagline-ar {
   margin-top: 0.8mm;
-  font-family: "Cairo", sans-serif;
+  font-family: "Firjar", sans-serif;
   font-size: 9.5pt;
   font-weight: 700;
   color: var(--doc-primary);
