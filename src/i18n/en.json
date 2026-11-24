@@ -112,6 +112,8 @@
     "createNewOffer": "Create new offer"
   },
   "offers": {
+    "deleteMessage": "\"{name}\" and every version of it will be hidden from the workspace.",
+    "deleted": "{name} and its versions were deleted.",
     "list": {
       "title": "Offers",
       "subtitle": "Find, manage, and keep track of every offer.",

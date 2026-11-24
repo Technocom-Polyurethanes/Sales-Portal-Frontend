@@ -1,58 +1,96 @@
 import { useMemo, useState } from "react"
 
 import PageHeader from "../../../app/layout/PageHeader"
+
 import PagedTable from "../../../components/PagedTable"
+
 import Badge from "../../../components/ui/Badge"
+
 import Button from "../../../components/ui/Button"
+
 import ConfirmDialog from "../../../components/ui/ConfirmDialog"
+
 import type { Column } from "../../../components/ui/DataTable"
+
 import Icon from "../../../components/ui/Icon"
+
 import SearchField from "../../../components/ui/SearchField"
+
 import Select from "../../../components/ui/Select"
+
 import { useTranslation } from "../../../i18n/I18nProvider"
+
 import { localeForLanguage } from "../../../lib/formatters/locale"
+
 import { formatNumber } from "../../../lib/formatters/number"
+
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
+
 import { useDelete } from "../../../lib/hooks/useDelete"
+
 import { usePermissions } from "../../account/hooks/usePermissions"
+
 import { settingsApi } from "../../settings/api"
+
 import { productsApi } from "../api"
+
 import MaterialDialog from "../components/MaterialDialog"
+
 import type { Product } from "../types"
 
 export default function ProductsPage() {
   const { t, language } = useTranslation()
+
   const { can } = usePermissions()
+
   const canCreate = can("catalog.create")
+
   const canEdit = can("catalog.edit")
+
   const canDelete = can("catalog.delete")
+
   const [search, setSearch] = useState("")
+
   const [category, setCategory] = useState("")
+
   const [page, setPage] = useState(1)
+
   const [dialogOpen, setDialogOpen] = useState(false)
+
   const [editing, setEditing] = useState<Product | undefined>()
+
   const { data, loading, error, reload, refresh } = useAsyncData(
     () => productsApi.listPage(search, category, page),
+
     [search, category, page],
   )
+
   const { data: catalogue, refresh: refreshCatalogue } = useAsyncData(
     () => productsApi.list().catch(() => []),
+
     [],
   )
+
   const { data: packageTypes } = useAsyncData(
     () => settingsApi.packageTypes().catch(() => []),
+
     [],
   )
+
   const deletion = useDelete({
     remove: (product: Product) => productsApi.delete(product.id),
+
     name: (product: Product) => product.name,
+
     onDeleted: () => {
       refresh()
+
       refreshCatalogue()
     },
   })
 
   const locale = localeForLanguage(language)
+
   const categories = useMemo(
     () =>
       [
@@ -60,8 +98,10 @@ export default function ProductsPage() {
           (catalogue ?? []).map((item) => item.category).filter(Boolean),
         ),
       ].sort(),
+
     [catalogue],
   )
+
   const packageName = (product: Product) =>
     product.defaultPackageTypeName ??
     packageTypes?.find((type) => type.id === product.defaultPackageTypeId)
@@ -70,10 +110,13 @@ export default function ProductsPage() {
 
   const openNew = () => {
     setEditing(undefined)
+
     setDialogOpen(true)
   }
+
   const openEdit = (product: Product) => {
     setEditing(product)
+
     setDialogOpen(true)
   }
 
@@ -81,48 +124,67 @@ export default function ProductsPage() {
     () => [
       {
         key: "code",
+
         header: t("products.code"),
+
         render: (product) => (
           <span dir="ltr" className="text-muted">
             {product.itemCode ?? product.code}
           </span>
         ),
       },
+
       {
         key: "name",
+
         header: t("products.material"),
+
         render: (product) => (
           <span className="font-medium text-ink">{product.name}</span>
         ),
       },
+
       {
         key: "category",
+
         header: t("products.category"),
+
         render: (product) => (
           <span className="text-muted">{product.category}</span>
         ),
       },
+
       {
         key: "packaging",
+
         header: t("products.defaultPackaging"),
+
         secondary: true,
+
         render: (product) => (
           <span className="text-muted">{packageName(product)}</span>
         ),
       },
+
       {
         key: "price",
+
         header: t("products.pricePerKg"),
+
         align: "end",
+
         render: (product) => (
           <span className="font-medium text-ink">
             {formatNumber(product.referencePrice, locale)}
           </span>
         ),
       },
+
       {
         key: "status",
+
         header: t("common.status"),
+
         render: (product) => (
           <Badge variant={product.isActive === false ? "neutral" : "accepted"}>
             {t(
@@ -133,23 +195,33 @@ export default function ProductsPage() {
           </Badge>
         ),
       },
+
       {
         key: "actions",
+
         header: t("common.actions"),
+
         align: "end",
+
         render: (product) => (
           <div className="flex justify-end gap-1">
             {canEdit && (
-              <Button variant="ghost" size="sm" onClick={() => openEdit(product)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => openEdit(product)}
+              >
                 <Icon name="edit" size={15} />
                 {t("common.edit")}
               </Button>
             )}
             {canDelete && (
               <Button
-                variant="ghost"
+                variant="danger"
                 size="sm"
-                aria-label={t("common.delete")}
+                data-testid="delete-button"
+                aria-label={t("common.deleteTitle", { name: product.name })}
+                className="w-8 shrink-0 px-0"
                 onClick={() => deletion.setTarget(product)}
               >
                 <Icon name="trash" size={15} />
@@ -159,10 +231,12 @@ export default function ProductsPage() {
         ),
       },
     ],
+
     [t, locale, packageTypes, canEdit, canDelete],
   )
 
   const hasFilters = search.trim() !== "" || category !== ""
+
   const visibleColumns =
     canEdit || canDelete
       ? columns
@@ -191,6 +265,7 @@ export default function ProductsPage() {
           value={search}
           onChange={(value) => {
             setSearch(value)
+
             setPage(1)
           }}
           placeholder={t("products.search")}
@@ -199,6 +274,7 @@ export default function ProductsPage() {
           value={category}
           onChange={(event) => {
             setCategory(event.target.value)
+
             setPage(1)
           }}
           aria-label={t("products.category")}
@@ -224,10 +300,12 @@ export default function ProductsPage() {
         query={search}
         onClearSearch={() => {
           setSearch("")
+
           setPage(1)
         }}
         onClearFilters={() => {
           setCategory("")
+
           setPage(1)
         }}
         hasFilters={hasFilters}

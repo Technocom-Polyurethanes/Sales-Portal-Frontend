@@ -1,52 +1,87 @@
 import { useMemo, useState } from "react"
+
 import { useNavigate } from "react-router-dom"
 
 import PageHeader from "../../../app/layout/PageHeader"
+
 import PagedTable from "../../../components/PagedTable"
+
 import Button from "../../../components/ui/Button"
+
 import ConfirmDialog from "../../../components/ui/ConfirmDialog"
+
 import Icon from "../../../components/ui/Icon"
+
 import SearchField from "../../../components/ui/SearchField"
+
 import { useTranslation } from "../../../i18n/I18nProvider"
+
 import { formatIsoDay } from "../../../lib/formatters/date"
+
 import { localeForLanguage } from "../../../lib/formatters/locale"
+
 import { formatCurrency } from "../../../lib/formatters/number"
+
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
+
 import { useDelete } from "../../../lib/hooks/useDelete"
+
 import { usePermissions } from "../../account/hooks/usePermissions"
+
 import { customersApi } from "../api"
+
 import { type Column } from "../../../components/ui/DataTable"
+
 import CustomerDialog from "../components/CustomerDialog"
+
 import type { Customer } from "../types"
 
 export default function CustomersPage() {
   const { t, language } = useTranslation()
+
   const navigate = useNavigate()
+
   const { can } = usePermissions()
+
   const canCreate = can("catalog.create")
+
   const canEdit = can("catalog.edit")
+
   const canDelete = can("catalog.delete")
+
   const [search, setSearch] = useState("")
+
   const [page, setPage] = useState(1)
+
   const [dialogOpen, setDialogOpen] = useState(false)
+
   const [editing, setEditing] = useState<Customer | undefined>()
+
   const { data, loading, error, reload, refresh } = useAsyncData(
     () => customersApi.listPage(search, page),
+
     [search, page],
   )
+
   const deletion = useDelete({
     remove: (customer: Customer) => customersApi.delete(customer.id),
+
     name: (customer: Customer) => customer.name,
+
     onDeleted: refresh,
   })
 
   const locale = localeForLanguage(language)
+
   const openNew = () => {
     setEditing(undefined)
+
     setDialogOpen(true)
   }
+
   const openEdit = (customer: Customer) => {
     setEditing(customer)
+
     setDialogOpen(true)
   }
 
@@ -54,66 +89,95 @@ export default function CustomersPage() {
     () => [
       {
         key: "code",
+
         header: t("customers.code"),
+
         render: (customer) => (
           <span dir="ltr" className="text-muted">
             {customer.customerCode ?? customer.code}
           </span>
         ),
       },
+
       {
         key: "name",
+
         header: t("customers.name"),
+
         render: (customer) => (
           <span className="font-medium text-ink">{customer.name}</span>
         ),
       },
+
       {
         key: "city",
+
         header: t("customers.cityEn"),
+
         secondary: true,
+
         render: (customer) => (
           <span className="text-muted">{customer.city || "—"}</span>
         ),
       },
+
       {
         key: "cityAr",
+
         header: t("customers.cityAr"),
+
         secondary: true,
+
         render: (customer) => (
           <span className="text-muted">{customer.cityAr || "—"}</span>
         ),
       },
+
       {
         key: "contact",
+
         header: t("customers.contact"),
+
         secondary: true,
+
         render: (customer) => (
           <span className="text-muted">{customer.contactPerson || "—"}</span>
         ),
       },
+
       {
         key: "offers",
+
         header: t("customers.offers"),
+
         align: "end",
+
         render: (customer) => (
           <span className="text-ink">{customer.offersCount ?? 0}</span>
         ),
       },
+
       {
         key: "totalValue",
+
         header: t("customers.totalValue"),
+
         align: "end",
+
         render: (customer) => (
           <span className="font-medium text-ink">
             {formatCurrency(customer.totalValue ?? 0, "EGP", locale)}
           </span>
         ),
       },
+
       {
         key: "lastOffer",
+
         header: t("customers.lastOffer"),
+
         secondary: true,
+
         render: (customer) => (
           <span className="text-muted" dir="ltr">
             {customer.lastOfferDate
@@ -122,10 +186,14 @@ export default function CustomersPage() {
           </span>
         ),
       },
+
       {
         key: "actions",
+
         header: t("common.actions"),
+
         align: "end",
+
         render: (customer) => (
           <div className="flex justify-end gap-1">
             {canEdit && (
@@ -134,6 +202,7 @@ export default function CustomersPage() {
                 size="sm"
                 onClick={(event) => {
                   event.stopPropagation()
+
                   openEdit(customer)
                 }}
               >
@@ -143,11 +212,14 @@ export default function CustomersPage() {
             )}
             {canDelete && (
               <Button
-                variant="ghost"
+                variant="danger"
                 size="sm"
-                aria-label={t("common.delete")}
+                data-testid="delete-button"
+                aria-label={t("common.deleteTitle", { name: customer.name })}
+                className="w-8 shrink-0 px-0"
                 onClick={(event) => {
                   event.stopPropagation()
+
                   deletion.setTarget(customer)
                 }}
               >
@@ -158,6 +230,7 @@ export default function CustomersPage() {
         ),
       },
     ],
+
     [t, locale, canEdit, canDelete],
   )
 
@@ -189,6 +262,7 @@ export default function CustomersPage() {
           value={search}
           onChange={(value) => {
             setSearch(value)
+
             setPage(1)
           }}
           placeholder={t("customers.search")}
@@ -207,6 +281,7 @@ export default function CustomersPage() {
         query={search}
         onClearSearch={() => {
           setSearch("")
+
           setPage(1)
         }}
         hasFilters={search.trim() !== ""}

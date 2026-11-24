@@ -1,47 +1,77 @@
 import { useMemo, useState } from "react"
 
 import PageHeader from "../../../app/layout/PageHeader"
+
 import PagedTable from "../../../components/PagedTable"
+
 import Badge from "../../../components/ui/Badge"
+
 import Button from "../../../components/ui/Button"
+
 import ConfirmDialog from "../../../components/ui/ConfirmDialog"
+
 import type { Column } from "../../../components/ui/DataTable"
+
 import Icon from "../../../components/ui/Icon"
+
 import SearchField from "../../../components/ui/SearchField"
+
 import { usePermissions } from "../../account/hooks/usePermissions"
+
 import { useTranslation } from "../../../i18n/I18nProvider"
+
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
+
 import { useDelete } from "../../../lib/hooks/useDelete"
+
 import type { BankAccount } from "../../settings/types"
+
 import { banksApi } from "../api"
+
 import BankDialog from "../components/BankDialog"
 
 export default function BanksPage() {
   const { t } = useTranslation()
+
   const { can } = usePermissions()
+
   const canCreate = can("catalog.create")
+
   const canEdit = can("catalog.edit")
+
   const canDelete = can("catalog.delete")
+
   const [search, setSearch] = useState("")
+
   const [page, setPage] = useState(1)
+
   const [dialogOpen, setDialogOpen] = useState(false)
+
   const [editing, setEditing] = useState<BankAccount | undefined>()
+
   const { data, loading, error, reload, refresh } = useAsyncData(
     () => banksApi.listPage(search, page),
+
     [search, page],
   )
+
   const deletion = useDelete({
     remove: (bank: BankAccount) => banksApi.delete(bank.id),
+
     name: (bank: BankAccount) => bank.bank,
+
     onDeleted: refresh,
   })
 
   const openNew = () => {
     setEditing(undefined)
+
     setDialogOpen(true)
   }
+
   const openEdit = (bank: BankAccount) => {
     setEditing(bank)
+
     setDialogOpen(true)
   }
 
@@ -49,33 +79,47 @@ export default function BanksPage() {
     const list: Column<BankAccount>[] = [
       {
         key: "bank",
+
         header: t("banks.bank"),
+
         render: (bank) => (
           <span className="font-medium text-ink">{bank.bank}</span>
         ),
       },
+
       {
         key: "branch",
+
         header: t("banks.branch"),
+
         render: (bank) => <span className="text-muted">{bank.branch}</span>,
       },
+
       {
         key: "accountNumber",
+
         header: t("banks.accountNumber"),
+
         render: (bank) => (
           <span dir="ltr" className="text-muted">
             {bank.accountNumber}
           </span>
         ),
       },
+
       {
         key: "currency",
+
         header: t("common.currency"),
+
         render: (bank) => <span className="text-muted">{bank.currency}</span>,
       },
+
       {
         key: "status",
+
         header: t("common.status"),
+
         render: (bank) => (
           <Badge variant={bank.isActive === false ? "neutral" : "accepted"}>
             {t(bank.isActive === false ? "banks.inactive" : "banks.active")}
@@ -87,8 +131,11 @@ export default function BanksPage() {
     if (canEdit || canDelete) {
       list.push({
         key: "actions",
+
         header: t("common.actions"),
+
         align: "end",
+
         render: (bank) => (
           <div className="flex justify-end gap-1">
             {canEdit && (
@@ -99,9 +146,11 @@ export default function BanksPage() {
             )}
             {canDelete && (
               <Button
-                variant="ghost"
+                variant="danger"
                 size="sm"
-                aria-label={t("common.delete")}
+                data-testid="delete-button"
+                aria-label={t("common.deleteTitle", { name: bank.bank })}
+                className="w-8 shrink-0 px-0"
                 onClick={() => deletion.setTarget(bank)}
               >
                 <Icon name="trash" size={15} />
@@ -138,6 +187,7 @@ export default function BanksPage() {
           value={search}
           onChange={(value) => {
             setSearch(value)
+
             setPage(1)
           }}
           placeholder={t("banks.search")}
@@ -155,6 +205,7 @@ export default function BanksPage() {
         query={search}
         onClearSearch={() => {
           setSearch("")
+
           setPage(1)
         }}
         hasFilters={search.trim() !== ""}
