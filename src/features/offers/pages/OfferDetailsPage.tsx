@@ -147,7 +147,7 @@ export default function OfferDetailsPage() {
     })
   }, [data, documentLanguage, viewOffer])
 
-  const deletion = useDelete<{ id: string reference: string }>({
+  const deletion = useDelete<{ id: string; reference: string }>({
     remove: (offer) => offersApi.delete(offer.id),
 
     name: (offer) => offer.reference,

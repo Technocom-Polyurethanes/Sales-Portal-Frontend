@@ -75,7 +75,7 @@ export const usersApi = {
   },
 
   create(
-    values: UserFormValues & { username: string password: string },
+    values: UserFormValues & { username: string; password: string },
   ): Promise<UserRecord> {
     return api.post<UserRecord>("/users", {
       ...toBody(values),

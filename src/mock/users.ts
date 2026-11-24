@@ -10,7 +10,7 @@ import type { Route } from "./transport"
 
 const ROLE_VALUES: Role[] = ["Admin", "Sales", "Accountant"]
 
-type UserBody = Partial<UserRecord> & { password?: string newPassword?: string }
+type UserBody = Partial<UserRecord> & { password?: string; newPassword?: string }
 
 const text = (value: unknown) => {
   const trimmed = typeof value === "string" ? value.trim() : ""

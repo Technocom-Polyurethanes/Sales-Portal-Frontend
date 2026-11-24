@@ -177,6 +177,17 @@ describe("what each role sees", () => {
     expect(dialog?.textContent).toContain("will be hidden from the workspace")
   })
 
+  it("warns that deleting an offer removes all of its versions", async () => {
+    await open("/offers", ADMIN)
+
+    await act(async () => {
+      deleteButtons()[0].click()
+    })
+
+    const dialog = container.querySelector('[role="dialog"]')
+    expect(dialog?.textContent).toContain("every version")
+  })
+
   it("renders the Users screen for the admin", async () => {
     const text = await open("/users", ADMIN)
 
