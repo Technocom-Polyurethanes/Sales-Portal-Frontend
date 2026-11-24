@@ -223,7 +223,7 @@ export default function CustomersPage() {
                   deletion.setTarget(customer)
                 }}
               >
-                <Icon name="trash" size={15} />
+                <Icon name="trash" size={18} />
               </Button>
             )}
           </div>

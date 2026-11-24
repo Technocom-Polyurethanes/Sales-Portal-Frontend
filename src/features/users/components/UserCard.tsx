@@ -130,7 +130,7 @@ export default function UserCard({
               className="w-8 shrink-0 px-0"
               onClick={() => onDelete(user)}
             >
-              <Icon name="trash" size={15} />
+              <Icon name="trash" size={18} />
             </Button>
           )}
         </div>

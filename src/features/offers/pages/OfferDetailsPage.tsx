@@ -246,7 +246,7 @@ export default function OfferDetailsPage() {
             {canDelete && (
               <Button
                 variant="danger"
-                icon={<Icon name="trash" size={16} />}
+                icon={<Icon name="trash" size={18} />}
                 onClick={() => deletion.setTarget(offer)}
               >
                 {t("common.delete")}
