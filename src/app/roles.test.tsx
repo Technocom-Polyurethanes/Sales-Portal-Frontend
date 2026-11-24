@@ -14,6 +14,8 @@ import { db } from "../mock/db"
 
 import App from "./App"
 
+;(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+
 // Sileo reads the system theme; jsdom has no matchMedia.
 
 if (!window.matchMedia) {
@@ -174,7 +176,7 @@ describe("what each role sees", () => {
 
     const dialog = container.querySelector('[role="dialog"]')
 
-    expect(dialog?.textContent).toContain("will be hidden from the workspace")
+    expect(dialog?.textContent).toContain("will be permanently deleted")
   })
 
   it("warns that deleting an offer removes all of its versions", async () => {

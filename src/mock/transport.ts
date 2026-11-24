@@ -38,6 +38,13 @@ import { userRoutes } from "./users"
 
 import type { ImportSource } from "../features/import/types"
 
+function removeOfferChains(ids: string[]) {
+  const versionIds = new Set(
+    ids.flatMap((id) => offerVersions(id).map((version) => version.id)),
+  )
+  db.offers = db.offers.filter((offer) => !versionIds.has(offer.id))
+}
+
 /** Offer to the list-row shape the real API returns. */
 
 function toListItem(offer: Offer): OfferListItem {
@@ -335,6 +342,11 @@ const routes: Route[] = [
     handle: ({ params }) => {
       assertCan("catalog.delete")
 
+      removeOfferChains(
+        db.offers
+          .filter((offer) => offer.customerId === params[0])
+          .map((offer) => offer.id),
+      )
       removeFrom(db.customers, params[0], "Customer")
     },
   },
@@ -393,6 +405,13 @@ const routes: Route[] = [
     handle: ({ params }) => {
       assertCan("catalog.delete")
 
+      removeOfferChains(
+        db.offers
+          .filter((offer) =>
+            offer.lines.some((line) => line.productId === params[0]),
+          )
+          .map((offer) => offer.id),
+      )
       removeFrom(db.products, params[0], "Material")
     },
   },
@@ -557,13 +576,11 @@ const routes: Route[] = [
     handle: ({ params }) => {
       assertCan("offers.delete")
 
-      const versionIds = new Set(
-        offerVersions(params[0]).map((version) => version.id),
-      )
+      const versions = offerVersions(params[0])
 
-      if (versionIds.size === 0) throw new ApiError("Offer not found", 404)
+      if (versions.length === 0) throw new ApiError("Offer not found", 404)
 
-      db.offers = db.offers.filter((offer) => !versionIds.has(offer.id))
+      removeOfferChains([params[0]])
     },
   },
 

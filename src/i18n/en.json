@@ -10,8 +10,8 @@
     "confirm": "Confirm",
     "delete": "Delete",
     "deleteTitle": "Delete {name}?",
-    "deleteMessage": "\"{name}\" will be hidden from the workspace. Existing offers keep their records.",
-    "deleted": "{name} was deleted.",
+    "deleteMessage": "\"{name}\" will be permanently deleted. This cannot be undone.",
+    "deleted": "{name} was permanently deleted.",
     "edit": "Edit",
     "add": "Add",
     "close": "Close",
@@ -112,8 +112,8 @@
     "createNewOffer": "Create new offer"
   },
   "offers": {
-    "deleteMessage": "\"{name}\" and every version of it will be hidden from the workspace.",
-    "deleted": "{name} and its versions were deleted.",
+    "deleteMessage": "\"{name}\" and every version of it will be permanently deleted. This cannot be undone.",
+    "deleted": "{name} and its versions were permanently deleted.",
     "list": {
       "title": "Offers",
       "subtitle": "Find, manage, and keep track of every offer.",
