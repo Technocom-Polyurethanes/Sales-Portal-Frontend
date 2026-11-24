@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Outlet } from "react-router-dom"
+import { Outlet, useLocation } from "react-router-dom"
 
 import Button from "../../components/ui/Button"
 import Dialog from "../../components/ui/Dialog"
@@ -19,6 +19,7 @@ const HELP_TIPS: TranslationKey[] = [
 
 export default function AppShell() {
   const { t } = useTranslation()
+  const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
 
@@ -31,11 +32,11 @@ export default function AppShell() {
       {menuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="absolute inset-0 bg-ink/40"
+            className="absolute inset-0 bg-ink/40 motion-safe:animate-fade-in"
             role="presentation"
             onClick={() => setMenuOpen(false)}
           />
-          <div className="absolute inset-y-0 start-0 w-64">
+          <div className="mobile-drawer absolute inset-y-0 start-0 w-64 motion-safe:animate-drawer-in">
             <Sidebar
               onNavigate={() => setMenuOpen(false)}
               onOpenHelp={() => {
@@ -53,7 +54,9 @@ export default function AppShell() {
           onOpenHelp={() => setHelpOpen(true)}
         />
         <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 lg:pb-10">
-          <Outlet />
+          <div key={location.pathname} className="motion-safe:animate-fade-in">
+            <Outlet />
+          </div>
         </main>
         <AppFooter />
       </div>

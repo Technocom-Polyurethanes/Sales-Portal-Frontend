@@ -33,7 +33,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-page px-4 py-10">
-      <div className="w-full max-w-sm rounded-xl border border-line bg-surface p-7 shadow-sm">
+      <div className="w-full max-w-sm rounded-xl border border-line bg-surface p-7 shadow-sm motion-safe:animate-rise-in">
         <Wordmark size="lg" />
         <h1 className="mt-6 text-xl font-semibold text-ink">
           {t("auth.welcomeBack")}
@@ -71,7 +71,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
           </Field>
 
           {error && (
-            <p className="rounded border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">
+            <p className="rounded border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger motion-safe:animate-fade-in">
               {error}
             </p>
           )}

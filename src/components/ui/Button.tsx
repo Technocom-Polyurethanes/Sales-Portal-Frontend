@@ -35,11 +35,19 @@ export default function Button({
 }: ButtonProps) {
   return (
     <button
+      aria-busy={loading}
       className={`inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
       disabled={disabled || loading}
       {...rest}
     >
-      {icon}
+      {loading ? (
+        <span
+          aria-hidden="true"
+          className="h-4 w-4 shrink-0 rounded-full border-2 border-current border-t-transparent motion-safe:animate-spin"
+        />
+      ) : (
+        icon
+      )}
       {children}
     </button>
   )

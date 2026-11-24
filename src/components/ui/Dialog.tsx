@@ -42,7 +42,7 @@ export default function Dialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 p-4 backdrop-blur-[2px] sm:items-center"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 p-4 backdrop-blur-[2px] motion-safe:animate-fade-in sm:items-center"
       onClick={onClose}
       role="presentation"
     >
@@ -51,7 +51,7 @@ export default function Dialog({
         aria-modal="true"
         aria-label={title}
         onClick={(event) => event.stopPropagation()}
-        className={`w-full ${SIZES[size]} rounded-xl border border-line bg-surface shadow-xl`}
+        className={`w-full ${SIZES[size]} rounded-xl border border-line bg-surface shadow-xl motion-safe:animate-panel-in`}
       >
         <header className="flex items-center justify-between gap-4 border-b border-line-soft px-5 py-4">
           <h2 className="text-base font-semibold text-ink">{title}</h2>
