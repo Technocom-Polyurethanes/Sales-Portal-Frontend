@@ -4,8 +4,10 @@ import { normalizeRole, roleCan, ROLES, type Permission } from "./permissions"
 
 const ALL: Permission[] = [
   "offers.write",
+  "offers.delete",
   "catalog.create",
   "catalog.edit",
+  "catalog.delete",
   "import.use",
   "users.manage",
 ]
@@ -18,14 +20,20 @@ describe("role permissions", () => {
     expect(allowed("Admin")).toEqual(ALL)
   })
 
-  it("lets sales create offers and catalogue records, but not edit, import or manage users", () => {
-    expect(allowed("Sales")).toEqual(["offers.write", "catalog.create"])
+  it("lets sales write and delete offers and catalogue records, but not edit, import or manage users", () => {
+    expect(allowed("Sales")).toEqual([
+      "offers.write",
+      "offers.delete",
+      "catalog.create",
+      "catalog.delete",
+    ])
   })
 
-  it("keeps offers read only for the accountant, who can import and edit the catalogue", () => {
+  it("keeps offers read only for the accountant, who can import and manage the catalogue", () => {
     expect(allowed("Accountant")).toEqual([
       "catalog.create",
       "catalog.edit",
+      "catalog.delete",
       "import.use",
     ])
   })

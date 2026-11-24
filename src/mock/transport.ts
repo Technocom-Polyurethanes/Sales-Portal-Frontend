@@ -1,5 +1,6 @@
 import type { ApiRequestOptions, Query, Transport } from "../lib/api/types"
 import { ApiError } from "../lib/api/types"
+import { roleCan, type Permission } from "../features/account/permissions"
 import { referenceSequence } from "../lib/calculations/reference"
 import { queryCustomers, queryMaterials } from "../lib/api/lookup"
 import type {
@@ -58,6 +59,22 @@ const pageOf = (query: Query) =>
         pageSize: Math.max(1, Number(query.pageSize ?? 20)),
       }
     : null
+
+const assertCan = (permission: Permission) => {
+  if (!roleCan(sessionAccount().role, permission)) {
+    throw new ApiError("You do not have permission to do that.", 403)
+  }
+}
+
+function removeFrom<T extends { id: string }>(
+  items: T[],
+  id: string,
+  label: string,
+) {
+  const index = items.findIndex((item) => item.id === id)
+  if (index < 0) throw new ApiError(`${label} not found`, 404)
+  items.splice(index, 1)
+}
 
 export type RouteContext = {
   params: string[]
@@ -193,6 +210,14 @@ const routes: Route[] = [
     },
   },
   {
+    method: "DELETE",
+    segments: ["customers", ":id"],
+    handle: ({ params }) => {
+      assertCan("catalog.delete")
+      removeFrom(db.customers, params[0], "Customer")
+    },
+  },
+  {
     method: "GET",
     segments: ["customers", ":id"],
     handle: ({ params }) => {
@@ -219,6 +244,14 @@ const routes: Route[] = [
         totalCount: offers.length,
         totalPages: Math.max(1, Math.ceil(offers.length / page.pageSize)),
       }
+    },
+  },
+  {
+    method: "DELETE",
+    segments: ["materials", ":id"],
+    handle: ({ params }) => {
+      assertCan("catalog.delete")
+      removeFrom(db.products, params[0], "Material")
     },
   },
   {
@@ -318,6 +351,14 @@ const routes: Route[] = [
     },
   },
   {
+    method: "DELETE",
+    segments: ["offers", ":id"],
+    handle: ({ params }) => {
+      assertCan("offers.delete")
+      removeFrom(db.offers, params[0], "Offer")
+    },
+  },
+  {
     method: "PATCH",
     segments: ["offers", ":id", "status"],
     handle: ({ params, body }) => {
@@ -387,6 +428,14 @@ const routes: Route[] = [
       if (!bank) throw new ApiError("Bank account not found", 404)
       Object.assign(bank, body, { id: bank.id })
       return bank
+    },
+  },
+  {
+    method: "DELETE",
+    segments: ["banks", ":id"],
+    handle: ({ params }) => {
+      assertCan("catalog.delete")
+      removeFrom(db.banks, params[0], "Bank account")
     },
   },
   {

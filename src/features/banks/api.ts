@@ -30,4 +30,8 @@ export const banksApi = {
     invalidate("banks", "catalog")
     return updated
   },
+  async delete(id: string): Promise<void> {
+    await api.delete<void>(`/banks/${id}`)
+    invalidate("banks", "catalog")
+  },
 }

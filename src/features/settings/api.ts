@@ -56,7 +56,7 @@ export const settingsApi = {
       return updated
     },
     async delete(id: string): Promise<void> {
-      const result = await api.delete<void>(`/settings/banks/${id}`)
+      const result = await api.delete<void>(`/banks/${id}`)
       invalidate("banks", "catalog")
       return result
     },

@@ -1,5 +1,6 @@
 import Badge from "../../../components/ui/Badge"
 import Button from "../../../components/ui/Button"
+import Icon from "../../../components/ui/Icon"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import { formatTimestampDay, localeForLanguage } from "../../../lib/formatters"
 import type { UserRecord } from "../types"
@@ -13,6 +14,7 @@ export type UserCardProps = {
   onEdit: (user: UserRecord) => void
   onResetPassword: (user: UserRecord) => void
   onToggleActive: (user: UserRecord) => void
+  onDelete?: (user: UserRecord) => void
 }
 
 /** One user with the actions an admin needs: edit, reset the password, activate or deactivate. */
@@ -23,6 +25,7 @@ export default function UserCard({
   onEdit,
   onResetPassword,
   onToggleActive,
+  onDelete,
 }: UserCardProps) {
   const { t, language } = useTranslation()
   const locale = localeForLanguage(language)
@@ -91,6 +94,17 @@ export default function UserCard({
               onClick={() => onToggleActive(user)}
             >
               {t(user.isActive ? "users.deactivate" : "users.activate")}
+            </Button>
+          )}
+          {!isSelf && onDelete && (
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={busy}
+              aria-label={t("common.delete")}
+              onClick={() => onDelete(user)}
+            >
+              <Icon name="trash" size={15} />
             </Button>
           )}
         </div>

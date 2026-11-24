@@ -1,5 +1,5 @@
 import { ApiError, type Query } from "../lib/api/types"
-import type { Role } from "../features/account/permissions"
+import { roleCan, type Role } from "../features/account/permissions"
 import type { UserRecord } from "../features/users/types"
 import { db, sessionAccount } from "./db"
 import type { Route } from "./transport"
@@ -164,6 +164,34 @@ export const userRoutes: Route[] = [
       if (password.length < 8)
         reject({ newPassword: ["Password must be at least 8 characters."] })
       return undefined
+    },
+  },
+  {
+    method: "DELETE",
+    segments: ["users", ":id"],
+    handle: ({ params }) => {
+      if (!roleCan(sessionAccount().role, "users.manage")) {
+        throw new ApiError("You do not have permission to do that.", 403)
+      }
+      const index = db.accounts.findIndex((account) => account.id === params[0])
+      if (index < 0) throw new ApiError("User was not found.", 404)
+      const user = db.accounts[index]
+      if (user.id === sessionAccount().id) {
+        throw new ApiError("You cannot delete your own account.", 409)
+      }
+      if (
+        user.role === "Admin" &&
+        user.isActive &&
+        !db.accounts.some(
+          (account) =>
+            account.id !== user.id &&
+            account.role === "Admin" &&
+            account.isActive,
+        )
+      ) {
+        throw new ApiError("At least one active administrator is required.", 409)
+      }
+      db.accounts.splice(index, 1)
     },
   },
 ]

@@ -4,12 +4,14 @@ import PageHeader from "../../../app/layout/PageHeader"
 import PagedTable from "../../../components/PagedTable"
 import Badge from "../../../components/ui/Badge"
 import Button from "../../../components/ui/Button"
+import ConfirmDialog from "../../../components/ui/ConfirmDialog"
 import type { Column } from "../../../components/ui/DataTable"
 import Icon from "../../../components/ui/Icon"
 import SearchField from "../../../components/ui/SearchField"
 import { usePermissions } from "../../account/hooks/usePermissions"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
+import { useDelete } from "../../../lib/hooks/useDelete"
 import type { BankAccount } from "../../settings/types"
 import { banksApi } from "../api"
 import BankDialog from "../components/BankDialog"
@@ -19,6 +21,7 @@ export default function BanksPage() {
   const { can } = usePermissions()
   const canCreate = can("catalog.create")
   const canEdit = can("catalog.edit")
+  const canDelete = can("catalog.delete")
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -27,6 +30,11 @@ export default function BanksPage() {
     () => banksApi.listPage(search, page),
     [search, page],
   )
+  const deletion = useDelete({
+    remove: (bank: BankAccount) => banksApi.delete(bank.id),
+    name: (bank: BankAccount) => bank.bank,
+    onDeleted: refresh,
+  })
 
   const openNew = () => {
     setEditing(undefined)
@@ -76,22 +84,36 @@ export default function BanksPage() {
       },
     ]
 
-    if (canEdit) {
+    if (canEdit || canDelete) {
       list.push({
         key: "actions",
         header: t("common.actions"),
         align: "end",
         render: (bank) => (
-          <Button variant="ghost" size="sm" onClick={() => openEdit(bank)}>
-            <Icon name="edit" size={15} />
-            {t("common.edit")}
-          </Button>
+          <div className="flex justify-end gap-1">
+            {canEdit && (
+              <Button variant="ghost" size="sm" onClick={() => openEdit(bank)}>
+                <Icon name="edit" size={15} />
+                {t("common.edit")}
+              </Button>
+            )}
+            {canDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                aria-label={t("common.delete")}
+                onClick={() => deletion.setTarget(bank)}
+              >
+                <Icon name="trash" size={15} />
+              </Button>
+            )}
+          </div>
         ),
       })
     }
 
     return list
-  }, [t, canEdit])
+  }, [t, canEdit, canDelete])
 
   return (
     <>
@@ -139,7 +161,7 @@ export default function BanksPage() {
         createLabel={canCreate ? t("banks.newBank") : undefined}
         onCreate={canCreate ? openNew : undefined}
         emptyTitle={t("banks.empty")}
-        skeletonColumns={canEdit ? 6 : 5}
+        skeletonColumns={canEdit || canDelete ? 6 : 5}
       />
 
       {dialogOpen && (
@@ -151,6 +173,15 @@ export default function BanksPage() {
           onSaved={refresh}
         />
       )}
+
+      <ConfirmDialog
+        open={deletion.target !== undefined}
+        title={deletion.title}
+        message={deletion.message}
+        loading={deletion.busy}
+        onConfirm={deletion.confirm}
+        onClose={() => deletion.setTarget(undefined)}
+      />
     </>
   )
 }

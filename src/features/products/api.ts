@@ -91,4 +91,8 @@ export const productsApi = {
     invalidate("materials", "catalog")
     return mapProduct(updated)
   },
+  async delete(id: string): Promise<void> {
+    await api.delete<void>(`/materials/${id}`)
+    invalidate("materials", "catalog")
+  },
 }

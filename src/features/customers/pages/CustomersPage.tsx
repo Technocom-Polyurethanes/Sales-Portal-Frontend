@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import PageHeader from "../../../app/layout/PageHeader"
 import PagedTable from "../../../components/PagedTable"
 import Button from "../../../components/ui/Button"
+import ConfirmDialog from "../../../components/ui/ConfirmDialog"
 import Icon from "../../../components/ui/Icon"
 import SearchField from "../../../components/ui/SearchField"
 import { useTranslation } from "../../../i18n/I18nProvider"
@@ -11,6 +12,7 @@ import { formatIsoDay } from "../../../lib/formatters/date"
 import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatCurrency } from "../../../lib/formatters/number"
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
+import { useDelete } from "../../../lib/hooks/useDelete"
 import { usePermissions } from "../../account/hooks/usePermissions"
 import { customersApi } from "../api"
 import { type Column } from "../../../components/ui/DataTable"
@@ -23,6 +25,7 @@ export default function CustomersPage() {
   const { can } = usePermissions()
   const canCreate = can("catalog.create")
   const canEdit = can("catalog.edit")
+  const canDelete = can("catalog.delete")
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -31,6 +34,11 @@ export default function CustomersPage() {
     () => customersApi.listPage(search, page),
     [search, page],
   )
+  const deletion = useDelete({
+    remove: (customer: Customer) => customersApi.delete(customer.id),
+    name: (customer: Customer) => customer.name,
+    onDeleted: refresh,
+  })
 
   const locale = localeForLanguage(language)
   const openNew = () => {
@@ -119,27 +127,44 @@ export default function CustomersPage() {
         header: t("common.actions"),
         align: "end",
         render: (customer) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={(event) => {
-              event.stopPropagation()
-              openEdit(customer)
-            }}
-          >
-            <Icon name="edit" size={15} />
-            {t("common.edit")}
-          </Button>
+          <div className="flex justify-end gap-1">
+            {canEdit && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  openEdit(customer)
+                }}
+              >
+                <Icon name="edit" size={15} />
+                {t("common.edit")}
+              </Button>
+            )}
+            {canDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                aria-label={t("common.delete")}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  deletion.setTarget(customer)
+                }}
+              >
+                <Icon name="trash" size={15} />
+              </Button>
+            )}
+          </div>
         ),
       },
     ],
-    [t, locale],
+    [t, locale, canEdit, canDelete],
   )
 
-  // A role that may create but not edit (Sales) sees no Edit button.
-  const visibleColumns = canEdit
-    ? columns
-    : columns.filter((column) => column.key !== "actions")
+  const visibleColumns =
+    canEdit || canDelete
+      ? columns
+      : columns.filter((column) => column.key !== "actions")
 
   return (
     <>
@@ -200,6 +225,15 @@ export default function CustomersPage() {
           onSaved={refresh}
         />
       )}
+
+      <ConfirmDialog
+        open={deletion.target !== undefined}
+        title={deletion.title}
+        message={deletion.message}
+        loading={deletion.busy}
+        onConfirm={deletion.confirm}
+        onClose={() => deletion.setTarget(undefined)}
+      />
     </>
   )
 }

@@ -4,6 +4,7 @@ import PageHeader from "../../../app/layout/PageHeader"
 import PagedTable from "../../../components/PagedTable"
 import Badge from "../../../components/ui/Badge"
 import Button from "../../../components/ui/Button"
+import ConfirmDialog from "../../../components/ui/ConfirmDialog"
 import type { Column } from "../../../components/ui/DataTable"
 import Icon from "../../../components/ui/Icon"
 import SearchField from "../../../components/ui/SearchField"
@@ -12,6 +13,7 @@ import { useTranslation } from "../../../i18n/I18nProvider"
 import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatNumber } from "../../../lib/formatters/number"
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
+import { useDelete } from "../../../lib/hooks/useDelete"
 import { usePermissions } from "../../account/hooks/usePermissions"
 import { settingsApi } from "../../settings/api"
 import { productsApi } from "../api"
@@ -23,6 +25,7 @@ export default function ProductsPage() {
   const { can } = usePermissions()
   const canCreate = can("catalog.create")
   const canEdit = can("catalog.edit")
+  const canDelete = can("catalog.delete")
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("")
   const [page, setPage] = useState(1)
@@ -32,7 +35,7 @@ export default function ProductsPage() {
     () => productsApi.listPage(search, category, page),
     [search, category, page],
   )
-  const { data: catalogue } = useAsyncData(
+  const { data: catalogue, refresh: refreshCatalogue } = useAsyncData(
     () => productsApi.list().catch(() => []),
     [],
   )
@@ -40,6 +43,14 @@ export default function ProductsPage() {
     () => settingsApi.packageTypes().catch(() => []),
     [],
   )
+  const deletion = useDelete({
+    remove: (product: Product) => productsApi.delete(product.id),
+    name: (product: Product) => product.name,
+    onDeleted: () => {
+      refresh()
+      refreshCatalogue()
+    },
+  })
 
   const locale = localeForLanguage(language)
   const categories = useMemo(
@@ -127,21 +138,35 @@ export default function ProductsPage() {
         header: t("common.actions"),
         align: "end",
         render: (product) => (
-          <Button variant="ghost" size="sm" onClick={() => openEdit(product)}>
-            <Icon name="edit" size={15} />
-            {t("common.edit")}
-          </Button>
+          <div className="flex justify-end gap-1">
+            {canEdit && (
+              <Button variant="ghost" size="sm" onClick={() => openEdit(product)}>
+                <Icon name="edit" size={15} />
+                {t("common.edit")}
+              </Button>
+            )}
+            {canDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                aria-label={t("common.delete")}
+                onClick={() => deletion.setTarget(product)}
+              >
+                <Icon name="trash" size={15} />
+              </Button>
+            )}
+          </div>
         ),
       },
     ],
-    [t, locale, packageTypes],
+    [t, locale, packageTypes, canEdit, canDelete],
   )
 
   const hasFilters = search.trim() !== "" || category !== ""
-  // A role that may create but not edit (Sales) sees no Edit button.
-  const visibleColumns = canEdit
-    ? columns
-    : columns.filter((column) => column.key !== "actions")
+  const visibleColumns =
+    canEdit || canDelete
+      ? columns
+      : columns.filter((column) => column.key !== "actions")
 
   return (
     <>
@@ -222,6 +247,15 @@ export default function ProductsPage() {
           onSaved={refresh}
         />
       )}
+
+      <ConfirmDialog
+        open={deletion.target !== undefined}
+        title={deletion.title}
+        message={deletion.message}
+        loading={deletion.busy}
+        onConfirm={deletion.confirm}
+        onClose={() => deletion.setTarget(undefined)}
+      />
     </>
   )
 }

@@ -2,14 +2,17 @@ import { useEffect, useState } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 
 import Button from "../../../components/ui/Button"
+import ConfirmDialog from "../../../components/ui/ConfirmDialog"
 import Icon from "../../../components/ui/Icon"
 import PageHeader from "../../../app/layout/PageHeader"
 import PagedCards from "../../../components/PagedCards"
 import { useTranslation } from "../../../i18n/I18nProvider"
+import { useDelete } from "../../../lib/hooks/useDelete"
 import { usePermissions } from "../../account/hooks/usePermissions"
+import { offersApi } from "../api"
 import OfferCard from "../components/OfferCard"
 import { useOffers } from "../hooks/useOffers"
-import type { OfferStatus } from "../types"
+import type { OfferListItem, OfferStatus } from "../types"
 
 /** Twelve cards fill whole rows of the one, two and three column grid. */
 const OFFERS_PAGE_SIZE = 12
@@ -26,6 +29,7 @@ export default function OffersListPage() {
   const { t } = useTranslation()
   const { can } = usePermissions()
   const canWrite = can("offers.write")
+  const canDelete = can("offers.delete")
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const statusParam = searchParams.get("status") as OfferStatus | null
@@ -52,11 +56,16 @@ export default function OffersListPage() {
 
   const search = searchParams.get("search") ?? ""
   const [page, setPage] = useState(1)
-  const { data, loading, error, reload } = useOffers({
+  const { data, loading, error, reload, refresh } = useOffers({
     status,
     search,
     page,
     pageSize: OFFERS_PAGE_SIZE,
+  })
+  const deletion = useDelete({
+    remove: (offer: OfferListItem) => offersApi.delete(offer.id),
+    name: (offer: OfferListItem) => offer.reference,
+    onDeleted: refresh,
   })
 
   // A new filter or search starts again from the first page.
@@ -117,6 +126,7 @@ export default function OffersListPage() {
           <OfferCard
             offer={offer}
             onOpen={(item) => navigate(`/offers/${item.id}`)}
+            onDelete={canDelete ? deletion.setTarget : undefined}
           />
         )}
         onPageChange={setPage}
@@ -130,6 +140,15 @@ export default function OffersListPage() {
         emptyTitle={t("offers.list.empty")}
         emptyDescription={t("offers.list.subtitle")}
         skeletonCount={OFFERS_PAGE_SIZE / 2}
+      />
+
+      <ConfirmDialog
+        open={deletion.target !== undefined}
+        title={deletion.title}
+        message={deletion.message}
+        loading={deletion.busy}
+        onConfirm={deletion.confirm}
+        onClose={() => deletion.setTarget(undefined)}
       />
     </>
   )

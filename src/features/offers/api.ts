@@ -66,6 +66,10 @@ export const offersApi = {
       .patch<any>(`/offers/${id}/status`, { status })
       .then((res) => mapOfferDetail(res))
   },
+  async delete(id: string): Promise<void> {
+    await api.delete<void>(`/offers/${id}`)
+    invalidate("customers")
+  },
 
   /**
    * The next free sequence. The number is global; the offer type is only needed to build the

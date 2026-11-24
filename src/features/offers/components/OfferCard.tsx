@@ -1,4 +1,5 @@
 import Badge from "../../../components/ui/Badge"
+import Button from "../../../components/ui/Button"
 import Icon from "../../../components/ui/Icon"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import { formatCurrency } from "../../../lib/formatters"
@@ -9,10 +10,11 @@ import type { OfferListItem } from "../types"
 export type OfferCardProps = {
   offer: OfferListItem
   onOpen: (offer: OfferListItem) => void
+  onDelete?: (offer: OfferListItem) => void
 }
 
 /** One offer with who created it and when: the list as cards instead of a table that scrolls sideways. */
-export default function OfferCard({ offer, onOpen }: OfferCardProps) {
+export default function OfferCard({ offer, onOpen, onDelete }: OfferCardProps) {
   const { t, language } = useTranslation()
   const locale = localeForLanguage(language)
   const creator = offer.createdByName || t("offers.list.unknownUser")
@@ -83,6 +85,20 @@ export default function OfferCard({ offer, onOpen }: OfferCardProps) {
         <span className="min-w-0 truncate">
           {modifiedBy ? `${t("offers.details.lastModifiedBy")}: ${modifiedBy}` : ""}
         </span>
+        {onDelete && (
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-label={t("common.delete")}
+            className="-my-1 shrink-0 text-muted"
+            onClick={(event) => {
+              event.stopPropagation()
+              onDelete(offer)
+            }}
+          >
+            <Icon name="trash" size={15} />
+          </Button>
+        )}
         <span className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-primary">
           {t("offers.list.open")}
           <Icon name="chevron" size={15} />

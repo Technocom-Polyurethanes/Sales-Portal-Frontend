@@ -5,6 +5,7 @@ import PageHeader from "../../../app/layout/PageHeader"
 import Badge from "../../../components/ui/Badge"
 import Button from "../../../components/ui/Button"
 import Card from "../../../components/ui/Card"
+import ConfirmDialog from "../../../components/ui/ConfirmDialog"
 import Icon from "../../../components/ui/Icon"
 import { useToast } from "../../../components/ui/ToastProvider"
 import { useTranslation } from "../../../i18n/I18nProvider"
@@ -12,6 +13,7 @@ import { findPaymentTerm, paymentTermConditions, paymentTermLabel } from "../pay
 import { formatDateTime, formatIsoDay } from "../../../lib/formatters/date"
 import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatCurrency } from "../../../lib/formatters/number"
+import { useDelete } from "../../../lib/hooks/useDelete"
 import OfferDocumentPreview from "../../../pdf/OfferDocumentPreview"
 import type { DocumentLanguage } from "../../../pdf/PdfLanguageProvider"
 import { usePrintOffer } from "../../../pdf/PrintProvider"
@@ -36,6 +38,7 @@ export default function OfferDetailsPage() {
   const navigate = useNavigate()
   const { can } = usePermissions()
   const canWrite = can("offers.write")
+  const canDelete = can("offers.delete")
   const { data, loading, error, reload, refresh, mutate } = useOfferDetails(id)
   const { notify } = useToast()
   const { print } = usePrintOffer()
@@ -82,6 +85,12 @@ export default function OfferDetailsPage() {
       paymentTermLabel: paymentTermLabel(viewOffer.term, documentLanguage),
     })
   }, [data, documentLanguage, viewOffer])
+
+  const deletion = useDelete<{ id: string; reference: string }>({
+    remove: (offer) => offersApi.delete(offer.id),
+    name: (offer) => offer.reference,
+    onDeleted: () => navigate("/offers"),
+  })
 
   const changeStatus = async (status: OfferStatus) => {
     if (!data) return
@@ -158,6 +167,16 @@ export default function OfferDetailsPage() {
             >
               {t("common.print")}
             </Button>
+
+            {canDelete && (
+              <Button
+                variant="danger"
+                icon={<Icon name="trash" size={16} />}
+                onClick={() => deletion.setTarget(offer)}
+              >
+                {t("common.delete")}
+              </Button>
+            )}
 
             {canWrite && (
               <>
@@ -282,6 +301,15 @@ export default function OfferDetailsPage() {
           </div>
         </aside>
       </div>
+
+      <ConfirmDialog
+        open={deletion.target !== undefined}
+        title={deletion.title}
+        message={deletion.message}
+        loading={deletion.busy}
+        onConfirm={deletion.confirm}
+        onClose={() => deletion.setTarget(undefined)}
+      />
 
       <StatusDialog
         open={statusOpen}

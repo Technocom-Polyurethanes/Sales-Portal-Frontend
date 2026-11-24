@@ -4,30 +4,39 @@
  * in a "forbidden" error. Keep the two in step.
  *
  * Admin       everything.
- * Sales       create offers; view customers (with history), materials and bank accounts and create new ones.
- * Accountant  data import and every catalogue feature; offers are read only.
+ * Sales       create and delete offers; view, create and delete customers, materials and banks.
+ * Accountant  data import and every catalogue feature including deletion; offers are read only.
  */
 export type Role = "Admin" | "Sales" | "Accountant"
 
 export const ROLES: readonly Role[] = ["Admin", "Sales", "Accountant"]
 
 export type Permission = /** Create, edit, duplicate, revise and change the status of offers. */
-"offers.write" | /** Create a customer, material or bank account. */
+"offers.write" | /** Delete an offer. */
+"offers.delete" | /** Create a customer, material or bank account. */
 "catalog.create" | /** Edit an existing customer, material or bank account. */
-"catalog.edit" | /** Data import. */
-"import.use" | /** The Users screen. */
+"catalog.edit" | /** Delete a customer, material or bank account. */
+"catalog.delete" | /** Data import. */
+"import.use" | /** The Users screen and its delete action. */
 "users.manage"
 
 const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   Admin: [
     "offers.write",
+    "offers.delete",
     "catalog.create",
     "catalog.edit",
+    "catalog.delete",
     "import.use",
     "users.manage",
   ],
-  Sales: ["offers.write", "catalog.create"],
-  Accountant: ["catalog.create", "catalog.edit", "import.use"],
+  Sales: ["offers.write", "offers.delete", "catalog.create", "catalog.delete"],
+  Accountant: [
+    "catalog.create",
+    "catalog.edit",
+    "catalog.delete",
+    "import.use",
+  ],
 }
 
 /** The role named by the API, or undefined for a missing or unknown value. */

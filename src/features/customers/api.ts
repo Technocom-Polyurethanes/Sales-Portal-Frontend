@@ -116,4 +116,8 @@ export const customersApi = {
     invalidate("customers")
     return mapCustomer(updated)
   },
+  async delete(id: string): Promise<void> {
+    await api.delete<void>(`/customers/${id}`)
+    invalidate("customers")
+  },
 }

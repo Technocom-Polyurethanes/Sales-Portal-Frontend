@@ -3,12 +3,14 @@ import { useState } from "react"
 import PageHeader from "../../../app/layout/PageHeader"
 import PagedCards from "../../../components/PagedCards"
 import Button from "../../../components/ui/Button"
+import ConfirmDialog from "../../../components/ui/ConfirmDialog"
 import Icon from "../../../components/ui/Icon"
 import SearchField from "../../../components/ui/SearchField"
 import Select from "../../../components/ui/Select"
 import { useToast } from "../../../components/ui/ToastProvider"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
+import { useDelete } from "../../../lib/hooks/useDelete"
 import { useSession } from "../../account/hooks/useSession"
 import { ROLES, type Role } from "../../account/permissions"
 import { USERS_PAGE_SIZE, userToFormValues, usersApi } from "../api"
@@ -33,6 +35,11 @@ export default function UsersPage() {
     () => usersApi.list({ search, role, status, page }),
     [search, role, status, page],
   )
+  const deletion = useDelete({
+    remove: (user: UserRecord) => usersApi.delete(user.id),
+    name: (user: UserRecord) => user.fullName,
+    onDeleted: refresh,
+  })
 
   const hasFilters = search.trim() !== "" || role !== "all" || status !== "all"
   const clearFilters = () => {
@@ -141,6 +148,7 @@ export default function UsersPage() {
             onEdit={setEditing}
             onResetPassword={setResetting}
             onToggleActive={toggleActive}
+            onDelete={user.id === me?.id ? undefined : deletion.setTarget}
           />
         )}
         onPageChange={setPage}
@@ -174,6 +182,15 @@ export default function UsersPage() {
           onClose={() => setResetting(undefined)}
         />
       )}
+
+      <ConfirmDialog
+        open={deletion.target !== undefined}
+        title={deletion.title}
+        message={deletion.message}
+        loading={deletion.busy}
+        onConfirm={deletion.confirm}
+        onClose={() => deletion.setTarget(undefined)}
+      />
     </>
   )
 }

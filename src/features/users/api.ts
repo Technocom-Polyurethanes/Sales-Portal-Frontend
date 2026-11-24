@@ -66,4 +66,8 @@ export const usersApi = {
   resetPassword(id: string, newPassword: string): Promise<void> {
     return api.post<void>(`/users/${id}/reset-password`, { newPassword })
   },
+
+  delete(id: string): Promise<void> {
+    return api.delete<void>(`/users/${id}`)
+  },
 }

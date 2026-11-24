@@ -37,6 +37,10 @@ describe("what each role sees", () => {
   let root: Root | undefined
 
   const open = async (path: string, userId: string) => {
+    if (root) {
+      await act(async () => root?.unmount())
+      root = undefined
+    }
     db.session.userId = userId
     window.history.pushState({}, "", path)
     root = createRoot(container)
@@ -57,6 +61,9 @@ describe("what each role sees", () => {
     Array.from(container.querySelectorAll("aside a")).map((a) =>
       a.getAttribute("href"),
     )
+
+  const deleteButtons = () =>
+    container.querySelectorAll<HTMLButtonElement>('button[aria-label="Delete"]')
 
   beforeEach(() => {
     clearCache()
@@ -94,6 +101,33 @@ describe("what each role sees", () => {
 
     expect(navLinks()).toContain("/import")
     expect(navLinks()).not.toContain("/users")
+  })
+
+  it("shows catalogue and offer delete buttons to sales but not on users", async () => {
+    await open("/customers", SALES)
+    expect(deleteButtons().length).toBeGreaterThan(0)
+
+    await open("/offers", SALES)
+    expect(deleteButtons().length).toBeGreaterThan(0)
+  })
+
+  it("shows catalogue deletes but no offer deletes to the accountant", async () => {
+    await open("/customers", ACCOUNTANT)
+    expect(deleteButtons().length).toBeGreaterThan(0)
+
+    await open("/offers", ACCOUNTANT)
+    expect(deleteButtons()).toHaveLength(0)
+  })
+
+  it("asks for confirmation before deleting", async () => {
+    await open("/customers", ADMIN)
+
+    await act(async () => {
+      deleteButtons()[0].click()
+    })
+
+    const dialog = container.querySelector('[role="dialog"]')
+    expect(dialog?.textContent).toContain("will be hidden from the workspace")
   })
 
   it("renders the Users screen for the admin", async () => {
