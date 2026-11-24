@@ -1,51 +1,103 @@
 import { useMemo, useState } from "react"
+
 import { useNavigate, useParams } from "react-router-dom"
 
 import PageHeader from "../../../app/layout/PageHeader"
+
 import Badge from "../../../components/ui/Badge"
+
 import Button from "../../../components/ui/Button"
+
 import Card from "../../../components/ui/Card"
+
+import ConfirmDialog from "../../../components/ui/ConfirmDialog"
+
 import Icon from "../../../components/ui/Icon"
+
 import { useToast } from "../../../components/ui/ToastProvider"
+
 import { useTranslation } from "../../../i18n/I18nProvider"
-import { findPaymentTerm, paymentTermConditions, paymentTermLabel } from "../paymentTerm"
+
+import {
+  findPaymentTerm,
+  paymentTermConditions,
+  paymentTermLabel,
+} from "../paymentTerm"
+
 import { formatDateTime, formatIsoDay } from "../../../lib/formatters/date"
+
 import { localeForLanguage } from "../../../lib/formatters/locale"
+
 import { formatCurrency } from "../../../lib/formatters/number"
+
+import { useDelete } from "../../../lib/hooks/useDelete"
+
 import OfferDocumentPreview from "../../../pdf/OfferDocumentPreview"
+
 import type { DocumentLanguage } from "../../../pdf/PdfLanguageProvider"
+
 import { usePrintOffer } from "../../../pdf/PrintProvider"
+
 import { usePermissions } from "../../account/hooks/usePermissions"
+
 import { offersApi } from "../api"
+
 import { banksForOffer } from "../bankSelection"
+
 import DetailsSkeleton from "../components/DetailsSkeleton"
+
 import DocumentLanguageToggle from "../components/DocumentLanguageToggle"
+
 import OfferSummary from "../components/OfferSummary"
+
 import StatusDialog from "../components/StatusDialog"
+
 import VersionHistory from "../components/VersionHistory"
+
 import { offerCreatedAt } from "../createdAt"
+
 import { buildDocumentData, offerToDocumentSource } from "../document"
+
 import { useOfferDetails } from "../hooks/useOfferDetails"
+
 import { withOfferStatus } from "../optimisticStatus"
+
 import type { OfferStatus } from "../types"
 
 export default function OfferDetailsPage() {
   const { t, language } = useTranslation()
+
   const locale = localeForLanguage(language)
+
   const { id } = useParams()
+
   const navigate = useNavigate()
+
   const { can } = usePermissions()
+
   const canWrite = can("offers.write")
+
+  const canDelete = can("offers.delete")
+
   const { data, loading, error, reload, refresh, mutate } = useOfferDetails(id)
+
   const { notify } = useToast()
+
   const { print } = usePrintOffer()
+
   const [statusOpen, setStatusOpen] = useState(false)
+
   const [saving, setSaving] = useState(false)
+
   // The document opens in the language the offer was saved in. Switching it here only changes
+
   // what is shown and printed, the saved language stays as it was.
-  const [languageChoice, setLanguageChoice] = useState<
-    { offerId: string | undefined; language: DocumentLanguage } | undefined
-  >()
+
+  const [languageChoice, setLanguageChoice] = useState<{
+    offerId: string | undefined
+    language: DocumentLanguage
+  } | undefined>()
+
   const documentLanguage: DocumentLanguage =
     languageChoice && languageChoice.offerId === id
       ? languageChoice.language
@@ -55,13 +107,20 @@ export default function OfferDetailsPage() {
     if (!data) return undefined
 
     const term = findPaymentTerm(data.paymentTerms, data.offer.paymentTermId)
+
     const savedText = (data.offer.paymentTermsText ?? "").trim()
-    const savedDefault = paymentTermConditions(term, data.offer.documentLanguage)
+
+    const savedDefault = paymentTermConditions(
+      term,
+      data.offer.documentLanguage,
+    )
 
     return {
       term,
+
       offer: {
         ...data.offer,
+
         paymentTermsText:
           savedText !== "" && savedText === savedDefault
             ? paymentTermConditions(term, documentLanguage)
@@ -75,28 +134,52 @@ export default function OfferDetailsPage() {
 
     return buildDocumentData(offerToDocumentSource(viewOffer.offer), {
       customer: data.customer,
+
       company: data.company,
+
       banks: banksForOffer(data.banks, data.offer.bankAccountIds),
+
       packageTypes: data.packageTypes,
+
       language: documentLanguage,
+
       paymentTermLabel: paymentTermLabel(viewOffer.term, documentLanguage),
     })
   }, [data, documentLanguage, viewOffer])
+
+  const deletion = useDelete<{ id: string; reference: string }>({
+    remove: (offer) => offersApi.delete(offer.id),
+
+    name: (offer) => offer.reference,
+
+    onDeleted: () => navigate("/offers"),
+
+    message: (name) => t("offers.deleteMessage", { name }),
+
+    success: (name) => t("offers.deleted", { name }),
+  })
 
   const changeStatus = async (status: OfferStatus) => {
     if (!data) return
 
     // Optimistic: show the new status and close the dialog at once, roll back on failure.
+
     const rollback = mutate((current) => withOfferStatus(current, status))
+
     setStatusOpen(false)
+
     setSaving(true)
+
     try {
       await offersApi.setStatus(data.offer.id, status)
+
       refresh()
     } catch (cause) {
       rollback()
+
       notify(
         cause instanceof Error ? cause.message : t("common.somethingWrong"),
+
         "error",
       )
     } finally {
@@ -125,6 +208,7 @@ export default function OfferDetailsPage() {
   }
 
   const { offer, versions, customer } = data
+
   const versionCount = versions?.length ?? (offer.version > 0 ? 1 : 0)
 
   return (
@@ -158,6 +242,16 @@ export default function OfferDetailsPage() {
             >
               {t("common.print")}
             </Button>
+
+            {canDelete && (
+              <Button
+                variant="danger"
+                icon={<Icon name="trash" size={18} />}
+                onClick={() => deletion.setTarget(offer)}
+              >
+                {t("common.delete")}
+              </Button>
+            )}
 
             {canWrite && (
               <>
@@ -213,7 +307,11 @@ export default function OfferDetailsPage() {
               <div>
                 <dt className="text-xs text-muted">{t("common.total")}</dt>
                 <dd className="font-semibold text-primary tabular-nums">
-                  {formatCurrency(offer.totals?.total ?? (offer as any).total ?? 0, offer.currency, locale)}
+                  {formatCurrency(
+                    offer.totals?.total ?? (offer as any).total ?? 0,
+                    offer.currency,
+                    locale,
+                  )}
                 </dd>
               </div>
             </dl>
@@ -246,7 +344,9 @@ export default function OfferDetailsPage() {
                 <dd className="text-xs text-muted">
                   {t("offers.details.lastModifiedAt")}{" "}
                   <bdi dir="ltr" className="tabular-nums">
-                    {offer.updatedAt ? formatDateTime(offer.updatedAt, locale) : "—"}
+                    {offer.updatedAt
+                      ? formatDateTime(offer.updatedAt, locale)
+                      : "—"}
                   </bdi>
                 </dd>
               </div>
@@ -282,6 +382,15 @@ export default function OfferDetailsPage() {
           </div>
         </aside>
       </div>
+
+      <ConfirmDialog
+        open={deletion.target !== undefined}
+        title={deletion.title}
+        message={deletion.message}
+        loading={deletion.busy}
+        onConfirm={deletion.confirm}
+        onClose={() => deletion.setTarget(undefined)}
+      />
 
       <StatusDialog
         open={statusOpen}

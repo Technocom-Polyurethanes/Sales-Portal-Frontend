@@ -1,24 +1,40 @@
 // @vitest-environment jsdom
+
 import { act } from "react"
+
 import { createRoot, type Root } from "react-dom/client"
+
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 
 import "@/mock"
+
 import { clearCache } from "../lib/cache/queryCache"
+
 import { db } from "../mock/db"
+
 import App from "./App"
 
+;(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+
 // Sileo reads the system theme; jsdom has no matchMedia.
+
 if (!window.matchMedia) {
   window.matchMedia = (query: string) =>
     ({
       matches: false,
+
       media: query,
+
       onchange: null,
+
       addEventListener: () => {},
+
       removeEventListener: () => {},
+
       addListener: () => {},
+
       removeListener: () => {},
+
       dispatchEvent: () => false,
     }) as MediaQueryList
 }
@@ -29,27 +45,45 @@ const pause = (ms: number) =>
   })
 
 const ADMIN = "acct-admin"
+
 const SALES = "acct-sales"
+
 const ACCOUNTANT = "acct-accountant"
 
 describe("what each role sees", () => {
   let container: HTMLDivElement
+
   let root: Root | undefined
 
   const open = async (path: string, userId: string) => {
+    if (root) {
+      await act(async () => root?.unmount())
+
+      root = undefined
+    }
+
     db.session.userId = userId
+
     window.history.pushState({}, "", path)
+
     root = createRoot(container)
+
     await act(async () => {
       root!.render(<App />)
     })
+
     // The mock API answers after a short delay: wait until nothing is loading any more.
+
     await pause(150)
+
     for (let tries = 0; tries < 40; tries += 1) {
       if (!container.querySelector('[aria-busy="true"]')) break
+
       await pause(100)
     }
+
     await pause(50)
+
     return container.textContent ?? ""
   }
 
@@ -58,19 +92,32 @@ describe("what each role sees", () => {
       a.getAttribute("href"),
     )
 
+  const deleteButtons = () =>
+    container.querySelectorAll<HTMLButtonElement>(
+      'button[data-testid="delete-button"]',
+    )
+
   beforeEach(() => {
     clearCache()
+
     localStorage.setItem("technocom.session", "active")
+
     localStorage.setItem("sales_portal_jwt", "test-token")
+
     container = document.createElement("div")
+
     document.body.appendChild(container)
   })
 
   afterEach(async () => {
     await act(async () => root?.unmount())
+
     container.remove()
+
     localStorage.clear()
+
     window.history.pushState({}, "", "/")
+
     db.session.userId = ADMIN
   })
 
@@ -78,6 +125,7 @@ describe("what each role sees", () => {
     await open("/", ADMIN)
 
     expect(navLinks()).toContain("/users")
+
     expect(navLinks()).toContain("/import")
   })
 
@@ -85,7 +133,9 @@ describe("what each role sees", () => {
     await open("/", SALES)
 
     expect(navLinks()).not.toContain("/users")
+
     expect(navLinks()).not.toContain("/import")
+
     expect(navLinks()).toContain("/offers")
   })
 
@@ -93,26 +143,76 @@ describe("what each role sees", () => {
     await open("/", ACCOUNTANT)
 
     expect(navLinks()).toContain("/import")
+
     expect(navLinks()).not.toContain("/users")
+  })
+
+  it("shows catalogue and offer delete buttons to sales but not on users", async () => {
+    await open("/customers", SALES)
+
+    expect(deleteButtons().length).toBeGreaterThan(0)
+
+    await open("/offers", SALES)
+
+    expect(deleteButtons().length).toBeGreaterThan(0)
+  })
+
+  it("shows catalogue deletes but no offer deletes to the accountant", async () => {
+    await open("/customers", ACCOUNTANT)
+
+    expect(deleteButtons().length).toBeGreaterThan(0)
+
+    await open("/offers", ACCOUNTANT)
+
+    expect(deleteButtons()).toHaveLength(0)
+  })
+
+  it("asks for confirmation before deleting", async () => {
+    await open("/customers", ADMIN)
+
+    await act(async () => {
+      deleteButtons()[0].click()
+    })
+
+    const dialog = container.querySelector('[role="dialog"]')
+
+    expect(dialog?.textContent).toContain("will be permanently deleted")
+  })
+
+  it("warns that deleting an offer removes all of its versions", async () => {
+    await open("/offers", ADMIN)
+
+    await act(async () => {
+      deleteButtons()[0].click()
+    })
+
+    const dialog = container.querySelector('[role="dialog"]')
+    expect(dialog?.textContent).toContain("every version")
   })
 
   it("renders the Users screen for the admin", async () => {
     const text = await open("/users", ADMIN)
 
     expect(text).toContain("New user")
+
     expect(text).toContain("Youssef Ali")
+
     expect(text).toContain("Hassan Mahmoud")
   })
 
   // Each role is checked against somebody else's name: its own shows in the sidebar.
+
   it.each([
     ["sales", SALES, "Hassan Mahmoud"],
+
     ["accountant", ACCOUNTANT, "Youssef Ali"],
   ])("blocks the Users screen for %s", async (_name, userId, someoneElse) => {
     const text = await open("/users", userId)
 
     expect(text).toContain("You don't have access to this page")
+
     expect(text).not.toContain("New user")
+
     expect(text).not.toContain(someoneElse)
   })
 
@@ -132,20 +232,27 @@ describe("what each role sees", () => {
     const text = await open("/offers", SALES)
 
     expect(text).toContain("Created by")
+
     expect(text).toContain("Amgad Anwar")
+
     expect(text).toContain("Loc/3089-2026/YL/AA")
   })
 
   it("gives sales the New offer button and the accountant none", async () => {
     const sales = await open("/offers", SALES)
+
     expect(sales).toContain("Create new offer")
 
     await act(async () => root?.unmount())
+
     container.innerHTML = ""
+
     clearCache()
 
     const accountant = await open("/offers", ACCOUNTANT)
+
     expect(accountant).not.toContain("Create new offer")
+
     expect(accountant).toContain("Loc/3089-2026/YL/AA")
   })
 
@@ -153,9 +260,11 @@ describe("what each role sees", () => {
     const text = await open("/customers", SALES)
 
     expect(text).toContain("New customer")
+
     const editButtons = Array.from(container.querySelectorAll("button")).filter(
       (button) => button.textContent?.trim() === "Edit",
     )
+
     expect(editButtons).toHaveLength(0)
   })
 
@@ -165,6 +274,7 @@ describe("what each role sees", () => {
     const editButtons = Array.from(container.querySelectorAll("button")).filter(
       (button) => button.textContent?.trim() === "Edit",
     )
+
     expect(editButtons.length).toBeGreaterThan(0)
   })
 })
