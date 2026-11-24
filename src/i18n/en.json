@@ -404,6 +404,9 @@
     "bankAccounts": "Bank accounts",
     "dropFile": "Drop an Excel or CSV file here",
     "orBrowse": "or browse from your computer",
+    "uploading": "Uploading {fileName}…",
+    "readingFile": "Reading file…",
+    "secondsLeft": "{seconds}s left",
     "start": "Start import",
     "cancel": "Cancel import",
     "steps": {

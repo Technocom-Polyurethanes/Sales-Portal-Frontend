@@ -549,7 +549,17 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 /** Mock transport: resolves requests from the in-memory database. */
 export const createMockTransport = (): Transport => {
   return async (path: string, options: ApiRequestOptions = {}) => {
+    const upload =
+      options.onProgress && options.body instanceof FormData
+        ? options.body.get("file")
+        : null
+    if (upload instanceof File) {
+      options.onProgress?.({ loaded: 0, total: upload.size })
+    }
     await delay(LATENCY_MS)
+    if (upload instanceof File) {
+      options.onProgress?.({ loaded: upload.size, total: upload.size })
+    }
 
     const method = options.method ?? "GET"
     const segments = path.split("/").filter(Boolean)

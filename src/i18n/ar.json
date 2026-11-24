@@ -404,6 +404,9 @@
     "bankAccounts": "الحسابات البنكية",
     "dropFile": "اسحب ملف Excel أو CSV إلى هنا",
     "orBrowse": "أو تصفح من جهازك",
+    "uploading": "جارٍ رفع {fileName}…",
+    "readingFile": "جارٍ قراءة الملف…",
+    "secondsLeft": "باقٍ {seconds} ث",
     "start": "بدء الاستيراد",
     "cancel": "إلغاء الاستيراد",
     "steps": {
