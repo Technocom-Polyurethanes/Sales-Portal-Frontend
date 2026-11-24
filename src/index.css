@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Firjar:wght@100..800&display=swap");
 @import "tailwindcss";
 
 @theme {
@@ -15,7 +15,7 @@
   --color-warning: #a2670a;
   --color-danger: #b3261e;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-arabic: "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: "Firjar", ui-sans-serif, system-ui, sans-serif;
   --radius-card: 10px;
   --animate-fade-in: fade-in 0.25s ease-out both;
   --animate-rise-in: rise-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
