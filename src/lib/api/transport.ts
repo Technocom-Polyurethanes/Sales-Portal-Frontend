@@ -145,15 +145,15 @@ async function handleResponse(response: Response): Promise<unknown> {
   }
 
   const contentType = response.headers.get("content-type") ?? ""
+  const text = await response.text()
   let data: unknown
-  if (contentType.includes("application/json")) {
+  if (contentType.includes("json")) {
     try {
-      data = await response.json()
+      data = JSON.parse(text)
     } catch {
-      data = undefined
+      data = text || undefined
     }
   } else {
-    const text = await response.text()
     data = text || undefined
   }
 
