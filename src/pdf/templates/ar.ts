@@ -41,4 +41,5 @@ export const arabicTemplate: OfferTemplate = {
   termsAndConditions: [
     "تنطبق شروط القوى القهرية على العرض بعاليه.",
   ],
+  taxExcluded: "هذه الأسعار غير شاملة الضريبة.",
 }

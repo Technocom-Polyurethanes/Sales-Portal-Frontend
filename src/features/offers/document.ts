@@ -3,7 +3,7 @@ import { roundMoney } from "../../lib/calculations/round"
 import { expiryDateFrom, normalizeValidityDays } from "../../lib/calculations/validity"
 import { translateCategory } from "../../pdf/format"
 import { formatPackagingSummaryDocument } from "../../pdf/format"
-import type { PackagingLine } from "../../lib/calculations/packaging"
+import { isPriceOnly, type PackagingLine } from "../../lib/calculations/packaging"
 import type { Customer } from "../customers/types"
 import type { DocumentLanguage } from "../../pdf/PdfLanguageProvider"
 import type {
@@ -207,6 +207,7 @@ export function buildDocumentData(source: DocumentSource,
       currency: bank.currency,
     })),
     notes: source.notes ?? "",
+    priceOnly: isPriceOnly(source.lines ?? []),
   }
 }
 

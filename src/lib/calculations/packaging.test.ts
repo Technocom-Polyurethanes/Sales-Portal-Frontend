@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import {
   formatPackagingSummary,
+  isPriceOnly,
   lineQuantityKg,
   packagingBreakdown,
   totalPackages,
@@ -47,6 +48,16 @@ describe("packaging calculations", () => {
   it("returns zero for empty packaging", () => {
     expect(totalQuantityKg([])).toBe(0)
     expect(totalPackages([])).toBe(0)
+  })
+
+  it("recognises a price-only offer across all of its lines", () => {
+    const zeroDrum = { ...drumRow, packages: 0 }
+
+    expect(isPriceOnly([])).toBe(false)
+    expect(isPriceOnly([{ packaging: [] }])).toBe(true)
+    expect(isPriceOnly([{ packaging: [zeroDrum] }])).toBe(true)
+    expect(isPriceOnly([{ packaging: [] }, { packaging: [zeroDrum] }])).toBe(true)
+    expect(isPriceOnly([{ packaging: [] }, { packaging: [drumRow] }])).toBe(false)
   })
 
   it("groups packaging rows by package type and weight", () => {

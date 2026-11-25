@@ -73,7 +73,11 @@ describe("step validation", () => {
     expect(noPrice.map((i) => i.message)).toEqual(["offers.builder.validation.rate"])
     expect(noPrice[0]?.params).toEqual({ name: "Resin" })
 
-    const noPackaging = validateStep(1, filled({ lines: [line({ packaging: [] })] }), ctx)
+    const noPackaging = validateStep(
+      1,
+      filled({ lines: [line(), line({ id: "l2", packaging: [] })] }),
+      ctx,
+    )
     expect(noPackaging.map((i) => i.message)).toEqual([
       "offers.builder.validation.packagingMissing",
     ])
@@ -81,8 +85,19 @@ describe("step validation", () => {
     const noCount = line()
     noCount.packaging[0]!.packages = 0
     expect(
-      validateStep(1, filled({ lines: [noCount] }), ctx).map((i) => i.message),
+      validateStep(1, filled({ lines: [line(), noCount] }), ctx).map((i) => i.message),
     ).toEqual(["offers.builder.validation.packagingPackages"])
+  })
+
+  it("accepts a price-only offer whose lines have no packages", () => {
+    const zeroRow = { ...line().packaging[0]!, packages: 0 }
+
+    for (const lines of [
+      [line({ packaging: [] })],
+      [line({ packaging: [zeroRow] })],
+    ]) {
+      expect(validateStep(1, filled({ lines }), ctx)).toEqual([])
+    }
   })
 
   it("keeps the tax and the discount between 0 and 100", () => {

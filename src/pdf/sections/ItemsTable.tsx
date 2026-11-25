@@ -15,6 +15,8 @@ export type ItemsTableProps = {
   weightUnit: string
   formatNumber: (value: number) => string
   formatMoney: (value: number) => string
+  /** Hides quantities, amounts and packaging: only material and price per kg remain. */
+  priceOnly?: boolean
 }
 
 /** Priced materials with their packaging breakdown. */
@@ -25,6 +27,7 @@ export default function ItemsTable({
   weightUnit,
   formatNumber,
   formatMoney,
+  priceOnly = false,
 }: ItemsTableProps) {
   return (
     <table className="doc-table doc-items">
@@ -34,15 +37,19 @@ export default function ItemsTable({
             #
           </th>
           <th scope="col">{headings.item}</th>
-          <th scope="col" className="doc-num">
-            {headings.quantity}
-          </th>
+          {!priceOnly && (
+            <th scope="col" className="doc-num">
+              {headings.quantity}
+            </th>
+          )}
           <th scope="col" className="doc-num">
             {headings.rate} ({currency}/{weightUnit})
           </th>
-          <th scope="col" className="doc-num">
-            {headings.amount} ({currency})
-          </th>
+          {!priceOnly && (
+            <th scope="col" className="doc-num">
+              {headings.amount} ({currency})
+            </th>
+          )}
         </tr>
       </thead>
       <tbody>
@@ -57,17 +64,21 @@ export default function ItemsTable({
                   {line.name}
                 </span>
               </td>
-              <td className="doc-num">
-                <span className="doc-ltr">{formatNumber(line.quantityKg)}</span>
-              </td>
+              {!priceOnly && (
+                <td className="doc-num">
+                  <span className="doc-ltr">{formatNumber(line.quantityKg)}</span>
+                </td>
+              )}
               <td className="doc-num">
                 <span className="doc-ltr">{formatMoney(line.ratePerKg)}</span>
               </td>
-              <td className="doc-num">
-                <span className="doc-ltr">{formatMoney(line.amount)}</span>
-              </td>
+              {!priceOnly && (
+                <td className="doc-num">
+                  <span className="doc-ltr">{formatMoney(line.amount)}</span>
+                </td>
+              )}
             </tr>
-            {line.packagingSummary && (
+            {!priceOnly && line.packagingSummary && (
               <tr className="doc-subrow">
                 <td colSpan={5}>
                   <span className="doc-subrow-label">

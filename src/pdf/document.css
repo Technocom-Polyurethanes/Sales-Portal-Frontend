@@ -110,9 +110,9 @@
 }
 
 .offer-document .doc-wordmark-en {
-  font-family: "Inter", "Arial Black", sans-serif;
+  font-family: "Inter", "Arial", sans-serif;
   font-size: 22pt;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.6pt;
   line-height: 1;
   color: var(--doc-primary);
