@@ -137,7 +137,7 @@ export function buildOffer(spec: OfferSpec): Offer {
 
   return {
     id: `offer-${spec.sequence}`,
-    reference: buildOfferReference("Loc", spec.sequence, "AA"),
+    reference: buildOfferReference("Loc", spec.sequence, "AA", spec.issueDate),
     offerType: "Loc",
     customerId: customer.id,
     customerName: customer.name,

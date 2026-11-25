@@ -337,6 +337,7 @@ export default function StepBasics({
                 ? t("offers.builder.basics.validityExpires", {
                     date: formatIsoDay(
                       expiryDateFrom(draft.issueDate, validityDays),
+                      locale,
                     ),
                     days: validityDays,
                   })

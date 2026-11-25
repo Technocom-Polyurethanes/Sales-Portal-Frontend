@@ -12,6 +12,8 @@ import type { PackageType } from "../../settings/types"
 import { productsApi } from "../api"
 import type { Product } from "../types"
 
+const CATEGORIES = ["Polyol", "Iso"]
+
 export type MaterialDialogProps = {
   open: boolean
   product?: Product
@@ -125,11 +127,21 @@ export default function MaterialDialog({
           required
           htmlFor="material-category"
         >
-          <Input
+          <Select
             id="material-category"
             value={form.category}
             onChange={(event) => set("category", event.target.value)}
-          />
+          >
+            <option value="">{t("common.select")}</option>
+            {CATEGORIES.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+            {form.category && !CATEGORIES.includes(form.category) && (
+              <option value={form.category}>{form.category}</option>
+            )}
+          </Select>
         </Field>
         <Field label={t("products.pricePerKg")} htmlFor="material-price">
           <Input

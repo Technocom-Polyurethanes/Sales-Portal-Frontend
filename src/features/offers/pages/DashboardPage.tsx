@@ -117,7 +117,9 @@ export default function DashboardPage() {
         key: "issueDate",
         header: t("offers.list.issueDate"),
         render: (offer) => (
-          <span className="text-muted">{formatIsoDay(offer.issueDate)}</span>
+          <span className="text-muted" dir="ltr">
+            {formatIsoDay(offer.issueDate, locale)}
+          </span>
         ),
       },
       {

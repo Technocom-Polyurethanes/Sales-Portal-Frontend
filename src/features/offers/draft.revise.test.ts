@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import type { Customer } from "../customers/types"
 import { calculateDraft } from "./calculations"
 import { offerToDraft } from "./draft"
 import { mapOfferDetail } from "./mappers"
@@ -111,5 +112,34 @@ describe("offerToDraft for a new version", () => {
     const draft = offerToDraft(apiOffer())
 
     expect(draft.lines[0].ratePerKg).toBe(168)
+  })
+
+  it("prefills attention from the customer when the source offer left it blank", () => {
+    const customer = {
+      id: "customer-1",
+      contactPerson: "Nader William",
+      contactPersonAr: "نادر وليام",
+    } as Customer
+
+    const draft = offerToDraft(apiOffer(), [], { customers: [customer] })
+
+    expect(draft.attention).toBe("Nader William")
+    expect(draft.attentionAr).toBe("نادر وليام")
+  })
+
+  it("keeps an attention name already stored on the source offer", () => {
+    const source = apiOffer()
+    source.attention = "Mostafa Fouad"
+    source.attentionAr = "مصطفى فؤاد"
+    const customer = {
+      id: "customer-1",
+      contactPerson: "Nader William",
+      contactPersonAr: "نادر وليام",
+    } as Customer
+
+    const draft = offerToDraft(source, [], { customers: [customer] })
+
+    expect(draft.attention).toBe("Mostafa Fouad")
+    expect(draft.attentionAr).toBe("مصطفى فؤاد")
   })
 })

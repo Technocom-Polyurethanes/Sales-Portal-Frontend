@@ -4,11 +4,17 @@ export type Query = Record<string, QueryValue>
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
 
+export type UploadProgress = {
+  loaded: number
+  total: number
+}
+
 export type ApiRequestOptions = {
   method?: HttpMethod
   query?: Query
   body?: unknown
   signal?: AbortSignal
+  onProgress?: (progress: UploadProgress) => void
 }
 
 /** Transport contract: one function that resolves a JSON payload. */
@@ -20,7 +26,7 @@ export type Transport = (
 export interface ApiClient {
   request<T>(path: string, options?: ApiRequestOptions): Promise<T>
   get<T>(path: string, query?: Query): Promise<T>
-  post<T>(path: string, body?: unknown): Promise<T>
+  post<T>(path: string, body?: unknown, options?: ApiRequestOptions): Promise<T>
   put<T>(path: string, body?: unknown): Promise<T>
   patch<T>(path: string, body?: unknown): Promise<T>
   delete<T>(path: string): Promise<T>

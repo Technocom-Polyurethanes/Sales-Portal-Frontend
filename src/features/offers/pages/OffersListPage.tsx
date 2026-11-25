@@ -1,40 +1,70 @@
 import { useEffect, useState } from "react"
+
 import { useNavigate, useSearchParams } from "react-router-dom"
 
 import Button from "../../../components/ui/Button"
+
+import ConfirmDialog from "../../../components/ui/ConfirmDialog"
+
 import Icon from "../../../components/ui/Icon"
+
 import PageHeader from "../../../app/layout/PageHeader"
+
 import PagedCards from "../../../components/PagedCards"
+
 import { useTranslation } from "../../../i18n/I18nProvider"
+
+import { useDelete } from "../../../lib/hooks/useDelete"
+
 import { usePermissions } from "../../account/hooks/usePermissions"
+
+import { offersApi } from "../api"
+
 import OfferCard from "../components/OfferCard"
+
 import { useOffers } from "../hooks/useOffers"
-import type { OfferStatus } from "../types"
+
+import type { OfferListItem, OfferStatus } from "../types"
 
 /** Twelve cards fill whole rows of the one, two and three column grid. */
+
 const OFFERS_PAGE_SIZE = 12
 
 const STATUS_FILTERS: (OfferStatus | "all")[] = [
   "all",
+
   "draft",
+
   "issued",
+
   "accepted",
+
   "rejected",
 ]
 
 export default function OffersListPage() {
   const { t } = useTranslation()
+
   const { can } = usePermissions()
+
   const canWrite = can("offers.write")
+
+  const canDelete = can("offers.delete")
+
   const navigate = useNavigate()
+
   const [searchParams, setSearchParams] = useSearchParams()
+
   const statusParam = searchParams.get("status") as OfferStatus | null
+
   const initialStatus =
     statusParam && STATUS_FILTERS.includes(statusParam) ? statusParam : "all"
+
   const [status, setStatus] = useState<OfferStatus | "all">(initialStatus)
 
   useEffect(() => {
     const sp = searchParams.get("status") as OfferStatus | null
+
     if (sp && STATUS_FILTERS.includes(sp)) {
       if (sp !== status) setStatus(sp)
     } else if (!sp && status !== "all") {
@@ -44,30 +74,53 @@ export default function OffersListPage() {
 
   const handleStatusChange = (value: OfferStatus | "all") => {
     setStatus(value)
+
     const next = new URLSearchParams(searchParams)
+
     if (value === "all") next.delete("status")
     else next.set("status", value)
+
     setSearchParams(next, { replace: true })
   }
 
   const search = searchParams.get("search") ?? ""
+
   const [page, setPage] = useState(1)
-  const { data, loading, error, reload } = useOffers({
+
+  const { data, loading, error, reload, refresh } = useOffers({
     status,
+
     search,
+
     page,
+
     pageSize: OFFERS_PAGE_SIZE,
   })
 
+  const deletion = useDelete({
+    remove: (offer: OfferListItem) => offersApi.delete(offer.id),
+
+    name: (offer: OfferListItem) => offer.reference,
+
+    onDeleted: refresh,
+
+    message: (name) => t("offers.deleteMessage", { name }),
+
+    success: (name) => t("offers.deleted", { name }),
+  })
+
   // A new filter or search starts again from the first page.
+
   useEffect(() => {
     setPage(1)
   }, [status, search])
 
   const setSearch = (value: string) => {
     const next = new URLSearchParams(searchParams)
+
     if (value) next.set("search", value)
     else next.delete("search")
+
     setSearchParams(next, { replace: true })
   }
 
@@ -117,6 +170,7 @@ export default function OffersListPage() {
           <OfferCard
             offer={offer}
             onOpen={(item) => navigate(`/offers/${item.id}`)}
+            onDelete={canDelete ? deletion.setTarget : undefined}
           />
         )}
         onPageChange={setPage}
@@ -130,6 +184,15 @@ export default function OffersListPage() {
         emptyTitle={t("offers.list.empty")}
         emptyDescription={t("offers.list.subtitle")}
         skeletonCount={OFFERS_PAGE_SIZE / 2}
+      />
+
+      <ConfirmDialog
+        open={deletion.target !== undefined}
+        title={deletion.title}
+        message={deletion.message}
+        loading={deletion.busy}
+        onConfirm={deletion.confirm}
+        onClose={() => deletion.setTarget(undefined)}
       />
     </>
   )

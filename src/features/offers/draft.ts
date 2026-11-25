@@ -3,9 +3,10 @@ import type { PackagingLine } from "../../lib/calculations/packaging"
 import { OTHER_TAX_PERCENT } from "../../lib/calculations/tax"
 import { DEFAULT_VALIDITY_DAYS, normalizeValidityDays } from "../../lib/calculations/validity"
 import type { Product } from "../products/types"
+import type { Customer } from "../customers/types"
 import type { BankAccount, PackageType } from "../settings/types"
 import { referenceSequence } from "../../lib/calculations/reference"
-import { activeBankIds } from "./bankSelection"
+import { defaultBankIds } from "./bankSelection"
 import { calculateDraft, type DraftCalculations } from "./calculations"
 import type { DeliveryBatch, Offer, OfferDraft, OfferDraftLine, OfferType } from "./types"
 
@@ -70,7 +71,7 @@ export function createEmptyDraft(
     taxPercent: 14,
     otherTaxEnabled: false,
     otherTaxPercent: 0,
-    bankAccountIds: activeBankIds(banks),
+    bankAccountIds: defaultBankIds(banks),
     orderDiscountPercent: 0,
     deliveryMode: "batches",
     delivery: [],
@@ -211,6 +212,7 @@ export function reconcileDelivery(
 export type DraftLookup = {
   products?: Product[]
   packageTypes?: PackageType[]
+  customers?: Customer[]
 }
 
 /**
@@ -227,6 +229,7 @@ export function offerToDraft(
 ): OfferDraft {
   const rowIds = new Map<string, string>()
   const snapshot = offer.document?.items ?? []
+  const customer = lookup.customers?.find((item) => item.id === offer.customerId)
 
   const lines = (offer.lines ?? []).map((line) => {
     const productId = line.productId ?? line.materialId
@@ -263,8 +266,14 @@ export function offerToDraft(
   return {
     reference: offer.reference,
     customerId: offer.customerId,
-    attention: offer.attention ?? "",
-    attentionAr: offer.attentionAr,
+    // A new version starts with the customer's contact person when the source
+    // offer left the attention line blank.
+    attention: offer.attention || customer?.contactPerson || "",
+    attentionAr:
+      offer.attentionAr ||
+      customer?.contactPersonAr ||
+      customer?.contactPerson ||
+      "",
     taxId: offer.taxId ?? "",
     issueDate: offer.issueDate,
     currency: offer.currency,
@@ -274,7 +283,7 @@ export function offerToDraft(
     taxPercent: offer.taxPercent,
     otherTaxEnabled: offer.otherTaxEnabled,
     otherTaxPercent: offer.otherTaxEnabled ? OTHER_TAX_PERCENT : 0,
-    bankAccountIds: offer.bankAccountIds ?? activeBankIds(banks),
+    bankAccountIds: offer.bankAccountIds ?? defaultBankIds(banks),
     orderDiscountPercent: offer.orderDiscountPercent ?? 0,
     offerType: (offer.offerType ?? "Loc") as OfferType,
     sequence: referenceSequence(offer.reference) ?? 0,

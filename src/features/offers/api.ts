@@ -1,35 +1,63 @@
 import { api } from "../../lib/api/client"
-import { invalidate } from "../../lib/cache/queryCache"
-import type { Offer, OfferStatus, OfferListItem, OfferListPage, OfferListParams } from "./types"
-import { mapListItem, mapListPage, mapOfferDetail, type RawOfferListItem, type RawOfferListPage } from "./mappers"
 
-type RawNextSequenceResponse =
-  | number
-  | {
-      suggestedSequence?: number
-      isFirstOffer?: boolean
-      sequence?: number
-      nextSequence?: number
-      serialNumber?: number
-    }
+import { invalidate } from "../../lib/cache/queryCache"
+
+import type {
+  Offer,
+  OfferStatus,
+  OfferListItem,
+  OfferListPage,
+  OfferListParams,
+} from "./types"
+
+import {
+  mapListItem,
+  mapListPage,
+  mapOfferDetail,
+  type RawOfferListItem,
+  type RawOfferListPage,
+} from "./mappers"
+
+type RawNextSequenceResponse = number | {
+  suggestedSequence?: number
+
+  isFirstOffer?: boolean
+
+  sequence?: number
+
+  nextSequence?: number
+
+  serialNumber?: number
+}
 
 export const offersApi = {
   async list(
     params: OfferListParams & {
       latestOnly?: boolean
+
       sortBy?: string
+
       sortDir?: string
     } = {},
   ): Promise<OfferListPage> {
     const raw = await api.get<RawOfferListPage>("/offers", {
       // "all" is a UI-only value: the backend enum has no "all", so omit it
+
       status:
-        params.status && params.status !== "all" ? (params.status as any) : undefined,
+        params.status && params.status !== "all"
+          ? params.status as any
+          : undefined,
+
       search: params.search?.trim() || undefined,
+
       page: params.page ?? 1,
+
       pageSize: params.pageSize ?? 20,
+
       latestOnly: (params as any).latestOnly,
+
       sortBy: (params as any).sortBy,
+
       sortDir: (params as any).sortDir,
     } as any)
 
@@ -38,33 +66,52 @@ export const offersApi = {
 
   async get(id: string): Promise<Offer> {
     const raw = await api.get<any>(`/offers/${id}`)
+
     return mapOfferDetail(raw)
   },
+
   create(offer: any): Promise<Offer> {
     return api.post<any>("/offers", offer).then((res) => {
-        // Customer directory aggregates (offers count, total value, last offer) just changed.
-        invalidate("customers")
-        return mapOfferDetail(res)
-      })
+      // Customer directory aggregates (offers count, total value, last offer) just changed.
+
+      invalidate("customers")
+
+      return mapOfferDetail(res)
+    })
   },
+
   update(id: string, offer: any): Promise<Offer> {
     return api.put<any>(`/offers/${id}`, offer).then((res) => {
-        // Customer directory aggregates (offers count, total value, last offer) just changed.
-        invalidate("customers")
-        return mapOfferDetail(res)
-      })
+      // Customer directory aggregates (offers count, total value, last offer) just changed.
+
+      invalidate("customers")
+
+      return mapOfferDetail(res)
+    })
   },
+
   revise(id: string, data?: any): Promise<Offer> {
     return api.post<any>(`/offers/${id}/revise`, data).then((res) => {
-        // Customer directory aggregates (offers count, total value, last offer) just changed.
-        invalidate("customers")
-        return mapOfferDetail(res)
-      })
+      // Customer directory aggregates (offers count, total value, last offer) just changed.
+
+      invalidate("customers")
+
+      return mapOfferDetail(res)
+    })
   },
+
   setStatus(id: string, status: OfferStatus): Promise<Offer> {
     return api
+
       .patch<any>(`/offers/${id}/status`, { status })
+
       .then((res) => mapOfferDetail(res))
+  },
+
+  async delete(id: string): Promise<void> {
+    await api.delete<void>(`/offers/${id}`)
+
+    invalidate("customers")
   },
 
   /**
@@ -72,21 +119,35 @@ export const offersApi = {
    * suggested reference. `isFirstOffer` is true while no offer exists, the only time the user
    * may choose the starting number.
    */
-  async nextSequence(
-    offerType: "Loc" | "Int" = "Loc",
-  ): Promise<{ sequence: number; isFirstOffer: boolean }> {
-    const res = await api.get<RawNextSequenceResponse>("/offers/next-sequence", { offerType })
+
+  async nextSequence(offerType: "Loc" | "Int" = "Loc"): Promise<{
+    sequence: number
+    isFirstOffer: boolean
+  }> {
+    const res = await api.get<RawNextSequenceResponse>(
+      "/offers/next-sequence",
+      { offerType },
+    )
+
     if (typeof res === "number") return { sequence: res, isFirstOffer: false }
+
     return {
       sequence:
-        res?.suggestedSequence ?? res?.sequence ?? res?.nextSequence ?? res?.serialNumber ?? 1,
+        res?.suggestedSequence ??
+        res?.sequence ??
+        res?.nextSequence ??
+        res?.serialNumber ??
+        1,
+
       isFirstOffer: res?.isFirstOffer === true,
     }
   },
 
   /** The offer and every version created from it, newest first. */
+
   async versions(id: string): Promise<OfferListItem[]> {
     const rows = await api.get<RawOfferListItem[]>(`/offers/${id}/versions`)
+
     return rows.map(mapListItem)
   },
 

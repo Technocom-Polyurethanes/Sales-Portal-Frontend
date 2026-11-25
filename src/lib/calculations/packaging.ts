@@ -48,6 +48,14 @@ export function totalPackages(lines: PackagingLine[]): number {
   )
 }
 
+/** True when a priced offer has no packages at all: prices are quoted per kg only. */
+export function isPriceOnly(lines: { packaging: PackagingLine[] }[]): boolean {
+  return (
+    lines.length > 0 &&
+    lines.every((line) => totalPackages(line.packaging ?? []) === 0)
+  )
+}
+
 /** Groups the packaging rows by package type and weight. */
 export function packagingBreakdown(
   lines: PackagingLine[],
