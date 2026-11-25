@@ -31,14 +31,17 @@ export default function ProductsPage() {
   const { data, loading, error, reload, refresh } = useAsyncData(
     () => productsApi.listPage(search, category, page),
     [search, category, page],
+    { live: ["materials", "catalog"] },
   )
   const { data: catalogue } = useAsyncData(
     () => productsApi.list().catch(() => []),
     [],
+    { live: ["materials"] },
   )
   const { data: packageTypes } = useAsyncData(
     () => settingsApi.packageTypes().catch(() => []),
     [],
+    { live: ["catalog"] },
   )
 
   const locale = localeForLanguage(language)

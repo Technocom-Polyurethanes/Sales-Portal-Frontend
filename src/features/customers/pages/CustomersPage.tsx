@@ -30,6 +30,7 @@ export default function CustomersPage() {
   const { data, loading, error, reload, refresh } = useAsyncData(
     () => customersApi.listPage(search, page),
     [search, page],
+    { live: ["customers", "offers"] },
   )
 
   const locale = localeForLanguage(language)

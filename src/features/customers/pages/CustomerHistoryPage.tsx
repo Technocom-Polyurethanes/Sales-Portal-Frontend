@@ -27,13 +27,17 @@ export default function CustomerHistoryPage() {
     data: customer,
     loading,
     error,
-  } = useAsyncData(() => customersApi.get(id), [id])
+  } = useAsyncData(() => customersApi.get(id), [id], {
+    live: ["customers"],
+  })
   const {
     data: offers,
     loading: offersLoading,
     error: offersError,
     reload: reloadOffers,
-  } = useAsyncData(() => customersApi.offersPage(id, page), [id, page])
+  } = useAsyncData(() => customersApi.offersPage(id, page), [id, page], {
+    live: ["offers", "customers"],
+  })
 
   const locale = localeForLanguage(language)
   const columns = useMemo<Column<OfferListItem>[]>(

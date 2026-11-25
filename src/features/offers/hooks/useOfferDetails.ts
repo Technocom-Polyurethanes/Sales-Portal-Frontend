@@ -61,5 +61,5 @@ export function useOfferDetails(id: string | undefined) {
       packageTypes: settings.packageTypes ?? [],
       paymentTerms: settings.paymentTerms ?? [],
     }
-  }, [id])
+  }, [id], { live: ["offers", "customers", "catalog", "banks"] })
 }

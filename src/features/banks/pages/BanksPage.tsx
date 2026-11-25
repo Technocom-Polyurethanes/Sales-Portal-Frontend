@@ -26,6 +26,7 @@ export default function BanksPage() {
   const { data, loading, error, reload, refresh } = useAsyncData(
     () => banksApi.listPage(search, page),
     [search, page],
+    { live: ["banks", "catalog"] },
   )
 
   const openNew = () => {

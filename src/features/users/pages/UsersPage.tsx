@@ -32,6 +32,7 @@ export default function UsersPage() {
   const { data, loading, error, reload, refresh, mutate } = useAsyncData(
     () => usersApi.list({ search, role, status, page }),
     [search, role, status, page],
+    { live: ["users"] },
   )
 
   const hasFilters = search.trim() !== "" || role !== "all" || status !== "all"

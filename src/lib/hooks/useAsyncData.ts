@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
+import { live, type LiveTopic } from "../live"
+
 export type AsyncData<T,> = {
   data: T | undefined
   error: Error | undefined
@@ -12,6 +14,15 @@ export type AsyncData<T,> = {
   mutate: (update: (current: T) => T) => () => void
 }
 
+export type AsyncDataOptions = {
+  /**
+   * Kinds of data this screen shows. When the server announces that one changed, the data is
+   * re-fetched in the background (see `refresh`), so the screen follows the database without a
+   * manual reload.
+   */
+  live?: readonly LiveTopic[]
+}
+
 /**
  * Small data loading helper used by the feature hooks. It keeps loading and
  * error state in one place and supports optimistic updates through `mutate`
@@ -20,6 +31,7 @@ export type AsyncData<T,> = {
 export function useAsyncData<T>(
   loader: () => Promise<T>,
   deps: unknown[] = [],
+  options: AsyncDataOptions = {},
 ): AsyncData<T> {
   const [data, setData] = useState<T | undefined>(undefined)
   const [error, setError] = useState<Error | undefined>(undefined)
@@ -78,6 +90,13 @@ export function useAsyncData<T>(
 
   const reload = useCallback(() => setNonce((value) => value + 1), [])
   const refresh = useCallback(() => setRefreshNonce((value) => value + 1), [])
+
+  // A string key, so passing a new array literal on every render does not resubscribe.
+  const liveKey = options.live?.join(",") ?? ""
+  useEffect(() => {
+    if (liveKey === "") return
+    return live.subscribe(liveKey.split(",") as LiveTopic[], refresh)
+  }, [liveKey, refresh])
 
   const mutate = useCallback(
     (update: (current: T) => T) => {

@@ -76,6 +76,10 @@ export function useBuilderCatalog() {
       }
 
     }
-  }, [])
+  }, [], {
+    // Not "offers": a new offer elsewhere changes the next sequence number, and the reference of the
+    // offer being built must not change under the user.
+    live: ["customers", "materials", "catalog", "banks"],
+  })
 }
 
