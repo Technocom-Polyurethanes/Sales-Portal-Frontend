@@ -6,7 +6,7 @@ import type { Product } from "../products/types"
 import type { Customer } from "../customers/types"
 import type { BankAccount, PackageType } from "../settings/types"
 import { referenceSequence } from "../../lib/calculations/reference"
-import { activeBankIds } from "./bankSelection"
+import { defaultBankIds } from "./bankSelection"
 import { calculateDraft, type DraftCalculations } from "./calculations"
 import type { DeliveryBatch, Offer, OfferDraft, OfferDraftLine, OfferType } from "./types"
 
@@ -71,7 +71,7 @@ export function createEmptyDraft(
     taxPercent: 14,
     otherTaxEnabled: false,
     otherTaxPercent: 0,
-    bankAccountIds: activeBankIds(banks),
+    bankAccountIds: defaultBankIds(banks),
     orderDiscountPercent: 0,
     deliveryMode: "batches",
     delivery: [],
@@ -283,7 +283,7 @@ export function offerToDraft(
     taxPercent: offer.taxPercent,
     otherTaxEnabled: offer.otherTaxEnabled,
     otherTaxPercent: offer.otherTaxEnabled ? OTHER_TAX_PERCENT : 0,
-    bankAccountIds: offer.bankAccountIds ?? activeBankIds(banks),
+    bankAccountIds: offer.bankAccountIds ?? defaultBankIds(banks),
     orderDiscountPercent: offer.orderDiscountPercent ?? 0,
     offerType: (offer.offerType ?? "Loc") as OfferType,
     sequence: referenceSequence(offer.reference) ?? 0,

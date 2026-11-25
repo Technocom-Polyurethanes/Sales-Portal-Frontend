@@ -4,6 +4,7 @@ import type { BankAccount } from "../settings/types"
 import {
   activeBankIds,
   banksForOffer,
+  defaultBankIds,
   hasBankSelection,
   setAllBanks,
   toggleBank,
@@ -35,6 +36,17 @@ const banks: BankAccount[] = [
     sortOrder: 1,
   },
   {
+    id: "bank-c",
+    bank: "Bank C",
+    branch: "Alexandria",
+    accountNumber: "3",
+    swift: "",
+    iban: "",
+    currency: "EGP",
+    isActive: true,
+    sortOrder: 3,
+  },
+  {
     id: "bank-off",
     bank: "Inactive",
     branch: "Cairo",
@@ -48,17 +60,18 @@ const banks: BankAccount[] = [
 ]
 
 describe("bank account selection", () => {
-  it("defaults a new draft to the active accounts in sort order", () => {
+  it("defaults a new draft to the first two active accounts in sort order", () => {
     const draft = createEmptyDraft({}, banks)
 
     expect(draft.bankAccountIds).toEqual(["bank-a", "bank-b"])
-    expect(activeBankIds(banks)).toEqual(["bank-a", "bank-b"])
+    expect(defaultBankIds(banks)).toEqual(["bank-a", "bank-b"])
+    expect(activeBankIds(banks)).toEqual(["bank-a", "bank-b", "bank-c"])
   })
 
   it("toggles one account and selects all or none", () => {
     expect(toggleBank(["bank-a"], "bank-b")).toEqual(["bank-a", "bank-b"])
     expect(toggleBank(["bank-a", "bank-b"], "bank-a")).toEqual(["bank-b"])
-    expect(setAllBanks(true, banks)).toEqual(["bank-a", "bank-b"])
+    expect(setAllBanks(true, banks)).toEqual(["bank-a", "bank-b", "bank-c"])
     expect(setAllBanks(false, banks)).toEqual([])
   })
 
@@ -74,7 +87,7 @@ describe("bank account selection", () => {
     expect(payload.bankAccountIds).toEqual(["bank-b"])
   })
 
-  it("maps a null selection to every active account when editing", () => {
+  it("maps a null selection to the default accounts when editing", () => {
     const offer = {
       reference: "1/OCT./YL/AA",
       customerId: "cust-1",

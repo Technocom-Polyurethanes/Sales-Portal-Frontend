@@ -7,9 +7,16 @@ export function activeBanks(banks: BankAccount[]): BankAccount[] {
     .sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0))
 }
 
-/** Default selection of a new offer. */
+/** All active account ids, for a full selection. */
 export function activeBankIds(banks: BankAccount[]): string[] {
   return activeBanks(banks).map((bank) => bank.id)
+}
+
+/** Default selection of a new offer: the first two active accounts by sort order. */
+export function defaultBankIds(banks: BankAccount[]): string[] {
+  return activeBanks(banks)
+    .slice(0, 2)
+    .map((bank) => bank.id)
 }
 
 /** The accounts printed on an offer; null means every account in the catalog. */

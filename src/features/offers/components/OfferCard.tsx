@@ -75,7 +75,7 @@ export default function OfferCard({ offer, onOpen, onDelete }: OfferCardProps) {
               size="sm"
               data-testid="delete-button"
               aria-label={t("common.deleteTitle", { name: offer.reference })}
-              className="w-8 shrink-0 px-0"
+              className="w-8 shrink-0 px-0!"
               onClick={(event) => {
                 event.stopPropagation()
 
