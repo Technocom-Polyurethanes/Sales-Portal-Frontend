@@ -150,7 +150,7 @@ export default function BanksPage() {
                 size="sm"
                 data-testid="delete-button"
                 aria-label={t("common.deleteTitle", { name: bank.bank })}
-                className="w-8 shrink-0 px-0"
+                className="w-8 shrink-0 px-0!"
                 onClick={() => deletion.setTarget(bank)}
               >
                 <Icon name="trash" size={18} />

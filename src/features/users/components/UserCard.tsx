@@ -1,61 +1,33 @@
 import Badge from "../../../components/ui/Badge"
-
 import Button from "../../../components/ui/Button"
-
 import Icon from "../../../components/ui/Icon"
-
 import { useTranslation } from "../../../i18n/I18nProvider"
-
 import { formatTimestampDay, localeForLanguage } from "../../../lib/formatters"
-
 import type { UserRecord } from "../types"
-
 import RoleBadge from "./RoleBadge"
-
 export type UserCardProps = {
   user: UserRecord
-
-  /** The signed in admin: their own role and status cannot be changed from here. */
-
   isSelf: boolean
-
   busy: boolean
-
   onEdit: (user: UserRecord) => void
-
   onResetPassword: (user: UserRecord) => void
-
   onToggleActive: (user: UserRecord) => void
-
   onDelete?: (user: UserRecord) => void
 }
 
-/** One user with the actions an admin needs: edit, reset the password, activate or deactivate. */
-
 export default function UserCard({
   user,
-
   isSelf,
-
   busy,
-
   onEdit,
-
   onResetPassword,
-
   onToggleActive,
-
   onDelete,
 }: UserCardProps) {
   const { t, language } = useTranslation()
-
   const locale = localeForLanguage(language)
-
-  const title =
-    language === "ar" ? user.roleTitleAr || user.roleTitle : user.roleTitle
-
+  const title = language === "ar" ? user.roleTitleAr || user.roleTitle : user.roleTitle
   const team = language === "ar" ? user.teamAr || user.team : user.team
-
   const subtitle = [title, team].filter(Boolean).join(" · ")
 
   return (
@@ -127,7 +99,7 @@ export default function UserCard({
               disabled={busy}
               data-testid="delete-button"
               aria-label={t("common.deleteTitle", { name: user.fullName })}
-              className="w-8 shrink-0 px-0"
+              className="w-8 shrink-0 px-0!"
               onClick={() => onDelete(user)}
             >
               <Icon name="trash" size={18} />

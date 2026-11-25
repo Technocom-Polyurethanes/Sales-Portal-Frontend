@@ -1,41 +1,22 @@
 import { useMemo, useState } from "react"
-
 import PageHeader from "../../../app/layout/PageHeader"
-
 import PagedTable from "../../../components/PagedTable"
-
 import Badge from "../../../components/ui/Badge"
-
 import Button from "../../../components/ui/Button"
-
 import ConfirmDialog from "../../../components/ui/ConfirmDialog"
-
 import type { Column } from "../../../components/ui/DataTable"
-
 import Icon from "../../../components/ui/Icon"
-
 import SearchField from "../../../components/ui/SearchField"
-
 import Select from "../../../components/ui/Select"
-
 import { useTranslation } from "../../../i18n/I18nProvider"
-
 import { localeForLanguage } from "../../../lib/formatters/locale"
-
 import { formatNumber } from "../../../lib/formatters/number"
-
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
-
 import { useDelete } from "../../../lib/hooks/useDelete"
-
 import { usePermissions } from "../../account/hooks/usePermissions"
-
 import { settingsApi } from "../../settings/api"
-
 import { productsApi } from "../api"
-
 import MaterialDialog from "../components/MaterialDialog"
-
 import type { Product } from "../types"
 
 export default function ProductsPage() {
@@ -221,7 +202,7 @@ export default function ProductsPage() {
                 size="sm"
                 data-testid="delete-button"
                 aria-label={t("common.deleteTitle", { name: product.name })}
-                className="w-8 shrink-0 px-0"
+                className="w-8 shrink-0 px-0!"
                 onClick={() => deletion.setTarget(product)}
               >
                 <Icon name="trash" size={18} />

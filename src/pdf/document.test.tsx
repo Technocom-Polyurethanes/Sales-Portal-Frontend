@@ -329,6 +329,37 @@ describe("offer document", () => {
     })
   })
 
+  describe("Arabic customer address", () => {
+    const renderArabicWith = (addressAr?: string) => {
+      const data = buildDocumentData(source as DocumentSource, {
+        customer: { ...customer, addressAr },
+        company,
+        banks,
+        packageTypes,
+        language: "ar",
+        paymentTermLabel: "شيك — ٣٠ يوم",
+      })
+      const root = createRoot(container)
+      act(() => {
+        root.render(<OfferDocument data={data} language="ar" />)
+      })
+    }
+
+    it("falls back to the English address when no Arabic one was entered", () => {
+      renderArabicWith()
+
+      // Arabic rendering localises the digits but keeps the Latin address.
+      expect(container.textContent).toContain("th of Ramadan City, Egypt")
+    })
+
+    it("prints the Arabic address when the customer has one", () => {
+      renderArabicWith("مدينة العاشر من رمضان، مصر")
+
+      expect(container.textContent).toContain("مدينة العاشر من رمضان، مصر")
+      expect(container.textContent).not.toContain(customer.address)
+    })
+  })
+
   describe("delivery total, offer validity and attention", () => {
     const renderWith = (
       language: "en" | "ar",

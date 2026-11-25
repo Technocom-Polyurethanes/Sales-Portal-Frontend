@@ -157,7 +157,7 @@ export function buildDocumentData(source: DocumentSource,
     customerName: options.customer?.name ?? "",
     customerNameAr: options.customer?.nameAr ?? "",
     customerAddress: options.customer?.address ?? "",
-    customerAddressAr: options.customer?.addressAr ?? "",
+    customerAddressAr: options.customer?.addressAr || options.customer?.address || "",
     customerCity: options.customer?.city || options.customer?.cityAr || "",
     customerCityAr: options.customer?.cityAr || options.customer?.city || "",
     attention:
