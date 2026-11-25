@@ -1,5 +1,6 @@
 import { useTranslation } from "../../../i18n/I18nProvider"
 import { formatIsoDay } from "../../../lib/formatters/date"
+import { localeForLanguage } from "../../../lib/formatters/locale"
 import { formatNumber } from "../../../lib/formatters/number"
 import type { Offer } from "../types"
 
@@ -44,7 +45,8 @@ function TextSection({ title, text }: { title: string; text?: string }) {
 
 /** Materials, delivery, payment conditions and notes of a stored offer. */
 export default function OfferSummary({ offer }: { offer: Offer }) {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
+  const locale = localeForLanguage(language)
 
   return (
     <div className="space-y-5">
@@ -167,7 +169,7 @@ export default function OfferSummary({ offer }: { offer: Offer }) {
                       number: batch.batchNumber,
                     })}
                     <span className="ms-2 font-normal text-muted">
-                      {formatIsoDay(batch.date ?? batch.deliveryDate)}
+                      {formatIsoDay(batch.date ?? batch.deliveryDate, locale)}
                     </span>
                   </span>
 

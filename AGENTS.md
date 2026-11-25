@@ -1,3 +1,21 @@
+# Agent rules (read first, every session)
+
+## Skills
+
+Refere to .claude/* to get all of the skills required for the task
+
+## Shell
+- This machine's bash has NO Unix utilities: `tail`, `head`, `tr`, `wc`, `sed`, `awk`, `cut` are unavailable.
+- Never pipe git or dotnet output into those. Use flags instead (`git log -n 10`, `git diff --stat`, `git diff --name-only`), the file-read tool with offset/limit, and the grep/glob tools.
+- Do not use `cmd.exe /c` or PowerShell wrappers to work around missing tools.
+- If a command fails twice for the same reason, STOP retrying. Report the failure and continue with the next step.
+- Do not run commands whose only purpose is measuring or counting output. Never spend more than 5 minutes on any single step.
+
+## Workflow
+- One step at a time: `dotnet build`, then commit, then next step.
+- Never run migrations or tests against a shared or remote database. Use the local dev database.
+- Never commit `.env`. Do not push to master; open a PR.
+
 # technocom-sales-portal
 
 React + Vite + TypeScript + Tailwind CSS application for the TECHNOCOM
@@ -82,13 +100,14 @@ path is missing, or when the repository contradicts this guide.
   after the first incomplete one, Next shows the errors instead of advancing,
   and going back is always allowed. Save as draft needs only a customer, a
   material and a bank; issuing needs every step complete.
-- **Reference number**: `{Loc|Int}/{sequence}/YL/{user initials}`, for example
-  `Loc/42/YL/JD`. It is never typed: the offer type, the sequence and the user's
-  initials build it, and changing the offer type rewrites the first segment. The
-  sequence is global and suggested by the server. Only the very first offer
-  (no offer exists yet) shows a sequence input to choose the starting number;
-  numbering continues from it and the input is hidden afterwards. See
-  `src/lib/calculations/reference.ts`.
+- **Reference number**: `{Loc|Int}/{0000 sequence}-{issue date year}/YL/{user
+  initials}`, for example `Loc/0042-2026/YL/JD`. It is never typed: the offer type,
+  the sequence, the issue date and the user's initials build it; changing the offer
+  type or issue date rewrites the relevant segments. References without a year are
+  still read for their sequence. The sequence is global and suggested by the server.
+  Only the very first offer (no offer exists yet) shows a sequence input to choose
+  the starting number; numbering continues from it and the input is hidden
+  afterwards. See `src/lib/calculations/reference.ts`.
 - **Packaging**: a line quantity is `packages × weight per package`; a material
   may mix several packaging types. See `src/lib/calculations/packaging.ts`.
 - **Tax**: tax is added to the subtotal, the "other tax" row is calculated from
@@ -152,17 +171,3 @@ Tailwind emits utility classes in `@layer utilities`, and CSS outside any cascad
 - Use double quotes for strings containing apostrophes (`"We're here to help"`), or escape them in single-quoted strings. An unescaped apostrophe in a single-quoted string breaks the build.
 - Ensure JSX tags are closed and braces are balanced.
 - Export components as default exports.
-
-# Agent rules (read first, every session)
-
-## Shell
-- This machine's bash has NO Unix utilities: `tail`, `head`, `tr`, `wc`, `sed`, `awk`, `cut` are unavailable.
-- Never pipe git or dotnet output into those. Use flags instead (`git log -n 10`, `git diff --stat`, `git diff --name-only`), the file-read tool with offset/limit, and the grep/glob tools.
-- Do not use `cmd.exe /c` or PowerShell wrappers to work around missing tools.
-- If a command fails twice for the same reason, STOP retrying. Report the failure and continue with the next step.
-- Do not run commands whose only purpose is measuring or counting output. Never spend more than 5 minutes on any single step.
-
-## Workflow
-- One step at a time: `dotnet build`, then commit, then next step.
-- Never run migrations or tests against a shared or remote database. Use the local dev database.
-- Never commit `.env`. Do not push to master; open a PR.

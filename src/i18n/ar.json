@@ -9,6 +9,9 @@
     "cancel": "إلغاء",
     "confirm": "تأكيد",
     "delete": "حذف",
+    "deleteTitle": "حذف {name}؟",
+    "deleteMessage": "سيتم حذف «{name}» نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+    "deleted": "تم حذف {name} نهائياً.",
     "edit": "تعديل",
     "add": "إضافة",
     "close": "إغلاق",
@@ -109,6 +112,8 @@
     "createNewOffer": "إنشاء عرض سعر جديد"
   },
   "offers": {
+    "deleteMessage": "سيتم حذف «{name}» وجميع إصداراته نهائياً. لا يمكن التراجع عن هذا الإجراء.",
+    "deleted": "تم حذف {name} وإصداراته نهائياً.",
     "list": {
       "title": "عروض الأسعار",
       "subtitle": "ابحث عن عروض الأسعار وتابعها في مكان واحد.",
@@ -239,6 +244,7 @@
         "presetLabel": "اختر",
         "presetPlaceholder": "اختر إعدادًا…",
         "presetCustom": "نص مخصص",
+        "placePresetLabel": "اختر مكان التوريد",
         "placeLabel": "مكان التوريد",
         "placeHint": "يُطبع في خانة مستقلة. اتركه فارغاً لإخفائه.",
         "placePlaceholder": "مصانعنا بمدينة بدر."
@@ -341,10 +347,11 @@
     "email": "البريد الإلكتروني",
     "phone": "الهاتف",
     "address": "العنوان",
+    "addressAr": "العنوان (بالعربية)",
     "edit": "تعديل العميل",
     "created": "تم إنشاء العميل",
     "updated": "تم تحديث العميل",
-    "codeNameRequired": "كود العميل واسمه مطلوبان.",
+    "codeNameRequired": "كود العميل واسمه وعنوانه مطلوبون.",
     "search": "ابحث بالاسم أو الكود أو المدينة",
     "notFound": "تعذّر العثور على هذا العميل.",
     "newOffer": "عرض جديد",
@@ -403,6 +410,9 @@
     "bankAccounts": "الحسابات البنكية",
     "dropFile": "اسحب ملف Excel أو CSV إلى هنا",
     "orBrowse": "أو تصفح من جهازك",
+    "uploading": "جارٍ رفع {fileName}…",
+    "readingFile": "جارٍ قراءة الملف…",
+    "secondsLeft": "باقٍ {seconds} ث",
     "start": "بدء الاستيراد",
     "cancel": "إلغاء الاستيراد",
     "steps": {

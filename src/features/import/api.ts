@@ -1,4 +1,5 @@
 import { api } from "../../lib/api/client"
+import type { UploadProgress } from "../../lib/api/types"
 import { invalidate } from "../../lib/cache/queryCache"
 import type {
   ImportHistoryPage,
@@ -12,10 +13,16 @@ export const importApi = {
   template(source: ImportSource): Promise<string> {
     return api.get<string>(`/import/templates/${source}`)
   },
-  preview(source: ImportSource, file: File): Promise<ImportPreview> {
+  preview(
+    source: ImportSource,
+    file: File,
+    onProgress: (progress: UploadProgress) => void,
+  ): Promise<ImportPreview> {
     const form = new FormData()
     form.append("file", file, file.name)
-    return api.post<ImportPreview>(`/import/${source}/preview`, form)
+    return api.post<ImportPreview>(`/import/${source}/preview`, form, {
+      onProgress,
+    })
   },
   async commit(importId: string): Promise<ImportResult> {
     const result = await api.post<ImportResult>(`/import/${importId}/commit`)

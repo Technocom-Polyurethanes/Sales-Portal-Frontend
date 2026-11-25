@@ -40,6 +40,8 @@ export type OfferTemplate = {
   termsAndConditionsHeading: string
   /** The terms and conditions printed on every offer. They are fixed, an offer cannot change them. */
   termsAndConditions: string[]
+  /** Added to the terms of a price-per-kg-only offer. */
+  taxExcluded: string
 }
 
 /** Everything the document needs, already calculated by the feature layer. */
@@ -125,4 +127,6 @@ export type OfferDocumentData = {
     currency: string
   }[]
   notes: string
+  /** No packaging: the document shows prices per kg and omits totals and trade terms. */
+  priceOnly?: boolean
 }

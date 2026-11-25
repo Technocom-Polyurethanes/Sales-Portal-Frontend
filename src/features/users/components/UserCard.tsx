@@ -1,21 +1,20 @@
 import Badge from "../../../components/ui/Badge"
 import Button from "../../../components/ui/Button"
+import Icon from "../../../components/ui/Icon"
 import { useTranslation } from "../../../i18n/I18nProvider"
-import { formatTimestampDay } from "../../../lib/formatters"
+import { formatTimestampDay, localeForLanguage } from "../../../lib/formatters"
 import type { UserRecord } from "../types"
 import RoleBadge from "./RoleBadge"
-
 export type UserCardProps = {
   user: UserRecord
-  /** The signed in admin: their own role and status cannot be changed from here. */
   isSelf: boolean
   busy: boolean
   onEdit: (user: UserRecord) => void
   onResetPassword: (user: UserRecord) => void
   onToggleActive: (user: UserRecord) => void
+  onDelete?: (user: UserRecord) => void
 }
 
-/** One user with the actions an admin needs: edit, reset the password, activate or deactivate. */
 export default function UserCard({
   user,
   isSelf,
@@ -23,10 +22,11 @@ export default function UserCard({
   onEdit,
   onResetPassword,
   onToggleActive,
+  onDelete,
 }: UserCardProps) {
   const { t, language } = useTranslation()
-  const title =
-    language === "ar" ? user.roleTitleAr || user.roleTitle : user.roleTitle
+  const locale = localeForLanguage(language)
+  const title = language === "ar" ? user.roleTitleAr || user.roleTitle : user.roleTitle
   const team = language === "ar" ? user.teamAr || user.team : user.team
   const subtitle = [title, team].filter(Boolean).join(" · ")
 
@@ -62,14 +62,15 @@ export default function UserCard({
           {user.email || ""}
         </dd>
         <span className="text-[12px] text-muted">
-          {t("users.createdOn")} {formatTimestampDay(user.createdAt)}
+          {t("users.createdOn")}{" "}
+          <bdi dir="ltr">{formatTimestampDay(user.createdAt, locale)}</bdi>
         </span>
       </dl>
 
       <footer className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-line-soft pt-3">
-          <Badge variant={user.isActive ? "accepted" : "rejected"}>
-            {t(user.isActive ? "users.active" : "users.inactive")}
-          </Badge>
+        <Badge variant={user.isActive ? "accepted" : "rejected"}>
+          {t(user.isActive ? "users.active" : "users.inactive")}
+        </Badge>
         <div className="flex flex-wrap items-center gap-1">
           <Button variant="ghost" size="sm" onClick={() => onEdit(user)}>
             {t("common.edit")}
@@ -89,6 +90,19 @@ export default function UserCard({
               onClick={() => onToggleActive(user)}
             >
               {t(user.isActive ? "users.deactivate" : "users.activate")}
+            </Button>
+          )}
+          {!isSelf && onDelete && (
+            <Button
+              variant="danger"
+              size="sm"
+              disabled={busy}
+              data-testid="delete-button"
+              aria-label={t("common.deleteTitle", { name: user.fullName })}
+              className="w-8 shrink-0 px-0!"
+              onClick={() => onDelete(user)}
+            >
+              <Icon name="trash" size={18} />
             </Button>
           )}
         </div>
