@@ -93,6 +93,13 @@ describe("offer view document language", () => {
     return heading?.parentElement?.querySelector("p")?.textContent ?? ""
   }
 
+  const summaryValue = (label: string) => {
+    const term = Array.from(container.querySelectorAll("dt")).find(
+      (item) => item.textContent === label,
+    )
+    return term?.nextElementSibling?.textContent ?? ""
+  }
+
   beforeEach(() => {
     clearCache()
     errors = []
@@ -136,6 +143,19 @@ describe("offer view document language", () => {
     expect(documentLanguage()).toBe("en")
     expect(languageButton("English")?.getAttribute("aria-pressed")).toBe("true")
     expect(offer.documentLanguage).toBe("ar")
+    expect(errors).toEqual([])
+  })
+
+  it("shows the offer expiry in the summary when the payment term is due on issue", async () => {
+    const offer = db.offers[0]
+    offer.paymentTermId = "bank-transfer-purchase-order"
+    offer.dueDate = offer.issueDate
+    offer.validityDays = 7
+
+    await open(offer.id)
+
+    expect(summaryValue("Issue date")).toBe("21/10/2026")
+    expect(summaryValue("Due date")).toBe("28/10/2026")
     expect(errors).toEqual([])
   })
 

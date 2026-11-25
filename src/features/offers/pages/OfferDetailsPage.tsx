@@ -293,7 +293,12 @@ export default function OfferDetailsPage() {
                   {t("offers.builder.basics.dueDate")}
                 </dt>
                 <dd className="font-medium text-ink">
-                  {formatIsoDay(offer.dueDate, locale)}
+                  {formatIsoDay(
+                    (offer.validityDays ?? 0) > 0 && documentData?.expiryDate
+                      ? documentData.expiryDate
+                      : offer.dueDate,
+                    locale,
+                  )}
                 </dd>
               </div>
               <div>
