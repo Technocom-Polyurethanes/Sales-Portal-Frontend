@@ -150,6 +150,13 @@
       "draftSaved": "Draft saved",
       "chooseCustomer": "Please choose a customer",
       "savedAgo": "Saved a moment ago",
+      "restored": {
+        "title": "Unsaved offer restored",
+        "message": "We kept what you were working on ({time}). Keep going, or start over.",
+        "startOver": "Start over",
+        "startOverConfirm": "Discard and start over",
+        "dismiss": "Keep editing"
+      },
       "packagingHint": "Choose a customer, then add your materials and quantities.",
       "steps": {
         "basics": "Customer & basics",

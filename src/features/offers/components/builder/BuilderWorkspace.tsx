@@ -14,6 +14,7 @@ import { offersApi } from "../../api"
 import { banksForOffer } from "../../bankSelection"
 import { buildDocumentData } from "../../document"
 import { createEmptyDraft, draftToPayload } from "../../draft"
+import { builderDraftKey } from "../../draftStorage"
 import { useOfferBuilder } from "../../hooks/useOfferBuilder"
 import type { AccountUser } from "../../../account/api"
 import type { PaymentTerm } from "../../../settings/types"
@@ -24,6 +25,7 @@ import type { OfferDraft } from "../../types"
 import BankAccountsStep from "./BankAccountsStep"
 import BuilderStepper from "./BuilderStepper"
 import LivePreview from "./LivePreview"
+import RestoredNotice from "./RestoredNotice"
 import ReviewDialog from "./ReviewDialog"
 import StepBasics from "./StepBasics"
 import StepDelivery from "./StepDelivery"
@@ -67,11 +69,25 @@ export default function BuilderWorkspace({
   }
   const [error, setError] = useState<string | undefined>(undefined)
 
+  // The form is kept in the browser until it is saved, one slot per user and source offer.
+  const persistence = useMemo(
+    () => ({
+      key: builderDraftKey(user?.id, parentOfferId),
+      isRevision: Boolean(parentOfferId),
+      sequenceEditable: catalog.isFirstOffer && !parentOfferId,
+      customers: catalog.customers,
+      banks: catalog.banks,
+      paymentTerms: catalog.paymentTerms,
+    }),
+    [user?.id, parentOfferId, catalog],
+  )
+
   const controller = useOfferBuilder({
     sequence: catalog.sequence,
     packageTypes: catalog.packageTypes,
     customers: catalog.customers,
     user: user ?? undefined,
+    persistence,
     initialDraft:
       initialDraft ??
       createEmptyDraft(
@@ -169,6 +185,17 @@ export default function BuilderWorkspace({
   const furthestStep = furthestOpenStep(issuesByStep)
   const stepComplete = issuesByStep.map((issues) => issues.length === 0)
 
+  // A restored form can reopen on a step the stepper would still lock (a customer that no
+  // longer exists, say), so it lands on the furthest step that is open instead.
+  const stepChecked = useRef(false)
+  useEffect(() => {
+    if (stepChecked.current) return
+    stepChecked.current = true
+    if (controller.step > furthestStep) controller.setStep(furthestStep)
+    // Only the step the form opened on matters, not later navigation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Errors only appear once the user tried to leave a step, then follow the edits live.
   const [revealed, setRevealed] = useState<number[]>([])
   const [focusRequest, setFocusRequest] = useState(0)
@@ -259,6 +286,9 @@ export default function BuilderWorkspace({
       return
     }
 
+    // The offer exists now: the temporary copy must not come back as "unsaved work".
+    controller.saved.discard()
+
     if (status === "issued") {
       try {
         await offersApi.setStatus(saved.id, "issued")
@@ -275,6 +305,14 @@ export default function BuilderWorkspace({
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
       <div className="no-print space-y-4">
+        {controller.saved.restoredAt !== undefined && (
+          <RestoredNotice
+            savedAt={controller.saved.restoredAt}
+            onStartOver={controller.saved.startOver}
+            onDismiss={controller.saved.dismissNotice}
+          />
+        )}
+
         <BuilderStepper
           steps={steps}
           current={controller.step}
