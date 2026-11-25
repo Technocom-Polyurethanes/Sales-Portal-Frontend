@@ -16,13 +16,20 @@ afterEach(() => {
   container = null
 })
 
-function render(offer: OfferListItem) {
+function render(
+  offer: OfferListItem,
+  handlers: { onOpen?: () => void; onDelete?: () => void } = {},
+) {
   container = document.createElement("div")
   document.body.append(container)
   act(() => {
     createRoot(container!).render(
       <I18nProvider>
-        <OfferCard offer={offer} onOpen={vi.fn()} />
+        <OfferCard
+          offer={offer}
+          onOpen={handlers.onOpen ?? vi.fn()}
+          onDelete={handlers.onDelete}
+        />
       </I18nProvider>,
     )
   })
@@ -60,5 +67,22 @@ describe("OfferCard", () => {
       (dd) => dd.textContent,
     )
     expect(values[2]).toBe("18/11/2026 12:21")
+  })
+
+  it("puts the delete button in the footer without opening the offer", () => {
+    const onOpen = vi.fn()
+    const onDelete = vi.fn()
+    render(base, { onOpen, onDelete })
+
+    const button = container!.querySelector<HTMLButtonElement>(
+      'footer button[data-testid="delete-button"]',
+    )
+    expect(button).not.toBeNull()
+
+    act(() => button!.click())
+
+    expect(onDelete).toHaveBeenCalledOnce()
+    expect(onOpen).not.toHaveBeenCalled()
+    expect(container!.textContent).not.toContain("Open")
   })
 })

@@ -204,7 +204,6 @@ export default function UsersPage() {
         query={search}
         onClearSearch={() => {
           setSearch("")
-
           setPage(1)
         }}
         onClearFilters={clearFilters}

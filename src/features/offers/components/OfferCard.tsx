@@ -69,22 +69,6 @@ export default function OfferCard({ offer, onOpen, onDelete }: OfferCardProps) {
           <Badge variant={offer.status}>
             {t(`offers.status.${offer.status}`)}
           </Badge>
-          {onDelete && (
-            <Button
-              variant="danger"
-              size="sm"
-              data-testid="delete-button"
-              aria-label={t("common.deleteTitle", { name: offer.reference })}
-              className="w-8 shrink-0 px-0!"
-              onClick={(event) => {
-                event.stopPropagation()
-
-                onDelete(offer)
-              }}
-            >
-              <Icon name="trash" size={18} />
-            </Button>
-          )}
         </div>
       </header>
 
@@ -119,10 +103,23 @@ export default function OfferCard({ offer, onOpen, onDelete }: OfferCardProps) {
             ? `${t("offers.details.lastModifiedBy")}: ${modifiedBy}`
             : ""}
         </span>
-        <span className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-primary">
-          {t("offers.list.open")}
-          <Icon name="chevron" size={15} />
-        </span>
+        {onDelete && (
+          <Button
+            variant="danger"
+            size="sm"
+            data-testid="delete-button"
+            aria-label={t("common.deleteTitle", { name: offer.reference })}
+            className=""
+            onClick={(event) => {
+              event.stopPropagation()
+
+              onDelete(offer)
+            }}
+          >
+            <Icon name="trash" size={18} />
+            {t("common.delete")}
+          </Button>
+        )}
       </footer>
     </article>
   )

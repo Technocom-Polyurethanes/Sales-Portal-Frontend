@@ -18,8 +18,10 @@
   --font-arabic: "Firjar", ui-sans-serif, system-ui, sans-serif;
   --radius-card: 10px;
   --animate-fade-in: fade-in 0.25s ease-out both;
+  --animate-fade-out: fade-out 0.2s ease-in both;
   --animate-rise-in: rise-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-panel-in: panel-in 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-panel-out: panel-out 0.2s ease-in both;
   --animate-drawer-in: drawer-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -36,8 +38,28 @@
   }
 }
 
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes panel-in {
   from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@keyframes panel-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
     opacity: 0;
     transform: translateY(8px) scale(0.98);
   }
