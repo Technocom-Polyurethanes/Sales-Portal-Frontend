@@ -69,6 +69,14 @@ const build = (language: "en" | "ar") =>
     paymentTermLabel: language === "ar" ? "شيك — ٣٠ يوم" : "Cheque — 30 days",
   })
 
+const priceOnlySource: DocumentSource = {
+  ...(source as DocumentSource),
+  lines: [{ ...source.lines[0], packaging: [], quantityKg: 0, amount: 0 }],
+  subtotal: 0,
+  taxAmount: 0,
+  total: 0,
+}
+
 describe("offer document", () => {
   let container: HTMLDivElement
 
@@ -105,8 +113,9 @@ describe("offer document", () => {
     expect(text).toContain("TF-06-01")
     expect(text).toContain("DALTORIM EG 26200 - D")
     expect(text).toContain("EG12 QNBA 0021 4589 0012")
-    expect(text).toContain("٢١/١٠/٢٠٢٦")
-    expect(text).toContain("٣٩٬٩٠٠")
+    expect(text).toContain("٢٠٢٦/١٠/٢١")
+    expect(text).toContain("٣٩٩٠٠")
+    expect(text).not.toContain("٬")
   })
 
   it("mirrors the Arabic document and translates the packaging", () => {
@@ -170,6 +179,36 @@ describe("offer document", () => {
     expect(container.textContent).not.toContain("Balance")
   })
 
+  it("prints prices and totals with two decimals but keeps the quantity compact", () => {
+    render("en")
+
+    const cells = Array.from(
+      container.querySelectorAll(".doc-items tbody tr:first-child td"),
+    ).map((cell) => cell.textContent)
+    expect(cells[2]).toBe("3,990")
+    expect(cells[3]).toBe("10.00")
+    expect(cells[4]).toBe("39,900.00")
+
+    const values = Array.from(container.querySelectorAll(".doc-totals td .doc-ltr")).map(
+      (cell) => cell.textContent,
+    )
+    expect(values).toContain("39,900.00")
+    expect(values).toContain("5,586.00")
+    expect(values).toContain("45,486.00")
+  })
+
+  it("prints Arabic prices and totals with a dot decimal and no separator", () => {
+    render("ar")
+
+    const cells = Array.from(
+      container.querySelectorAll(".doc-items tbody tr:first-child td"),
+    ).map((cell) => cell.textContent)
+    expect(cells[2]).toBe("٣٩٩٠")
+    expect(cells[3]).toBe("١٠٫٠٠")
+    expect(cells[4]).toBe("٣٩٩٠٠٫٠٠")
+    expect(container.textContent).not.toContain("٬")
+  })
+
   it("hides the attention line when it is empty", () => {
     render("en")
     expect(container.textContent).not.toContain("Attention:")
@@ -214,6 +253,111 @@ describe("offer document", () => {
       expect(page.querySelector(".doc-footer")).not.toBeNull()
     }
     expect(container.querySelectorAll(".doc-title")).toHaveLength(1)
+  })
+
+  describe("price-only offer", () => {
+    const buildPriceOnly = (language: "en" | "ar") =>
+      buildDocumentData(priceOnlySource, {
+        customer,
+        company,
+        banks,
+        packageTypes,
+        language,
+        paymentTermLabel: language === "ar" ? "شيك — ٣٠ يوم" : "Cheque — 30 days",
+      })
+
+    const renderPriceOnly = (language: "en" | "ar") => {
+      const root = createRoot(container)
+      act(() => {
+        root.render(<OfferDocument data={buildPriceOnly(language)} language={language} />)
+      })
+    }
+
+    it("prints only customer, material, price per kg, terms and the tax note in English", () => {
+      renderPriceOnly("en")
+      const text = container.textContent ?? ""
+
+      expect(text).toContain("Customer Information")
+      expect(text).toContain("DALTORIM EG 26200 - D")
+      expect(text).toContain("Unit Price")
+      expect(text).toContain("10.00")
+      expect(text).toContain("Terms and Conditions")
+      expect(text).toContain("Force majeure")
+      expect(text).toContain("These prices are tax excluded.")
+
+      expect(container.querySelector(".doc-totals")).toBeNull()
+      expect(container.querySelector(".doc-payment-terms")).toBeNull()
+      expect(container.querySelector(".doc-banks")).toBeNull()
+      expect(container.querySelector(".doc-schedule")).toBeNull()
+      expect(container.querySelector(".doc-subrow")).toBeNull()
+      expect(text).not.toContain("Payment Terms")
+      expect(text).not.toContain("Bank Details")
+      expect(text).not.toContain("Delivery Place")
+      expect(text).not.toContain("Prices are valid for 7 days.")
+      expect(text).not.toContain("Qty (kg)")
+      expect(text).not.toContain("Amount")
+    })
+
+    it("mirrors the reduced document in Arabic", () => {
+      renderPriceOnly("ar")
+      const text = container.textContent ?? ""
+
+      expect(text).toContain("السادة")
+      expect(text).toContain("DALTORIM EG 26200 - D")
+      expect(text).toContain("سعر الوحدة")
+      expect(text).toContain("١٠٫٠٠")
+      expect(text).toContain("الشروط والأحكام")
+      expect(text).toContain("هذه الأسعار غير شاملة الضريبة.")
+
+      expect(container.querySelector(".doc-totals")).toBeNull()
+      expect(container.querySelector(".doc-payment-terms")).toBeNull()
+      expect(container.querySelector(".doc-banks")).toBeNull()
+      expect(container.querySelector(".doc-schedule")).toBeNull()
+      expect(text).not.toContain("شروط الدفع")
+      expect(text).not.toContain("بيانات البنك")
+      expect(text).not.toContain("التوريد")
+    })
+
+    it("leaves the full document untouched", () => {
+      render("en")
+
+      expect(container.querySelector(".doc-totals")).not.toBeNull()
+      expect(container.querySelector(".doc-payment-terms")).not.toBeNull()
+      expect(container.querySelector(".doc-banks")).not.toBeNull()
+      expect(container.querySelector(".doc-schedule")).not.toBeNull()
+      expect(container.textContent).not.toContain("These prices are tax excluded.")
+    })
+  })
+
+  describe("Arabic customer address", () => {
+    const renderArabicWith = (addressAr?: string) => {
+      const data = buildDocumentData(source as DocumentSource, {
+        customer: { ...customer, addressAr },
+        company,
+        banks,
+        packageTypes,
+        language: "ar",
+        paymentTermLabel: "شيك — ٣٠ يوم",
+      })
+      const root = createRoot(container)
+      act(() => {
+        root.render(<OfferDocument data={data} language="ar" />)
+      })
+    }
+
+    it("falls back to the English address when no Arabic one was entered", () => {
+      renderArabicWith()
+
+      // Arabic rendering localises the digits but keeps the Latin address.
+      expect(container.textContent).toContain("th of Ramadan City, Egypt")
+    })
+
+    it("prints the Arabic address when the customer has one", () => {
+      renderArabicWith("مدينة العاشر من رمضان، مصر")
+
+      expect(container.textContent).toContain("مدينة العاشر من رمضان، مصر")
+      expect(container.textContent).not.toContain(customer.address)
+    })
   })
 
   describe("delivery total, offer validity and attention", () => {
@@ -280,7 +424,7 @@ describe("offer document", () => {
       renderWith("ar", { validityDays: 7 })
 
       expect(referenceLabels()).toContain("صلاحية العرض")
-      expect(referenceValue("صلاحية العرض")).toBe("٧ أيام — حتى ٢٨/١٠/٢٠٢٦")
+      expect(referenceValue("صلاحية العرض")).toBe("٧ أيام — حتى ٢٠٢٦/١٠/٢٨")
     })
 
     it("writes a single day in the singular", () => {

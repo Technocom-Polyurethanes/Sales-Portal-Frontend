@@ -9,6 +9,9 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "delete": "Delete",
+    "deleteTitle": "Delete {name}?",
+    "deleteMessage": "\"{name}\" will be permanently deleted. This cannot be undone.",
+    "deleted": "{name} was permanently deleted.",
     "edit": "Edit",
     "add": "Add",
     "close": "Close",
@@ -109,6 +112,8 @@
     "createNewOffer": "Create new offer"
   },
   "offers": {
+    "deleteMessage": "\"{name}\" and every version of it will be permanently deleted. This cannot be undone.",
+    "deleted": "{name} and its versions were permanently deleted.",
     "list": {
       "title": "Offers",
       "subtitle": "Find, manage, and keep track of every offer.",
@@ -246,6 +251,7 @@
         "presetLabel": "Delivery term preset",
         "presetPlaceholder": "Choose a preset…",
         "presetCustom": "Custom text",
+        "placePresetLabel": "Delivery place preset",
         "placeLabel": "Delivery place",
         "placeHint": "Printed in its own block. Leave empty to hide it.",
         "placePlaceholder": "Our factories in Badr City."
@@ -348,10 +354,11 @@
     "email": "Email",
     "phone": "Phone",
     "address": "Address",
+    "addressAr": "Address (Arabic)",
     "edit": "Edit customer",
     "created": "Customer created",
     "updated": "Customer updated",
-    "codeNameRequired": "Customer code and name are required.",
+    "codeNameRequired": "Customer code, name and address are required.",
     "search": "Search name, code or city",
     "notFound": "This customer could not be found.",
     "newOffer": "New offer",
@@ -410,6 +417,9 @@
     "bankAccounts": "Bank accounts",
     "dropFile": "Drop an Excel or CSV file here",
     "orBrowse": "or browse from your computer",
+    "uploading": "Uploading {fileName}…",
+    "readingFile": "Reading file…",
+    "secondsLeft": "{seconds}s left",
     "start": "Start import",
     "cancel": "Cancel import",
     "steps": {

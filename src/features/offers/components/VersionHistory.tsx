@@ -71,13 +71,13 @@ export default function VersionHistory({
                 <span>
                   {t("offers.list.createdAt")}: <bdi>{creator}</bdi> ·{" "}
                   <span dir="ltr" className="tabular-nums">
-                    {formatDateTime(version.createdAt)}
+                    {formatDateTime(version.createdAt, locale)}
                   </span>
                 </span>
                 <span>
                   {t("offers.list.updatedAt")}: <bdi>{modifiedBy}</bdi> ·{" "}
                   <span dir="ltr" className="tabular-nums">
-                    {modifiedAt ? formatDateTime(modifiedAt) : "—"}
+                    {modifiedAt ? formatDateTime(modifiedAt, locale) : "—"}
                   </span>
                 </span>
               </span>

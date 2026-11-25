@@ -1,4 +1,5 @@
 import type { TranslationKey } from "../../i18n/types"
+import { isPriceOnly } from "../../lib/calculations/packaging"
 import { hasBankSelection } from "./bankSelection"
 import type { OfferDraft } from "./types"
 
@@ -89,6 +90,7 @@ function packaging(draft: OfferDraft, ctx: StepValidationContext): StepIssue[] {
   }
 
   const issues: StepIssue[] = []
+  const priceOnly = isPriceOnly(draft.lines)
 
   for (const line of draft.lines) {
     const name = line.materialName || line.materialCode || ""
@@ -100,6 +102,9 @@ function packaging(draft: OfferDraft, ctx: StepValidationContext): StepIssue[] {
         params: { name },
       })
     }
+
+    // Zero packages on every line is a deliberate price-per-kg quotation.
+    if (priceOnly) continue
 
     if (line.packaging.length === 0) {
       issues.push({

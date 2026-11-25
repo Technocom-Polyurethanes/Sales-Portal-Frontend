@@ -22,12 +22,14 @@ const DAY_NAMES: Record<Locale, string[]> = {
   ],
 }
 
-/** `21/10/2026` */
-export function formatIsoDay(value: string): string {
+/** `21/10/2026` in English, `2026/10/21` in Arabic. */
+export function formatIsoDay(value: string, locale: Locale = "en-US"): string {
   const parsed = parseIsoDate(value)
   if (!parsed) return value
   const pad = (part: number) => String(part).padStart(2, "0")
-  return `${pad(parsed.day)}/${pad(parsed.month)}/${parsed.year}`
+  return locale === "ar-EG"
+    ? `${pad(parsed.year)}/${pad(parsed.month)}/${pad(parsed.day)}`
+    : `${pad(parsed.day)}/${pad(parsed.month)}/${parsed.year}`
 }
 
 /** Localised long date, e.g. `21 October 2026`. */
@@ -59,29 +61,38 @@ export function formatDateWithWeekday(
 ): string {
   const weekday = formatWeekday(value, locale)
   if (!weekday) return value
-  return `${weekday} ${formatIsoDay(value)}`
+  return `${weekday} ${formatIsoDay(value, locale)}`
 }
 
 /**
- * `21/10/2026 14:05` in the viewer's time zone, for a timestamp such as `2026-10-21T11:05:00Z`.
- * A plain day (`2026-10-21`) has no time, so it is shown as a day only.
+ * `21/10/2026 14:05` in English, `2026/10/21 14:05` in Arabic, in the viewer's
+ * time zone. A plain day (`2026-10-21`) has no time, so it is shown as a day only.
  */
-export function formatDateTime(value: string | null | undefined): string {
+export function formatDateTime(
+  value: string | null | undefined,
+  locale: Locale = "en-US",
+): string {
   if (!value) return ""
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) return formatIsoDay(value)
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value.trim())) return formatIsoDay(value, locale)
 
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
 
   const pad = (part: number) => String(part).padStart(2, "0")
-  return (
-    `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ` +
-    `${pad(date.getHours())}:${pad(date.getMinutes())}`
-  )
+  const year = pad(date.getFullYear())
+  const month = pad(date.getMonth() + 1)
+  const day = pad(date.getDate())
+  const time = `${pad(date.getHours())}:${pad(date.getMinutes())}`
+  const datePart =
+    locale === "ar-EG" ? `${year}/${month}/${day}` : `${day}/${month}/${year}`
+  return `${datePart} ${time}`
 }
 
-/** `21/10/2026` for a timestamp, in the viewer's time zone. */
-export function formatTimestampDay(value: string | null | undefined): string {
+/** The day part of a timestamp, in the viewer's time zone. */
+export function formatTimestampDay(
+  value: string | null | undefined,
+  locale: Locale = "en-US",
+): string {
   if (!value) return ""
-  return formatDateTime(value).split(" ")[0]
+  return formatDateTime(value, locale).split(" ")[0]
 }

@@ -1,8 +1,9 @@
-import { useCallback, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 
 import { downloadCsv } from "../../../lib/import/csv"
 import { importApi } from "../api"
 import type { ImportPreview, ImportResult, ImportSource } from "../types"
+import { uploadProgressView, type UploadProgressView } from "../uploadProgress"
 
 export type ImportStep = 1 | 2 | 3
 
@@ -16,6 +17,8 @@ export function useImportFlow() {
   )
   const [error, setError] = useState<Error | null>(null)
   const [fileName, setFileName] = useState("")
+  const [progress, setProgress] = useState<UploadProgressView | null>(null)
+  const uploadStartedAt = useRef(0)
 
   const step: ImportStep = result ? 3 : preview ? 2 : 1
 
@@ -44,11 +47,20 @@ export function useImportFlow() {
       setBusy("preview")
       setError(null)
       setFileName(file.name)
+      uploadStartedAt.current = Date.now()
+      setProgress(uploadProgressView({ loaded: 0, total: file.size }, 0))
       try {
-        setPreview(await importApi.preview(source, file))
+        setPreview(
+          await importApi.preview(source, file, (next) => {
+            setProgress(
+              uploadProgressView(next, Date.now() - uploadStartedAt.current),
+            )
+          }),
+        )
       } catch (cause) {
         setError(cause instanceof Error ? cause : new Error(String(cause)))
       } finally {
+        setProgress(null)
         setBusy(null)
       }
     },
@@ -84,6 +96,7 @@ export function useImportFlow() {
     setResult(null)
     setFileName("")
     setError(null)
+    setProgress(null)
   }, [])
 
   return {
@@ -94,6 +107,7 @@ export function useImportFlow() {
     busy,
     error,
     fileName,
+    progress,
     chooseSource,
     downloadTemplate,
     upload,

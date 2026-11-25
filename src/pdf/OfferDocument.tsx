@@ -7,6 +7,7 @@ import { createPortal } from "react-dom"
 import {
   formatDocumentCurrency,
   formatDocumentDate,
+  formatDocumentMoney,
   formatDocumentNumber,
   formatDocumentValidity,
   formatDocumentWeekday,
@@ -61,7 +62,7 @@ function buildReferenceRows(
     { label: template.reference, value: data.reference, ltr: true, keepLatin: true },
     {
       label: template.date,
-      value: formatDocumentDate(data.issueDate),
+      value: formatDocumentDate(data.issueDate, language),
       ltr: true,
     },
     ...validity,
@@ -78,35 +79,35 @@ function buildTotalsRows(
   const rows: TotalsRow[] = [
     {
       label: template.subtotal,
-      value: formatDocumentNumber(data.subtotal),
+      value: formatDocumentMoney(data.subtotal, language),
     },
   ]
 
   if (data.orderDiscount > 0) {
     rows.push({
       label: template.discount,
-      value: `- ${formatDocumentNumber(data.orderDiscount)}`,
+      value: `- ${formatDocumentMoney(data.orderDiscount, language)}`,
     })
   }
 
   if (data.taxPercent > 0) {
     rows.push({
       label: `${template.tax} ${data.taxPercent}%`,
-      value: formatDocumentNumber(data.taxAmount),
+      value: formatDocumentMoney(data.taxAmount, language),
     })
   }
 
   if (data.otherTaxEnabled && data.otherTaxPercent > 0) {
     rows.push({
       label: template.otherTax,
-      value: `- ${formatDocumentNumber(data.otherTaxAmount)}`,
+      value: `- ${formatDocumentMoney(data.otherTaxAmount, language)}`,
       variant: "deduction",
     })
   }
 
   rows.push({
     label: template.itemsTotalLabel,
-    value: formatDocumentNumber(data.total),
+    value: formatDocumentMoney(data.total, language),
     currency,
     variant: "grand",
   })
@@ -146,6 +147,10 @@ function deliveryColumns(data: OfferDocumentData, language: DocumentLanguage): A
 function OfferDocument({ data, language }: OfferDocumentProps) {
   const template = getTemplate(language)
   const arabic = language === "ar"
+  const priceOnly = data.priceOnly === true
+  const terms = priceOnly
+    ? [...template.termsAndConditions, template.taxExcluded]
+    : template.termsAndConditions
   const referenceRows = buildReferenceRows(data, template, language)
   const totalsRows = buildTotalsRows(data, template, language)
   const columns = deliveryColumns(data, language)
@@ -247,85 +252,83 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
               lines={data.lines}
               currency={currency}
               weightUnit={weightUnit}
-              formatNumber={(value) =>
-                (value ?? 0).toLocaleString("en-US", {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 2,
-                })
-              }
+              formatNumber={(value) => formatDocumentNumber(value ?? 0, language)}
+              formatMoney={(value) => formatDocumentMoney(value ?? 0, language)}
+              priceOnly={priceOnly}
             />
           </div>
 
-          <div data-doc-unit>
-            <div className="doc-summary-row">
-              <PaymentTermsBlock
-                heading={template.terms}
-                term={data.paymentTerm}
-                conditions={data.paymentTermsText}
-              />
-              <TotalsBlock rows={totalsRows} />
-            </div>
-          </div>
-
-          <div data-doc-unit data-doc-keep>
-            <DeliveryScheduleTable
-              heading={template.schedule}
-              headings={{
-                batch: template.batch,
-                deliveryDate: template.deliveryDate,
-                packages: template.packages,
-                totalWeight: template.totalWeight,
-                total: template.deliveryTotalLabel,
-              }}
-              batches={batches}
-              columns={columns}
-              weightUnit={weightUnit}
-              formatDate={formatDocumentDate}
-              formatNumber={(value) =>
-                (value ?? 0).toLocaleString("en-US", {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 2,
-                })
-              }
-              language={language}
-              source={data}
-            />
-          </div>
-
-          {data.deliveryMode === "text" && (
+          {!priceOnly && (
             <div data-doc-unit>
-              <TextBlock heading={template.delivery} text={data.deliveryText} />
+              <div className="doc-summary-row">
+                <PaymentTermsBlock
+                  heading={template.terms}
+                  term={data.paymentTerm}
+                  conditions={data.paymentTermsText}
+                />
+                <TotalsBlock rows={totalsRows} />
+              </div>
             </div>
           )}
 
-          <div data-doc-unit>
-            <TextBlock heading={template.deliveryPlace} text={data.deliveryPlace} />
-          </div>
+          {!priceOnly && (
+            <>
+              <div data-doc-unit data-doc-keep>
+                <DeliveryScheduleTable
+                  heading={template.schedule}
+                  headings={{
+                    batch: template.batch,
+                    deliveryDate: template.deliveryDate,
+                    packages: template.packages,
+                    totalWeight: template.totalWeight,
+                    total: template.deliveryTotalLabel,
+                  }}
+                  batches={batches}
+                  columns={columns}
+                  weightUnit={weightUnit}
+                  formatDate={(value) => formatDocumentDate(value, language)}
+                  formatNumber={(value) => formatDocumentNumber(value ?? 0, language)}
+                  language={language}
+                  source={data}
+                />
+              </div>
 
-          <div data-doc-unit data-doc-keep>
-            <BankAccountsTable
-              heading={template.bankDetails}
-              headings={{
-                bank: template.bank,
-                branch: template.branch,
-                accountNumber: template.accountNumber,
-                swift: template.swift,
-                iban: template.iban,
-                currency: template.currency,
-              }}
-              banks={data.banks}
-              formatCurrency={(value) => formatDocumentCurrency(value, language)}
-            />
-          </div>
+              {data.deliveryMode === "text" && (
+                <div data-doc-unit>
+                  <TextBlock heading={template.delivery} text={data.deliveryText} />
+                </div>
+              )}
 
-          <div data-doc-unit>
-            <NotesBlock heading={template.notes} notes={data.notes} />
-          </div>
+              <div data-doc-unit>
+                <TextBlock heading={template.deliveryPlace} text={data.deliveryPlace} />
+              </div>
+
+              <div data-doc-unit data-doc-keep>
+                <BankAccountsTable
+                  heading={template.bankDetails}
+                  headings={{
+                    bank: template.bank,
+                    branch: template.branch,
+                    accountNumber: template.accountNumber,
+                    swift: template.swift,
+                    iban: template.iban,
+                    currency: template.currency,
+                  }}
+                  banks={data.banks}
+                  formatCurrency={(value) => formatDocumentCurrency(value, language)}
+                />
+              </div>
+
+              <div data-doc-unit>
+                <NotesBlock heading={template.notes} notes={data.notes} />
+              </div>
+            </>
+          )}
 
           <div data-doc-unit data-doc-keep>
             <TermsAndConditions
               heading={template.termsAndConditionsHeading}
-              terms={template.termsAndConditions}
+              terms={terms}
             />
           </div>
         </>,

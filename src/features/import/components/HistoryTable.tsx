@@ -4,7 +4,7 @@ import DataTable, { type Column } from "../../../components/ui/DataTable"
 import EmptyState from "../../../components/ui/EmptyState"
 import TableSkeleton from "../../../components/ui/TableSkeleton"
 import { useTranslation } from "../../../i18n/I18nProvider"
-import { formatIsoDay } from "../../../lib/formatters"
+import { formatIsoDay, localeForLanguage } from "../../../lib/formatters"
 import { SOURCE_KEYS } from "../labels"
 import type { ImportHistoryItem, ImportHistoryPage } from "../types"
 
@@ -26,14 +26,17 @@ export default function HistoryTable({
   page,
   onPageChange,
 }: HistoryTableProps) {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
+  const locale = localeForLanguage(language)
 
   const columns: Column<ImportHistoryItem>[] = [
     {
       key: "date",
       header: t("import.history.date"),
       render: (item) =>
-        item.committedAt ? formatIsoDay(item.committedAt.slice(0, 10)) : "—",
+        item.committedAt
+          ? formatIsoDay(item.committedAt.slice(0, 10), locale)
+          : "—",
     },
     {
       key: "type",

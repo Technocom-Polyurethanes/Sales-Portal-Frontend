@@ -41,4 +41,5 @@ export const englishTemplate: OfferTemplate = {
   termsAndConditions: [
     "Force majeure conditions applies to above Offer ( CBE foreign currencies rate, availability, Quantities, prices, deliveries plan .….etc )",
   ],
+  taxExcluded: "These prices are tax excluded.",
 }

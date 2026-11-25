@@ -3,11 +3,14 @@ export type OfferType = "Loc" | "Int"
 /** Static company identifier printed in every reference. */
 export const REFERENCE_COMPANY_CODE = "YL"
 
-const REFERENCE_PATTERN = /^(Loc|Int)\/(\d+)\/YL\/([A-Za-z0-9]+)$/i
+const REFERENCE_PATTERN =
+  /^(Loc|Int)\/(\d+)(?:-(\d{4}))?\/YL\/([A-Za-z0-9]+)$/i
 
 export type ParsedReference = {
   offerType: OfferType
   sequence: number
+  /** 0 on legacy references that have no year segment. */
+  year: number
   initials: string
 }
 
@@ -31,18 +34,20 @@ export function resolveInitials(initials?: string, fullName?: string): string {
 }
 
 /**
- * Builds an offer reference such as `Loc/42/YL/JD` or `Int/43/YL/JD`:
- * offer type / sequence / `YL` / user initials.
+ * Builds an offer reference such as `Loc/0042-2026/YL/JD`: offer type /
+ * zero-padded sequence - issue year / `YL` / user initials.
  */
 export function buildOfferReference(
   offerType: OfferType,
   sequence: number,
   initials: string,
+  issueDate: string,
 ): string {
-  return `${offerType}/${sequence}/${REFERENCE_COMPANY_CODE}/${initials.trim().toUpperCase()}`
+  const year = issueDate.slice(0, 4)
+  return `${offerType}/${String(sequence).padStart(4, "0")}-${year}/${REFERENCE_COMPANY_CODE}/${initials.trim().toUpperCase()}`
 }
 
-/** Reads the parts of a new-format reference, or `null` for anything else. */
+/** Reads the parts of a reference, or `null` for a legacy one. */
 export function parseReference(reference: string): ParsedReference | null {
   const match = REFERENCE_PATTERN.exec(reference.trim())
   if (!match) return null
@@ -51,7 +56,8 @@ export function parseReference(reference: string): ParsedReference | null {
   return {
     offerType: type,
     sequence: Number.parseInt(match[2]!, 10),
-    initials: match[3]!.toUpperCase(),
+    year: match[3] ? Number.parseInt(match[3], 10) : 0,
+    initials: match[4]!.toUpperCase(),
   }
 }
 
