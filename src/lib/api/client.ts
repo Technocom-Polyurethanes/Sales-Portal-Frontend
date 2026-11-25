@@ -8,8 +8,12 @@ export const api: ApiClient = {
   get<T,>(path: string, query?: Query): Promise<T> {
     return api.request<T>(path, { method: "GET", query })
   },
-  post<T,>(path: string, body?: unknown): Promise<T> {
-    return api.request<T>(path, { method: "POST", body })
+  post<T,>(
+    path: string,
+    body?: unknown,
+    options?: ApiRequestOptions,
+  ): Promise<T> {
+    return api.request<T>(path, { ...options, method: "POST", body })
   },
   put<T,>(path: string, body?: unknown): Promise<T> {
     return api.request<T>(path, { method: "PUT", body })

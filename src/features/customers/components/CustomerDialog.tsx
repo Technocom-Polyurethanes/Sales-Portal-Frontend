@@ -14,7 +14,6 @@ export type CustomerDialogProps = {
   customer?: Customer
   onClose: () => void
   onSaved: () => void
-  /** Receives the created customer so a picker can select it immediately. */
   onCreated?: (customer: Customer) => void
 }
 
@@ -28,6 +27,7 @@ const EMPTY = {
   city: "",
   cityAr: "",
   address: "",
+  addressAr: "",
   taxId: "",
 }
 
@@ -53,6 +53,7 @@ export default function CustomerDialog({
           city: customer.city,
           cityAr: customer.cityAr ?? "",
           address: customer.address,
+          addressAr: customer.addressAr ?? "",
           taxId: customer.taxId ?? "",
         }
       : EMPTY,
@@ -64,7 +65,7 @@ export default function CustomerDialog({
     setForm((current) => ({ ...current, [field]: value }))
 
   const save = async () => {
-    if (!form.code.trim() || !form.name.trim()) {
+    if (!form.code.trim() || !form.name.trim() || !form.address.trim()) {
       setError(t("customers.codeNameRequired"))
       return
     }
@@ -83,6 +84,7 @@ export default function CustomerDialog({
         city: form.city.trim() || undefined,
         cityAr: form.cityAr.trim() || undefined,
         address: form.address.trim(),
+        addressAr: form.addressAr.trim() || undefined,
         taxId: form.taxId.trim() || undefined,
       }
       if (customer) await customersApi.update(customer.id, body)
@@ -106,6 +108,7 @@ export default function CustomerDialog({
   return (
     <Dialog
       open={open}
+      size="lg"
       title={t(customer ? "customers.edit" : "customers.newCustomer")}
       onClose={onClose}
       footer={
@@ -177,22 +180,33 @@ export default function CustomerDialog({
             onChange={(event) => set("cityAr", event.target.value)}
           />
         </Field>
-        <Field label={t("customers.taxId")} htmlFor="customer-tax">
-          <Input
-            id="customer-tax"
-            value={form.taxId}
-            onChange={(event) => set("taxId", event.target.value)}
-          />
-        </Field>
         <div className="sm:col-span-2">
-          <Field label={t("customers.address")} htmlFor="customer-address">
+          <Field label={t("customers.taxId")} htmlFor="customer-tax">
             <Input
-              id="customer-address"
-              value={form.address}
-              onChange={(event) => set("address", event.target.value)}
-            />
+              id="customer-tax"
+              value={form.taxId}
+              onChange={(event) => set("taxId", event.target.value)}
+              />
           </Field>
         </div>
+        <Field
+          label={t("customers.address")}
+          required
+          htmlFor="customer-address"
+        >
+          <Input
+            id="customer-address"
+            value={form.address}
+            onChange={(event) => set("address", event.target.value)}
+          />
+        </Field>
+        <Field label={t("customers.addressAr")} htmlFor="customer-address-ar">
+          <Input
+            id="customer-address-ar"
+            value={form.addressAr}
+            onChange={(event) => set("addressAr", event.target.value)}
+          />
+        </Field>
       </div>
       {error && (
         <p className="mt-3 rounded border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger">

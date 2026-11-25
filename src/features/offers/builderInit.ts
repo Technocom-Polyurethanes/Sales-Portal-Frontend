@@ -33,6 +33,7 @@ export function prepareBuilderDraft(
       base.offerType,
       draftSequence,
       existing?.initials ?? resolveInitials(user?.initials, user?.fullName ?? user?.name),
+      base.issueDate,
     ),
     otherTaxPercent: base.otherTaxEnabled ? 1 : 0,
   }

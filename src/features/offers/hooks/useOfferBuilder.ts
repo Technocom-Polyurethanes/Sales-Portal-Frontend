@@ -249,7 +249,8 @@ export function useOfferBuilder({
 
         if (
           (patch.offerType && patch.offerType !== current.offerType) ||
-          (patch.sequence !== undefined && patch.sequence !== current.sequence)
+          (patch.sequence !== undefined && patch.sequence !== current.sequence) ||
+          (patch.issueDate !== undefined && patch.issueDate !== current.issueDate)
         ) {
           // The reference follows the offer type and the sequence. Initials stay
           // those already in the reference, so an existing offer keeps its creator.
@@ -258,6 +259,7 @@ export function useOfferBuilder({
             next.sequence,
             parseReference(current.reference)?.initials ??
               resolveInitials(user?.initials, user?.fullName ?? user?.name),
+            next.issueDate,
           )
         }
 

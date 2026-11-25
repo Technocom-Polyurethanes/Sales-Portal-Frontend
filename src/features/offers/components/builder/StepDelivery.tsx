@@ -3,6 +3,7 @@ import Select from "../../../../components/ui/Select"
 import Textarea from "../../../../components/ui/Textarea"
 import { useTranslation } from "../../../../i18n/I18nProvider"
 import type { TranslationKey } from "../../../../i18n/types"
+import type { Customer } from "../../../customers/types"
 import { lockedDeliveryMode } from "../../deliveryLock"
 import { DELIVERY_PRESETS, presetFor } from "../../deliveryPresets"
 import { TEXT_LIMITS, type DeliveryMode, type OfferDraft } from "../../types"
@@ -13,7 +14,11 @@ import DeliveryScheduleEditor, {
 export type StepDeliveryProps = DeliveryScheduleEditorProps & {
   onChange: (patch: Partial<OfferDraft>) => void
   errors?: Record<string, string>
+  customer?: Customer
 }
+
+const OUR_FACTORIES = "مصانعنا بمدينة بدر"
+const customerFactories = (city: string) => `مصانعكم بمدينة ${city}`
 
 const MODES: {
   mode: DeliveryMode
@@ -34,18 +39,26 @@ const MODES: {
 
 /**
  * Step 4: how the delivery is described. Either the dated batch schedule or free text for
- * conditions a schedule cannot express, plus the place of delivery, which is always free text.
- * The two methods exclude each other: once one has content the other is locked until it is cleared.
+ * conditions a schedule cannot express, plus a preset dropdown and editable text for the
+ * place of delivery. The two methods exclude each other: once one has content the other is
+ * locked until it is cleared.
  */
 export default function StepDelivery({
   onChange,
   errors = {},
+  customer,
   ...schedule
 }: StepDeliveryProps) {
   const { t, language } = useTranslation()
   const { draft } = schedule
   const preset = presetFor(draft.deliveryText)
   const locked = lockedDeliveryMode(draft)
+
+  const city = customer?.cityAr || customer?.city || ""
+  const placeOptions = [OUR_FACTORIES, ...(city ? [customerFactories(city)] : [])]
+  const placePreset = placeOptions.find(
+    (option) => option === draft.deliveryPlace?.trim(),
+  )
 
   return (
     <div className="space-y-6">
@@ -148,6 +161,27 @@ export default function StepDelivery({
         <DeliveryScheduleEditor {...schedule} />
       )}
 
+      <Field
+        label={t("offers.builder.delivery.placePresetLabel")}
+        htmlFor="offer-delivery-place-preset"
+      >
+        <Select
+          id="offer-delivery-place-preset"
+          value={placePreset ?? ""}
+          onChange={(event) => onChange({ deliveryPlace: event.target.value })}
+        >
+          <option value="">
+            {draft.deliveryPlace && !placePreset
+              ? t("offers.builder.delivery.presetCustom")
+              : t("offers.builder.delivery.presetPlaceholder")}
+          </option>
+          {placeOptions.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </Select>
+      </Field>
       <Field
         label={t("offers.builder.delivery.placeLabel")}
         hint={t("offers.builder.delivery.placeHint")}

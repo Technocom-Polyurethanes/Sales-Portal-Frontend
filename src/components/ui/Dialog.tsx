@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
 
 import Button from "./Button"
@@ -27,6 +27,19 @@ export default function Dialog({
   footer,
   size = "md",
 }: DialogProps) {
+  // Keep the dialog mounted until the closing animation has finished.
+  const [visible, setVisible] = useState(open)
+
+  useEffect(() => {
+    if (open) {
+      setVisible(true)
+      return
+    }
+
+    const timer = window.setTimeout(() => setVisible(false), 200)
+    return () => window.clearTimeout(timer)
+  }, [open])
+
   useEffect(() => {
     if (!open) return
 
@@ -38,11 +51,12 @@ export default function Dialog({
     return () => document.removeEventListener("keydown", onKeyDown)
   }, [open, onClose])
 
-  if (!open) return null
+  if (!visible) return null
+  const closing = !open
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 p-4 backdrop-blur-[2px] sm:items-center"
+      className={`fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 p-4 backdrop-blur-[2px] sm:items-center ${closing ? "motion-safe:animate-fade-out" : "motion-safe:animate-fade-in"}`}
       onClick={onClose}
       role="presentation"
     >
@@ -51,7 +65,7 @@ export default function Dialog({
         aria-modal="true"
         aria-label={title}
         onClick={(event) => event.stopPropagation()}
-        className={`w-full ${SIZES[size]} rounded-xl border border-line bg-surface shadow-xl`}
+        className={`w-full ${SIZES[size]} rounded-xl border border-line bg-surface shadow-xl ${closing ? "motion-safe:animate-panel-out" : "motion-safe:animate-panel-in"}`}
       >
         <header className="flex items-center justify-between gap-4 border-b border-line-soft px-5 py-4">
           <h2 className="text-base font-semibold text-ink">{title}</h2>

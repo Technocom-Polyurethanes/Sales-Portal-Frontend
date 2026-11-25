@@ -3,7 +3,6 @@ import { useEffect, useState } from "react"
 import PageHeader from "../../../app/layout/PageHeader"
 import Button from "../../../components/ui/Button"
 import Card from "../../../components/ui/Card"
-import TableSkeleton from "../../../components/ui/TableSkeleton"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import type { TranslationKey } from "../../../i18n/types"
 import { downloadCsv, errorsCsv } from "../../../lib/import/csv"
@@ -102,9 +101,37 @@ export default function ImportPage() {
                 />
               )}
 
-              {flow.busy === "preview" && (
-                <div className="rounded-lg border border-line bg-surface">
-                  <TableSkeleton rows={5} columns={5} />
+              {flow.busy === "preview" && flow.progress && (
+                <div className="rounded-lg border border-line bg-surface p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <span className="font-medium text-ink">
+                      {flow.progress.percent === 100
+                        ? t("import.readingFile")
+                        : t("import.uploading", { fileName: flow.fileName })}
+                    </span>
+                    <span className="text-muted">
+                      {flow.progress.percent}%
+                      {flow.progress.etaSeconds !== null &&
+                        ` · ${t("import.secondsLeft", {
+                          seconds: flow.progress.etaSeconds,
+                        })}`}
+                    </span>
+                  </div>
+                  <div
+                    role="progressbar"
+                    aria-label={t("import.uploading", {
+                      fileName: flow.fileName,
+                    })}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={flow.progress.percent}
+                    className="mt-3 h-2 overflow-hidden rounded-full bg-line-soft"
+                  >
+                    <div
+                      className="h-full rounded-full bg-primary transition-[width] duration-200 motion-reduce:transition-none"
+                      style={{ width: `${flow.progress.percent}%` }}
+                    />
+                  </div>
                 </div>
               )}
             </div>

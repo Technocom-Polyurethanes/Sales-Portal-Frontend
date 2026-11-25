@@ -21,12 +21,15 @@ function persistence(overrides: Partial<BuilderPersistence> = {}): BuilderPersis
 
 afterEach(() => localStorage.clear())
 
+// The reference carries the issue year, which a new draft takes from today.
+const year = new Date().getFullYear()
+
 describe("prepareBuilderDraft", () => {
   it("builds the reference from the type, the sequence and the user's initials", () => {
     const draft = prepareBuilderDraft(createEmptyDraft(), 42, user)
 
     expect(draft.sequence).toBe(42)
-    expect(draft.reference).toBe("Loc/42/YL/JD")
+    expect(draft.reference).toBe(`Loc/0042-${year}/YL/JD`)
   })
 
   it("keeps the sequence and the initials of an existing reference", () => {
@@ -34,7 +37,7 @@ describe("prepareBuilderDraft", () => {
     const draft = prepareBuilderDraft(base, 42, user)
 
     expect(draft.sequence).toBe(7)
-    expect(draft.reference).toBe("Int/7/YL/AB")
+    expect(draft.reference).toBe(`Int/0007-${year}/YL/AB`)
   })
 })
 
@@ -64,7 +67,7 @@ describe("restoreBuilderDraft", () => {
     const restored = restoreBuilderDraft(persistence(), 7, user)
 
     expect(restored?.draft.sequence).toBe(7)
-    expect(restored?.draft.reference).toBe("Loc/7/YL/JD")
+    expect(restored?.draft.reference).toBe(`Loc/0007-${year}/YL/JD`)
   })
 
   it("keeps the offer type of the saved form when the sequence moves", () => {
@@ -77,7 +80,7 @@ describe("restoreBuilderDraft", () => {
 
     const restored = restoreBuilderDraft(persistence(), 7, user)
 
-    expect(restored?.draft.reference).toBe("Int/7/YL/JD")
+    expect(restored?.draft.reference).toBe(`Int/0007-${year}/YL/JD`)
   })
 
   it("keeps the starting number the user chose for the very first offer", () => {
@@ -87,7 +90,7 @@ describe("restoreBuilderDraft", () => {
     const restored = restoreBuilderDraft(persistence({ sequenceEditable: true }), 1, user)
 
     expect(restored?.draft.sequence).toBe(100)
-    expect(restored?.draft.reference).toBe("Loc/100/YL/JD")
+    expect(restored?.draft.reference).toBe(`Loc/0100-${year}/YL/JD`)
   })
 
   it("keeps the reference a revision was derived from", () => {
@@ -101,7 +104,7 @@ describe("restoreBuilderDraft", () => {
 
     const restored = restoreBuilderDraft(persistence({ key, isRevision: true }), 9, user)
 
-    expect(restored?.draft.reference).toBe("Loc/3/YL/AB")
+    expect(restored?.draft.reference).toBe(`Loc/0003-${year}/YL/AB`)
     expect(restored?.draft.sequence).toBe(3)
   })
 
