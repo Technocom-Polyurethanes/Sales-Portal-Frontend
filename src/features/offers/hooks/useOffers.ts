@@ -7,5 +7,6 @@ export function useOffers(params: OfferListParams = {}) {
   return useAsyncData<OfferListPage>(
     () => offersApi.list({ status, search, page, pageSize }),
     [status, search, page, pageSize],
+    { live: ["offers"] },
   )
 }

@@ -6,6 +6,7 @@ import { I18nProvider } from "../../i18n/I18nProvider"
 import { PdfLanguageProvider } from "../../pdf/PdfLanguageProvider"
 import { PrintProvider } from "../../pdf/PrintProvider"
 import { SessionProvider } from "../../features/account/SessionProvider"
+import { LiveUpdates } from "./LiveUpdates"
 
 export type AppProvidersProps = {
   children: ReactNode
@@ -18,6 +19,7 @@ export function AppProviders({ children }: AppProvidersProps) {
       <PdfLanguageProvider>
         <ToastProvider>
           <SessionProvider>
+            <LiveUpdates />
             <PrintProvider>
               <BrowserRouter>{children}</BrowserRouter>
             </PrintProvider>

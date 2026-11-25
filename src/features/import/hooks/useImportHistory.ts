@@ -3,5 +3,5 @@ import { importApi } from "../api"
 
 /** The committed import log, newest first. */
 export function useImportHistory(page: number) {
-  return useAsyncData(() => importApi.history(page), [page])
+  return useAsyncData(() => importApi.history(page), [page], { live: ["imports"] })
 }

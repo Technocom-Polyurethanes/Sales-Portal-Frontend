@@ -23,13 +23,19 @@ function clearAuth(): void {
   localStorage.removeItem(SESSION_KEY)
 }
 
-function requestUrl(path: string): string {
+/** The full URL of an API path ("offers" or "/offers" become "<base>/api/offers"). */
+export function buildApiUrl(path: string): string {
   const rawBase = API_BASE_URL
   const base = rawBase.replace(/\/$/, "")
   const normalizedPath = path.replace(/^\//, "")
   const isApiBase = /\/api$/i.test(base)
   const finalBase = isApiBase ? base.replace(/\/api$/i, "") : base
   return path.startsWith("http") ? path : `${finalBase}/api/${normalizedPath}`
+}
+
+/** The signed-in user's token, for requests that do not go through the transport (streams). */
+export function readAuthToken(): string | null {
+  return getToken()
 }
 
 function requestHeaders(options: Parameters<Transport>[1]): Headers {
@@ -85,7 +91,7 @@ async function httpTransport(
   path: string,
   options: Parameters<Transport>[1] = {},
 ): Promise<unknown> {
-  const url = requestUrl(path)
+  const url = buildApiUrl(path)
   const headers = requestHeaders(options)
 
   if (options.onProgress && options.body instanceof FormData) {

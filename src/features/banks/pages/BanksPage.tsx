@@ -53,6 +53,7 @@ export default function BanksPage() {
     () => banksApi.listPage(search, page),
 
     [search, page],
+    { live: ["banks", "catalog"] },
   )
 
   const deletion = useDelete({

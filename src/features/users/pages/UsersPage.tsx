@@ -63,6 +63,7 @@ export default function UsersPage() {
     () => usersApi.list({ search, role, status, page }),
 
     [search, role, status, page],
+    { live: ["users"] },
   )
 
   const deletion = useDelete({

@@ -44,18 +44,21 @@ export default function ProductsPage() {
     () => productsApi.listPage(search, category, page),
 
     [search, category, page],
+    { live: ["materials", "catalog"] },
   )
 
   const { data: catalogue, refresh: refreshCatalogue } = useAsyncData(
     () => productsApi.list().catch(() => []),
 
     [],
+    { live: ["materials"] },
   )
 
   const { data: packageTypes } = useAsyncData(
     () => settingsApi.packageTypes().catch(() => []),
 
     [],
+    { live: ["catalog"] },
   )
 
   const deletion = useDelete({

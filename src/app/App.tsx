@@ -1,11 +1,9 @@
+import { isMockApi } from "@/lib/api/mode"
 import { AppProviders } from "./providers/AppProviders"
 import { AppRouter } from "./router"
 
 async function setupTransport() {
-  const useMock =
-    import.meta.env.VITE_USE_MOCK === "true" ||
-    import.meta.env.VITE_API_MODE === "mock"
-  if (useMock) {
+  if (isMockApi()) {
     await import("@/mock")
     return
   }
