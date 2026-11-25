@@ -1,322 +1,359 @@
 # TECHNOCOM Sales Portal — frontend
 
-Internal workspace for the TECHNOCOM sales team to create, calculate, version, search and print
-quotations / proforma offers (عروض الأسعار). This repository is the React frontend; the ASP.NET Core
-8 + PostgreSQL backend lives in `../backend/Sales Portal` (API docs:
-`../backend/Sales Portal/docs/API.md`).
+Internal workspace for the TECHNOCOM sales team to create, calculate, save, version, search and
+print quotations / proforma offers (عروض الأسعار).
 
-The app is bilingual in two independent senses: the **workspace** switches between English and
-Arabic, and each **printed offer** carries its own English or Arabic document language, saved with
-the offer.
+This repository contains the **React frontend only**. The ASP.NET Core 8 + PostgreSQL backend lives
+in `../backend/Sales Portal`; its endpoint contract is documented in
+[the backend API reference](../backend/Sales%20Portal/docs/API.md).
+
+The app is bilingual in two independent senses: the **workspace** follows the user's language, and
+each **printed offer** stores its own English or Arabic document language.
+
+## Contents
+
+- [What the application does](#what-the-application-does)
+- [Get started](#get-started)
+- [How the application works](#how-the-application-works)
+- [Offer rules](#offer-rules)
+- [Printing and languages](#printing-and-languages)
+- [Repository layout](#repository-layout)
+- [Tests, CI and deployment](#tests-ci-and-deployment)
+- [Common changes](#common-changes)
+- [Current state and gotchas](#current-state-and-gotchas)
+- [Further reading](#further-reading)
 
 ---
 
-## 1. Start here
+## What the application does
 
-Requirements: **Node 22** and **pnpm 10** (see `.mise.toml`).
+| Area | What users can do |
+| --- | --- |
+| Offers | Build an offer in five steps, see totals and a live A4 preview, save a draft, issue it, change status, revise it into a new version and print it. |
+| Search | Filter and search offers, view a customer's offer history and browse the version chain of an offer. |
+| Reference data | Manage customers, materials (with packaging options) and bank accounts. |
+| Import | Upload CSV files, match columns, preview the result and commit an import. |
+| Administration | Manage users and roles; `Admin`, `Sales` and `Accountant` see different actions. |
+| Languages | Switch the workspace between English and Arabic, independently of the printed document language. |
+
+**Terms used in this document**
+
+| Term | Meaning |
+| --- | --- |
+| Offer | A quotation / proforma offer; the main business object. |
+| Workspace | The application UI that surrounds the document. |
+| Document | The paginated A4 offer that is previewed and printed. |
+| Draft | A saved but not issued offer. A draft needs only a customer, at least one material line and a bank. |
+| Version | A revised copy of an offer, linked to its parent through `parentOfferId`. |
+
+---
+
+## Get started
+
+Requirements: **Node 22** and **pnpm 10** (see [.mise.toml](.mise.toml)).
 
 ```bash
-cp .env.example .env     # point VITE_API_BASE_URL at the backend
+cp .env.example .env       # point VITE_API_BASE_URL at the backend
 pnpm install
-pnpm dev                 # Vite on $PORT, default 8443
+pnpm dev                   # Vite on $PORT, default 8443
 ```
 
-A dev server is already running in this environment on `$PORT` (default `8443`); use the preview
-panel. Source changes hot-reload.
+A dev server is already running in this development environment on `$PORT` (default `8443`); use
+the preview panel. Source changes hot-reload.
 
 | Command | Purpose |
 | --- | --- |
-| `pnpm dev` | Development server (`host: true`, `strictPort`) |
+| `pnpm dev` | Development server (`host: true`, `strictPort: true`) |
 | `pnpm build` | Production bundle |
 | `pnpm preview` | Serve the built bundle |
-| `pnpm typecheck` | `tsc --noEmit`, strict mode |
+| `pnpm typecheck` | Strict TypeScript check (`tsc --noEmit`) |
 | `pnpm test` / `pnpm test:watch` | Vitest, once / watch |
-| `pnpm format` | oxfmt |
+| `pnpm format` | Format sources with oxfmt |
 
-**Mock mode:** set `VITE_USE_MOCK=true` (or `VITE_API_MODE=mock`) to run without a backend. The
-mock is an in-memory, non-persistent database; a reload restores the seed data. Vitest forces mock
-mode in `vite.config.ts`, so tests never touch a real API. Production/CI builds set
-`VITE_USE_MOCK=false` and require `VITE_API_BASE_URL`.
+### Configuration
 
-`srs.md` is the original specification and is useful for intent and domain background, but it is
-**not** an implementation description: it names React 18, TanStack Query/Table, React Hook Form +
-Zod and `react-to-print`. The code actually uses React 19, a small in-house query cache, plain
-controlled forms and a print portal. Trust the code and this README for current behaviour.
+| Variable | Purpose |
+| --- | --- |
+| `VITE_API_BASE_URL` | Backend base URL, for example `http://localhost:5065/api`. A trailing `/api` added by the client is normalised, so it will not be doubled. |
+| `VITE_USE_MOCK` | `true` runs against the in-browser mock instead of the backend. |
+| `VITE_API_MODE` | Alternative to `VITE_USE_MOCK`: set to `mock` for mock mode. |
+| `PORT` | Dev and preview server port, default `8443`. |
+
+**Mock mode:** set `VITE_USE_MOCK=true` in `.env` to run without a backend. The mock is an
+in-memory, non-persistent database; reloading the page restores the seed data. Any non-empty
+credentials sign in, as the user selected in `src/mock/db.ts` (Admin by default). Vitest forces
+mock mode in `vite.config.ts`, so tests never call a real API. CI and production builds set
+`VITE_USE_MOCK=false` and require `VITE_API_BASE_URL`. Never commit `.env`.
+
+`srs.md` is the original specification and useful for intent and domain background, but it is **not**
+an implementation description: it names React 18, TanStack Query/Table, React Hook Form + Zod and
+`react-to-print`. The code uses React 19, a small in-house query cache, controlled forms and a print
+portal. Trust the code and this README for current behaviour.
 
 ---
 
-## 2. Stack at a glance
+## How the application works
 
-- React 19, React Router 7, TypeScript 5.7 (`strict`), Vite 8.
-- Tailwind CSS v4 via `@tailwindcss/vite`; theme tokens live in `src/index.css`, no Tailwind config.
-- Vitest 5 + jsdom (jsdom opted into per test file), oxfmt for formatting.
-- `sileo` for toasts; custom `DataTable`, skeletons and dialogs instead of a component library.
-
----
-
-## 3. Repo map
+### Boot, routes and access control
 
 ```text
-src/
-  main.tsx                 React root; imports index.css and mounts <App/>
-  index.css                Tailwind import, theme tokens, base styles, fonts
-  app/                     Router, providers and layout shell
-    App.tsx                Registers the API transport, mounts providers + router
-    AppProviders.tsx       Provider nesting order
-    router.tsx             Route table and login gate
-    navigation.ts          Sidebar items + breadcrumb labels
-    RequirePermission.tsx  Route-level permission guard
-    layout/                Sidebar, Topbar, PageHeader, AppShell, login, footer, placeholder
-    pages/                 NotFound, Forbidden
-  components/
-    ui/                    Buttons, inputs, dialogs, tables, badges, toasts, skeletons, icons...
-    pickers/               Customer/material search modals + shared lookup hook
-    PagedTable.tsx         Table + loading/empty/error/pagination states
-    TableState.tsx         State renderer used by PagedTable
-  features/
-    offers/                Builder, list, details, calculations, draft mapping, statuses
-    customers/             Directory and per-customer offer history
-    products/              Materials catalogue
-    banks/                 Bank accounts CRUD
-    import/                CSV import wizard and history
-    settings/              Catalog/settings API + types (page is a placeholder)
-    account/               Session, permissions, account page (placeholder)
-    users/                 Admin user management
-  lib/
-    api/                   Typed api client, transport registry, HTTP transport, errors, lookup
-    calculations/          Pure offer maths + unit tests
-    formatters/            Number, currency, date and locale helpers
-    cache/queryCache.ts    Tiny tag-based in-memory cache
-    hooks/                 useAsyncData, useDelete
-    import/                CSV parsing, templates, preview
-  i18n/                    en.json / ar.json, typed keys, direction, provider
-  pdf/                     Printable A4 offer, templates, sections, CSS, pagination, print portal
-  mock/                    In-memory DB, transport, seed data and import simulation
+index.html → src/main.tsx → src/app/App.tsx → AppProviders → AppRouter → AppShell
 ```
 
-Conventions: one component per file, keep files under ~250 lines, default-export components, use
-`@/` for `src/`. Shared UI goes in `src/components/ui`; business maths goes in
-`src/lib/calculations` with unit tests.
+`App.tsx` selects the API transport at startup: the mock when `VITE_USE_MOCK === "true"` or
+`VITE_API_MODE === "mock"`, otherwise HTTP. The transport is registered once; feature code does not
+know which one is active.
 
----
+Providers, outermost first (in `src/app/providers/AppProviders.tsx`):
 
-## 4. Boot, routing and access control
+1. `I18nProvider` — workspace language and text direction.
+2. `PdfLanguageProvider` — independent document language.
+3. `ToastProvider` — notifications, positioned according to the workspace direction.
+4. `SessionProvider` — login, user profile and permissions.
+5. `LiveUpdates` — keeps the backend event stream open while signed in.
+6. `PrintProvider` — renders the printable document in a portal outside the app.
+7. `BrowserRouter` — then `AppRouter`.
 
-`index.html` → `src/main.tsx` → `src/app/App.tsx` → `AppProviders` → `AppRouter` → `AppShell`.
+If nobody is signed in, **every URL** shows the login screen; successful login navigates to `/`.
+A `401` response clears `sales_portal_jwt` and `technocom.session` and redirects to `/login`.
+Signing out also clears the in-memory query cache.
 
-`App.tsx` chooses the API transport at module load: mock when `VITE_USE_MOCK === "true"` or
-`VITE_API_MODE === "mock"`, HTTP otherwise. `getTransport()` lazily falls back to HTTP if nothing
-registered in time.
+Authenticated routes are rendered inside `AppShell`:
 
-Provider order (outermost first), in `AppProviders.tsx`:
-
-1. `I18nProvider` — workspace language/direction.
-2. `PdfLanguageProvider` — document language (independent).
-3. `ToastProvider` — sileo toasts; corner follows app direction.
-4. `SessionProvider` — login/session.
-5. `PrintProvider` — print portal mounted outside the app.
-6. `BrowserRouter` — then `AppRouter`.
-
-If unauthenticated, **every URL** renders `LoginScreen`; successful login always navigates to `/`.
-A `401` from the HTTP transport clears `sales_portal_jwt` and `technocom.session` and hard-redirects
-to `/login`.
-
-Authenticated routes (all under `AppShell`):
-
-| Path | Page | Guard |
+| Path | Page | Route guard |
 | --- | --- | --- |
 | `/` | Dashboard | — |
 | `/offers` | Offer list | — |
 | `/offers/new` | Offer builder | `offers.write` |
-| `/offers/:id` | Offer details, versions, status | — |
-| `/customers`, `/customers/:id` | Directory, history | — |
-| `/products` | Materials | — |
-| `/banks` | Bank accounts | — |
+| `/offers/:id` | Offer details, versions, status, print | — |
+| `/customers`, `/customers/:id` | Customer directory and history | — |
+| `/products`, `/banks` | Materials and bank accounts | — |
 | `/import` | Import wizard | `import.use` |
-| `/users` | Users | `users.manage` |
+| `/users` | User management | `users.manage` |
 | `/settings`, `/account` | Placeholder screens | — |
-| `/home`, `/login` | Redirects to `/` | — |
+| `/home`, `/login` | Redirect to `/` | — |
 | `*` | Not found | — |
 
-Roles are `Admin`, `Sales`, `Accountant` (`src/features/account/permissions.ts`), with seven
-permissions: `offers.write`, `offers.delete`, `catalog.create`, `catalog.edit`, `catalog.delete`,
-`import.use`, `users.manage`. Admin has all; Sales cannot edit catalog, import or manage users;
-Accountant has read-only offers and no user management. The matrix mirrors backend `Policies.cs`.
-Route guards exist only on the three paths above; other write actions are hidden per page with
-`usePermissions().can(...)` and enforced again by the API.
+Roles and permissions mirror the backend policy matrix (`Policies.cs`). Route guards cover only the
+three paths above; other write actions are hidden per page with `usePermissions().can(...)` and
+enforced again by the API.
 
-Local storage keys: `sales_portal_jwt`, `technocom.session`, `technocom.app-language`,
-`technocom.pdf-language`. Signing out clears the session, token and query cache.
+| Role | Permissions |
+| --- | --- |
+| Admin | Everything |
+| Sales | Create/revise/status-change offers, delete offers, create customers/materials/banks, delete them |
+| Accountant | Create, edit and delete catalogue data; import data; offers are read-only |
 
----
+Source: `src/features/account/permissions.ts`.
 
-## 5. Data flow
+### Data flow
 
 ```text
 page → feature api.ts → src/lib/api/client.ts → transport (mock | HTTP) → backend
-                     ↘ src/lib/cache/queryCache.ts (tags + 2 min TTL)
+                     ↘ src/lib/cache/queryCache.ts (tags + 2 minute TTL)
 ```
 
-- **Feature modules call their own `api.ts`; they must not import mock data directly.**
+- **Feature modules call their own `api.ts` and never import mock data directly.**
 - `Transport` is a single `(path, options) => Promise<unknown>` function. `registerTransport()`
   swaps implementations; the mock registers itself on import. The HTTP transport prefixes `/api/`,
   sends the bearer token, uses `XMLHttpRequest` only for upload progress, and throws `ApiError`
-  with `status`, `detail` and optional field `errors`.
-- `src/lib/api/lookup.ts` provides `PaginatedResult<T>`, `paginate()` and natural-sorting search
-  helpers shared by mock routes and picker fallbacks.
-- `src/lib/cache/queryCache.ts` caches by key with tags `customers`, `materials`, `banks`, `catalog`;
-  writes invalidate the relevant tags. Failed requests are never cached and stale in-flight
-  responses are discarded.
+  with a status, detail and optional field errors.
+- `queryCache.ts` caches reference data with the tags `customers`, `materials`, `banks` and
+  `catalog`; writes invalidate the relevant tags. Failed requests are not cached, and stale
+  in-flight responses are discarded.
 - `useAsyncData()` supplies `{ data, loading, error, reload, refresh, mutate }`; `mutate()` returns a
-  rollback function for optimistic updates. `useDelete()` shares confirm/busy/toast behaviour.
-  `PagedTable` + `TableState` render loading, empty, error and page states consistently.
-- Pickers call `/customers/lookup` and `/materials/lookup` directly through `api`, with a local
-  fallback when those endpoints are unavailable (as in mock mode).
+  rollback function for optimistic updates. `useDelete()` shares confirmation, busy and toast
+  behaviour. `PagedTable` + `TableState` render loading, empty, error and page states consistently.
+- With the real backend, `LiveUpdates` opens one SSE connection to `GET /api/events`. Announcements
+  invalidate cached reference data and refresh the affected visible screens; the client reconnects
+  with backoff and polls while the stream is down. Mock mode has no server to listen to.
 
 Endpoint groups (exact paths are in each `src/features/*/api.ts`): auth (`/auth/login`, `/auth/me`),
 offers (`/offers`, `/offers/calculate`, `/offers/next-sequence`, `/offers/:id/versions`,
 `POST /offers/:id/revise`, `PATCH /offers/:id/status`), customers (`/customers`, `/customers/:id/offers`,
-`/customers/lookup`), materials (`/materials`, `/materials/lookup`), banks, settings/catalog,
-users, and import (`/import/templates/:type`, `/import/:type/preview`, `/import/:id/commit`,
-`/import/history`). The mock implements most of these with 120 ms latency and permission checks on
-deletes; it lacks server calculation, revise/update and lookup routes. The full backend contract is
-in `../backend/Sales Portal/docs/API.md`.
+`/customers/lookup`), materials (`/materials`, `/materials/lookup`), banks, settings/catalog, users,
+and import (`/import/templates/:type`, `/import/:type/preview`, `/import/:id/commit`,
+`/import/history`). The mock implements most routes with simulated latency; server calculation,
+revise/update and lookup endpoints work against the backend only.
 
-**Field mappings** to keep in mind: backend `materialId` ↔ frontend `productId`/line
-`materialId`; `customerCode` ↔ `code`; `defaultPaymentTermId` ↔ `paymentTermId`;
-`itemCode` ↔ `code`; `referencePricePerKg` ↔ `referencePrice`. Statuses arrive capitalized from the
-API and are lowercased by `features/offers/mappers.ts`. Settings arrive either flat (mock `/settings`)
-or as `{ company, workspace: { bankAccounts, ... } }` (backend); `normalizeSettings()` merges both
-shapes with `/catalog/bootstrap`.
+**Backend field mapping:** backend `materialId` ↔ frontend `productId` / line `materialId`,
+`customerCode` ↔ `code`, `defaultPaymentTermId` ↔ `paymentTermId`, `itemCode` ↔ `code`,
+`referencePricePerKg` ↔ `referencePrice`. Statuses arrive capitalised and are lowercased by
+`features/offers/mappers.ts`. Settings arrive either flat (mock `/settings`) or as
+`{ company, workspace: { bankAccounts, ... } }` (backend); `normalizeSettings()` merges both shapes
+with `/catalog/bootstrap`.
 
 ---
 
-## 6. Offer domain rules
+## Offer rules
 
-The builder has five steps — `basics`, `packaging`, `taxes`, `delivery`, `notes` — implemented in
-`src/features/offers/stepValidation.ts`. Steps after the first incomplete one are locked; going back
-is always allowed; Next shows errors instead of advancing. **Save as draft** only checks issues that
-block a draft (customer, at least one line, at least one bank); **issue** checks every step.
-Issuing is `POST /offers` followed by `PATCH /offers/:id/status` with `issued` — not a special create
-payload. Statuses: `draft`, `issued`, `accepted`, `rejected` (backend also documents `Cancelled`).
-Allowed transitions: `Draft → Issued → Accepted|Rejected`. Deleting/revising works on the whole
-version chain.
+### Builder and lifecycle
 
-**Reference** (`src/lib/calculations/reference.ts`): `{Loc|Int}/{0000 sequence}-{year}/YL/{initials}`,
-e.g. `Loc/0042-2026/YL/JD`. It is never typed. Offer type, sequence, issue date year and user
-initials build it; changing type or date rewrites those segments. Sequence is global, suggested by
-the server, and only the very first offer shows a starting-sequence input. Legacy references without
-a year are still parsed for their sequence.
+The builder has five steps — `basics`, `packaging`, `taxes`, `delivery`, `notes` — validated in
+`src/features/offers/stepValidation.ts`. A step after the first incomplete one is locked; going back
+is always allowed; **Next** shows errors instead of advancing. **Save as draft** checks only the
+issues that block a draft (customer, at least one line, bank); **issue** requires every step to be
+complete. Issuing is `POST /offers` followed by `PATCH /offers/:id/status` with `issued` — there is no
+special create payload.
 
-**Money** (`src/lib/calculations`, `src/features/offers/calculations.ts`; amounts rounded to 2 dp):
+Frontend statuses are `draft`, `issued`, `accepted` and `rejected`. The normal flow is
+`Draft → Issued → Accepted | Rejected`; the backend also documents `Cancelled`. Deleting or revising
+affects the whole version chain. **New version** opens `/offers/new?from=<id>` and prefills
+`version + 1` with `parentOfferId`; `VersionHistory` lists versions newest first.
+
+### Reference numbers
+
+`{Loc|Int}/{0000 sequence}-{issue year}/YL/{initials}`, for example `Loc/0042-2026/YL/JD`.
+The reference is never typed: offer type, global sequence, issue date and the user's initials build
+it, and changing the type or date rewrites the relevant segments. The sequence is suggested by the
+server; only the very first offer shows an input for choosing the starting number. Legacy references
+without a year are still read for their sequence. See `src/lib/calculations/reference.ts`.
+
+### Money and dates
+
+Amounts are rounded to two decimals. The frontend rules in `src/lib/calculations` and
+`src/features/offers/calculations.ts` are:
 
 ```text
-lineQuantityKg = weightPerPackageKg × packages      // a material may mix packaging rows
-lineAmount     = lineQuantityKg × ratePerKg × (1 - lineDiscountPercent/100)
+lineQuantityKg = Σ (packages × weightPerPackageKg)   // a line may mix packaging types
+lineAmount     = lineQuantityKg × ratePerKg × (1 - lineDiscountPercent / 100)
 subtotal       = Σ lineAmount
 netBeforeTax   = subtotal - orderDiscount + extraExpenses
-taxAmount      = netBeforeTax × taxPercent / 100    // added
-otherTaxAmount = netBeforeTax × 1 / 100             // fixed 1% deduction when enabled
+taxAmount      = netBeforeTax × taxPercent / 100      // added
+otherTaxAmount = netBeforeTax × 1 / 100               // fixed 1% deduction when enabled
 total          = netBeforeTax + taxAmount - otherTaxAmount
 balanceDue     = total - advancePayment
 dueDate        = issueDate + paymentTerm.days
-expiryDate     = issueDate + validityDays           // 0 hides the validity row
+expiryDate     = issueDate + validityDays             // 0 hides the validity row
 ```
 
-The frontend local maths also has `extraExpenses`, `advancePayment` and `balanceDue`; the backend
-calculator is authoritative for saved offers and does **not** store those three fields. It rounds
-weights to 3 dp, applies discounts at order level (not per line), and clamps delivery allocations to
-the remaining packages of each packaging row. The builder debounces `POST /offers/calculate` by
-250 ms with cancellation and uses the server response for reference/due date and validation
-warnings; local `calculateDraft()` keeps the preview instant.
+The backend calculator is authoritative for saved offers and does **not** store `extraExpenses`,
+`advancePayment` or `balanceDue`. It rounds weights to three decimals, applies discounts at order
+level (not per line), and clamps delivery allocations to the remaining packages of each packaging
+row. The builder debounces `POST /offers/calculate` by 250 ms with cancellation, uses the server
+response for the reference, due date and validation warnings, and keeps local `calculateDraft()`
+for an instant preview.
 
-**Delivery** can be free text or batches. Batches allocate packages per material/packaging row,
-tracking ordered, scheduled and remaining quantities; helpers in `draft.ts` reconcile allocations
-when lines change. **Bank selection** requires at least one account (defaults to the first two
-active on a new draft). **New version** opens `/offers/new?from=<id>` and prefills `version + 1`
-with `parentOfferId`; `VersionHistory` lists versions newest-first.
+### Delivery and banks
+
+Delivery is free text or batches. Batches allocate packages per material/packaging row and track
+ordered, scheduled and remaining quantities; helpers in `draft.ts` reconcile allocations when lines
+change. At least one bank account must be selected; a new draft defaults to the first two active
+accounts.
 
 ---
 
-## 7. The printed offer
+## Printing and languages
 
-`src/pdf/` turns an offer into paginated A4 HTML that is printed by the browser.
+`src/pdf/` turns an offer into paginated A4 HTML printed by the browser.
 
-- `OfferDocument.tsx` renders the document; `buildDocumentData()` / `offerToDocumentSource()` in
-  `features/offers/document.ts` map stored offers (including `document.items` snapshots) into its
-  input. Fixed labels live in `pdf/templates/en.ts` and `ar.ts`, one section component per block in
-  `pdf/sections/`, formatting in `format.ts` and `arabicDigits.ts`.
+- `OfferDocument.tsx` renders the document. `buildDocumentData()` / `offerToDocumentSource()` in
+  `features/offers/document.ts` map stored offers, including `document.items` snapshots, into its
+  input. Fixed labels live in `pdf/templates/en.ts` and `ar.ts`; one component per block lives in
+  `pdf/sections/`; formatting lives in `format.ts` and `arabicDigits.ts`.
 - Page metrics: sheet `210 × 297 mm`, margins `12.7 mm`, content `184.6 × 271.6 mm`. The preview
-  renders a real sheet and scales the **whole sheet** (`OfferDocumentPreview.tsx`,
-  `scale = min(1, availableWidth / 794)`); never scale the document alone.
-- `paginate.ts` splits into pages, clones header/footer, repeats table headings and keeps sub-rows,
+  renders a real sheet and scales the **whole sheet** (`OfferDocumentPreview.tsx`); never scale the
+  document alone.
+- `paginate.ts` splits pages, clones header/footer, repeats table headings and keeps sub-rows,
   totals, delivery/bank tables and terms unbroken.
 - Arabic mirrors English: container `dir="rtl"`, logical CSS properties in `document.css`, Latin
-  values isolated with `.doc-ltr` (`direction: ltr; unicode-bidi: isolate`), and Arabic-Indic digits
-  except inside `[data-latin]`. Do not put `direction: ltr` on a table cell — it flips the meaning
-  of `text-align: end`.
-- **Never call `window.print()` from a page.** Use `usePrintOffer()` from `PrintProvider.tsx`; it
-  renders `OfferDocument` into a `#print-root` portal outside `#root`, then prints. `print.css`
-  hides the workspace and applies `@page { size: A4 portrait; margin: 0 }`.
+  values isolated with `.doc-ltr`, and Arabic-Indic digits except inside `[data-latin]`. Do not put
+  `direction: ltr` on a table cell; it would flip the meaning of `text-align: end`.
+- **Never call `window.print()` from a page.** Use `usePrintOffer()` from `PrintProvider.tsx`: it
+  renders the document into a `#print-root` portal outside `#root`, then prints. `print.css` hides
+  the workspace and applies `@page { size: A4 portrait; margin: 0 }`.
+
+Two unrelated language settings are persisted:
+
+| Setting | Storage | Effect |
+| --- | --- | --- |
+| Workspace language (`src/i18n/`) | `technocom.app-language` | `en` (default) or `ar`; sets `<html lang>` and `dir`, changes the font, selects `en.json` / `ar.json` and switches toast placement. Keys are typed dot-paths derived from `en.json`; missing Arabic keys fall back to English. |
+| Document language (`src/pdf/PdfLanguageProvider.tsx`) | `technocom.pdf-language` | `en` or `ar`; used for new drafts and printing. On the details page the toggle changes only the viewed/printed document, not the saved offer. |
 
 ---
 
-## 8. Languages
+## Repository layout
 
-Two unrelated settings, both persisted:
+```text
+src/
+  main.tsx, index.css      React entrypoint and Tailwind v4 theme/base styles
+  app/                     Router, providers and layout shell
+    App.tsx                API transport registration
+    providers/             Provider composition, live updates
+    router.tsx, navigation.ts, RequirePermission.tsx
+    layout/                Shell, sidebar, top bar, login, headers, footer
+    pages/                 Not found and forbidden screens
+  components/
+    ui/                    Buttons, inputs, dialogs, tables, toasts, skeletons...
+    pickers/               Customer and material search modals
+    PagedTable.tsx         Table with loading/empty/error/pagination states
+  features/
+    offers/                Builder, list, details, calculations, draft mapping, statuses
+    customers/, products/, banks/
+    import/                CSV import wizard and history
+    settings/, account/, users/
+  lib/
+    api/                   Typed client, transport registry, HTTP transport, errors
+    calculations/          Pure offer maths and unit tests
+    cache/, hooks/, live/  Query cache, async helpers, SSE live updates
+    formatters/, import/   Locale formatting and CSV helpers
+  i18n/                    en.json, ar.json, direction handling, provider
+  pdf/                     Printable A4 offer, templates, sections, CSS, pagination, print portal
+  mock/                    In-memory database, transport, seed data and import simulation
+```
 
-- App language (`src/i18n/`): `technocom.app-language`, `en` (default) or `ar`. Sets `<html lang>`
-  and `dir`, changes the font, selects `en.json`/`ar.json`, and switches toast placement. Keys are
-  typed dot-paths derived from `en.json`; missing Arabic keys fall back to English.
-- Document language (`src/pdf/PdfLanguageProvider.tsx`): `technocom.pdf-language`, `en` or `ar`.
-  Used for new drafts and printing. On the details page, the language toggle changes only the
-  viewed/printed document — it does not rewrite the saved offer.
+Conventions: one component per file, files under roughly 250 lines, default-export components, and
+`@/` as an alias for `src/`. Shared UI belongs in `src/components/ui`; business maths belongs in
+`src/lib/calculations` with unit tests.
 
 ---
 
-## 9. Tests, CI and deployment
+## Tests, CI and deployment
 
 Tests default to the `node` environment; React tests opt into jsdom with a
-`// @vitest-environment jsdom` pragma and seed the mock DB. Good examples:
-`src/lib/calculations/*.test.ts` for maths, `src/features/offers/stepValidation.test.ts` for
-validation tiers, `src/pdf/document.test.tsx` + `paginate.test.ts` + `print.test.tsx` for the
-document, `src/app/roles.test.tsx` for permissions, `src/lib/cache/queryCache.test.ts` for caching.
+`// @vitest-environment jsdom` pragma. Useful examples: `src/lib/calculations/*.test.ts` for maths,
+`src/features/offers/stepValidation.test.ts` for validation tiers, `src/pdf/*.test.*` for the
+document, `src/app/roles.test.tsx` for permissions and `src/lib/cache/queryCache.test.ts` for
+caching.
 
-`.github/workflows/deploy-frontend.yml` runs typecheck, tests and a production build on PRs and
-pushes. On `master`/`main` it bumps `package.json` (minor for `feat/*`/`feature/*` branches, patch
-otherwise, with a `[skip ci]` commit) and deploys the prebuilt app to Vercel. Runs for the same ref
-are queued, never cancelled. `vercel.json` rewrites all paths to `/index.html` (SPA routing) and
-disables Git deployments; the footer displays the version from `package.json`.
+Documentation is versioned with the code, so review README changes like source changes. Add
+markdownlint and prose linting (Vale or alex) to CI to catch broken style and link regressions
+before merge.
 
-Environment variables: `VITE_API_BASE_URL`, `VITE_USE_MOCK`, `VITE_API_MODE` (undocumented in
-`.env.example`), and `PORT` for the dev/preview server. Never commit `.env`.
+[`.github/workflows/deploy-frontend.yml`](.github/workflows/deploy-frontend.yml) runs typecheck,
+tests and a production build on PRs and pushes to `master` / `main`. On `master` / `main` it bumps
+`package.json` (minor for `feat/*` / `feature/*` branches, patch otherwise, with a `[skip ci]`
+commit) and deploys the prebuilt app to Vercel. A manual run can choose `patch`, `minor` or `none`.
+Runs for the same ref are queued, never cancelled. [`vercel.json`](vercel.json) rewrites all paths to
+`/index.html` for SPA routing and disables Git deployments; the footer displays the version from
+`package.json`.
 
 ---
 
-## 10. Common tasks
+## Common changes
 
-- **Add a page:** create the page under `src/features/<area>/pages`, add it to `src/app/router.tsx`,
-  add nav/breadcrumb entries in `src/app/navigation.ts`, and guard it with `RequirePermission` if
-  needed.
+- **Add a page:** create it under `src/features/<area>/pages`, add it to `src/app/router.tsx`, add
+  navigation and breadcrumb entries in `src/app/navigation.ts`, and guard it with
+  `RequirePermission` if needed.
 - **Add an API call:** put it in that feature's `api.ts` using `api` from `src/lib/api/client.ts`,
   invalidate the right cache tags, and add a mock route if mock mode should support it.
 - **Change a calculation:** edit `src/lib/calculations/*` or `src/features/offers/calculations.ts`
   and add a unit test. Keep the backend calculator (`OfferCalculator.cs`) in sync.
-- **Change printed text/layout:** edit `pdf/templates/*`, `pdf/sections/*` or `document.css`; use
-  logical properties and run `pnpm test`.
+- **Change printed text or layout:** edit `pdf/templates/*`, `pdf/sections/*` or `document.css`;
+  use logical properties and run `pnpm test`.
 - **Add UI copy:** add the key to both `src/i18n/en.json` and `ar.json`; `TranslationKey` is
   generated from `en.json`.
 - **Switch to the real backend:** copy `.env.example` to `.env`, set `VITE_API_BASE_URL` to the
-  backend `/api` URL and `VITE_USE_MOCK=false`; no feature module changes needed.
+  backend `/api` URL and `VITE_USE_MOCK=false`; no feature module changes are needed.
 
 ---
 
-## 11. Current state and gotchas
+## Current state and gotchas
 
-Phases 1 and 2 (shell, calculations, mock API, offer builder, printed document) are complete.
-`Customers`, `Products`, `Banks`, `Import` and `Users` screens are implemented; `/settings` and
-`/account` are still `PhasePlaceholder` screens. Side-by-side document comparison and final polish
-are future phases — see `PHASES.md`.
+Phases 1 and 2 (shell, calculations, mock API, offer builder, printed document) are complete, as are
+the Customers, Products, Banks, Import and Users screens. `/settings` and `/account` still show
+`PhasePlaceholder`; side-by-side document comparison and final polish are future phases in
+[Phase.md](Phase.md).
 
 Things that surprise new developers:
 
@@ -327,17 +364,19 @@ Things that surprise new developers:
   `serialNumber`.
 - Save-as-draft is deliberately weaker than issuing; issuing is create + status patch.
 - The details-page language toggle is view-only; PDF language and app language are separate.
-- The mock lacks server calculation, revise/update and lookup endpoints; those only work against
-  the backend. The unused flat `mock/fixtures/calculate.response.json` is legacy.
+- The mock lacks server calculation, revise/update and lookup endpoints. The unused
+  `mock/fixtures/calculate.response.json` is legacy.
 - React tests need the jsdom pragma; `vite.config.ts` defaults to `node`.
-- Deleting a customer/product/offer removes its whole offer chain in the mock.
+- Deleting a customer, product or offer removes its whole offer chain in the mock.
 
 ---
 
 ## Further reading
 
-- `AGENTS.md` — agent rules, canonical structure and business invariants.
-- `srs.md` — original requirements, database schema and printed layout reference (spec, not current code).
-- `PHASES.md` — delivery phases and what remains.
-- `CHANGELOG.md` — shipped features and fixes.
-- `../backend/Sales Portal/docs/API.md` — authoritative backend endpoints, DTOs and offer rules.
+- [AGENTS.md](AGENTS.md) — agent rules, canonical structure and business invariants.
+- [srs.md](srs.md) — original requirements, database schema and printed layout reference (spec,
+  not current code).
+- [Phase.md](Phase.md) — delivery phases and what remains.
+- [CHANGELOG.md](CHANGELOG.md) — shipped features and fixes.
+- [Backend API reference](../backend/Sales%20Portal/docs/API.md) — authoritative endpoints, DTOs
+  and offer rules.
