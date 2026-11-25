@@ -1,17 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
-
 import Button from "../../../../components/ui/Button"
 import Card from "../../../../components/ui/Card"
 import Icon from "../../../../components/ui/Icon"
 import { useToast } from "../../../../components/ui/ToastProvider"
 import { useTranslation } from "../../../../i18n/I18nProvider"
 import { ApiError } from "../../../../lib/api/types"
-import {
-  findPaymentTerm,
-  nextPaymentTermsText,
-  paymentTermLabel,
-} from "../../paymentTerm"
+import { findPaymentTerm, nextPaymentTermsText, paymentTermLabel } from "../../paymentTerm"
 import { settingsApi } from "../../../settings/api"
 import { usePdfLanguage } from "../../../../pdf/PdfLanguageProvider"
 import { usePrintOffer } from "../../../../pdf/PrintProvider"
@@ -23,12 +18,7 @@ import { useOfferBuilder } from "../../hooks/useOfferBuilder"
 import type { AccountUser } from "../../../account/api"
 import type { PaymentTerm } from "../../../settings/types"
 import type { BuilderCatalog } from "../../hooks/useBuilderCatalog"
-import {
-  furthestOpenStep,
-  SUMMARY_FIELD,
-  validateAllSteps,
-  type StepValidationContext,
-} from "../../stepValidation"
+import { furthestOpenStep, SUMMARY_FIELD, validateAllSteps, type StepValidationContext} from "../../stepValidation"
 import type { OfferStatus } from "../../types"
 import type { OfferDraft } from "../../types"
 import BankAccountsStep from "./BankAccountsStep"
