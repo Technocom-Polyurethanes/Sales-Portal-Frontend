@@ -321,6 +321,21 @@ export default function OfferDetailsPage() {
               </div>
             </dl>
 
+            {documentData?.totalInWords ? (
+              <dl className="mb-4 rounded-md border border-line-soft bg-page/50 p-4 text-sm">
+                <dt className="text-xs text-muted">
+                  {t("common.amountInWords")}
+                </dt>
+                <dd
+                  lang={documentLanguage}
+                  dir={documentLanguage === "ar" ? "rtl" : "ltr"}
+                  className="[overflow-wrap:anywhere] font-medium text-ink"
+                >
+                  {documentData.totalInWords}
+                </dd>
+              </dl>
+            ) : null}
+
             <dl
               aria-label={t("offers.list.createdBy")}
               className="mb-4 grid gap-3 rounded-md border border-line-soft bg-page/50 p-4 text-sm sm:grid-cols-2"
