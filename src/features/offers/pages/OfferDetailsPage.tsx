@@ -326,15 +326,11 @@ export default function OfferDetailsPage() {
                 <dt className="text-xs text-muted">
                   {t("common.amountInWords")}
                 </dt>
-<<<<<<< HEAD
                 <dd
                   lang={documentLanguage}
                   dir={documentLanguage === "ar" ? "rtl" : "ltr"}
                   className="[overflow-wrap:anywhere] font-medium text-ink"
                 >
-=======
-                <dd className="[overflow-wrap:anywhere] font-medium text-ink">
->>>>>>> f5980e63d092efaa11e184b56660762b7fbd60b1
                   {documentData.totalInWords}
                 </dd>
               </dl>

@@ -45,11 +45,7 @@ function arabicAmount(major: number, minor: number, code: string): string {
       arabicCurrencyPhrase(
         minor,
         definition.arMinor,
-<<<<<<< HEAD
         definition.arMinorFeminine ?? definition.arFeminine,
-=======
-        definition.arFeminine,
->>>>>>> f5980e63d092efaa11e184b56660762b7fbd60b1
       ),
     )
   }
