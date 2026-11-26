@@ -68,14 +68,20 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState(false)
   const [retryToken, setRetryToken] = useState(0)
   const itemsRef = useRef(items)
+  const unreadCountRef = useRef(unreadCount)
   const knownIdsRef = useRef(new Set<string>())
   const arrivalIdsRef = useRef<string[]>([])
   const readsRef = useRef(0)
+  const pendingWritesRef = useRef(new Set<Promise<unknown>>())
 
   useEffect(() => {
     itemsRef.current = items
     knownIdsRef.current = new Set(items.map((item) => item.id))
   }, [items])
+
+  useEffect(() => {
+    unreadCountRef.current = unreadCount
+  }, [unreadCount])
 
   const markAsRead = useCallback(
     async (id: string) => {
@@ -91,8 +97,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       setItems(optimistic)
       setUnreadCount((count) => Math.max(0, count - 1))
 
+      const write = notificationsApi.markRead(id)
+      pendingWritesRef.current.add(write)
       try {
-        await notificationsApi.markRead(id)
+        await write
       } catch {
         // Revert only this row: a notification may have arrived while the request was in flight.
         const reverted = itemsRef.current.map((item) =>
@@ -103,6 +111,8 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         setItems(reverted)
         setUnreadCount((count) => count + 1)
         notify(t("notifications.writeFailed"), "error")
+      } finally {
+        pendingWritesRef.current.delete(write)
       }
     },
     [notify, t],
@@ -112,6 +122,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     const changedIds = new Set(
       itemsRef.current.filter((item) => !item.readAt).map((item) => item.id),
     )
+    const countBefore = unreadCountRef.current
     readsRef.current += changedIds.size
 
     const stamp = new Date().toISOString()
@@ -123,8 +134,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     setItems(optimistic)
     setUnreadCount(0)
 
+    const write = notificationsApi.markAllRead()
+    pendingWritesRef.current.add(write)
     try {
-      await notificationsApi.markAllRead()
+      await write
     } catch {
       const reverted = itemsRef.current.map((item) =>
         changedIds.has(item.id) ? { ...item, readAt: null } : item,
@@ -132,8 +145,11 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       itemsRef.current = reverted
       readsRef.current -= changedIds.size
       setItems(reverted)
-      setUnreadCount((count) => count + changedIds.size)
+      // The server count may include unread rows outside the loaded page.
+      setUnreadCount((count) => count + countBefore)
       notify(t("notifications.writeFailed"), "error")
+    } finally {
+      pendingWritesRef.current.delete(write)
     }
   }, [notify, t])
 
@@ -153,6 +169,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     let active = true
 
     const load = async () => {
+      const pendingWrites = [...pendingWritesRef.current]
+      if (pendingWrites.length > 0) await Promise.allSettled(pendingWrites)
+      if (!active) return
+
       const arrivalsAtStart = arrivalIdsRef.current.length
       const readsAtStart = readsRef.current
       setLoading(itemsRef.current.length === 0)

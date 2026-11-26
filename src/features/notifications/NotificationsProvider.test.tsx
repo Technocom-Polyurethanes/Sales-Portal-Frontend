@@ -178,6 +178,59 @@ describe("NotificationsProvider", () => {
     )
   })
 
+  it("restores the full unread count when mark-all fails", async () => {
+    mocks.list.mockResolvedValue(
+      page([notification("n1"), notification("n2")], 35),
+    )
+    await renderProvider()
+    expect(view!.unreadCount).toBe(35)
+
+    mocks.markAllRead.mockRejectedValueOnce(new Error("offline"))
+    await act(async () => view!.markAllRead())
+
+    expect(view!.unreadCount).toBe(35)
+    expect(view!.items.every((item) => item.readAt === null)).toBe(true)
+  })
+
+  it("waits for an in-flight read before resyncing", async () => {
+    mocks.list.mockResolvedValue(
+      page([notification("n1"), notification("n2")], 2),
+    )
+    await renderProvider()
+    expect(view!.unreadCount).toBe(2)
+
+    let resolveRead: () => void
+    mocks.markRead.mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        resolveRead = resolve
+      }),
+    )
+    let read: Promise<void>
+    await act(async () => {
+      read = view!.markAsRead("n1")
+    })
+    expect(view!.unreadCount).toBe(1)
+
+    const onReady = mocks.onReady.mock.calls[0][0]
+    await act(async () => onReady())
+    expect(mocks.list).toHaveBeenCalledTimes(1)
+
+    mocks.list.mockResolvedValue(
+      page(
+        [notification("n1", new Date().toISOString()), notification("n2")],
+        1,
+      ),
+    )
+    await act(async () => {
+      resolveRead()
+      await read
+    })
+    await settle()
+
+    expect(mocks.list).toHaveBeenCalledTimes(2)
+    expect(view!.unreadCount).toBe(1)
+  })
+
   it("reports a failed load and reloads on retry", async () => {
     mocks.list.mockRejectedValueOnce(new Error("offline"))
     await renderProvider()
