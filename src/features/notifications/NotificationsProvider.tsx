@@ -40,7 +40,16 @@ function mergeItems(
   incoming: Notification[],
 ): Notification[] {
   const byId = new Map(current.map((item) => [item.id, item]))
-  for (const item of incoming) byId.set(item.id, item)
+  for (const item of incoming) {
+    const existing = byId.get(item.id)
+    // A stale page response must not undo a read the user just made locally.
+    byId.set(
+      item.id,
+      existing?.readAt && !item.readAt
+        ? { ...item, readAt: existing.readAt }
+        : item,
+    )
+  }
   return [...byId.values()].sort(
     (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt),
   )
@@ -60,7 +69,8 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [retryToken, setRetryToken] = useState(0)
   const itemsRef = useRef(items)
   const knownIdsRef = useRef(new Set<string>())
-  const revisionRef = useRef(0)
+  const arrivalsRef = useRef(0)
+  const readsRef = useRef(0)
 
   useEffect(() => {
     itemsRef.current = items
@@ -71,7 +81,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     async (id: string) => {
       const previous = itemsRef.current.find((item) => item.id === id)
       if (!previous || previous.readAt) return
-      revisionRef.current += 1
+      readsRef.current += 1
 
       const stamp = new Date().toISOString()
       const optimistic = itemsRef.current.map((item) =>
@@ -89,6 +99,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
           item.id === id ? { ...item, readAt: previous.readAt } : item,
         )
         itemsRef.current = reverted
+        readsRef.current -= 1
         setItems(reverted)
         setUnreadCount((count) => count + 1)
         notify(t("notifications.writeFailed"), "error")
@@ -101,7 +112,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     const changedIds = new Set(
       itemsRef.current.filter((item) => !item.readAt).map((item) => item.id),
     )
-    revisionRef.current += 1
+    readsRef.current += changedIds.size
 
     const stamp = new Date().toISOString()
     const optimistic = itemsRef.current.map((item) => ({
@@ -119,6 +130,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         changedIds.has(item.id) ? { ...item, readAt: null } : item,
       )
       itemsRef.current = reverted
+      readsRef.current -= changedIds.size
       setItems(reverted)
       setUnreadCount((count) => count + changedIds.size)
       notify(t("notifications.writeFailed"), "error")
@@ -141,7 +153,8 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     let active = true
 
     const load = async () => {
-      const revision = revisionRef.current
+      const arrivalsAtStart = arrivalsRef.current
+      const readsAtStart = readsRef.current
       setLoading(itemsRef.current.length === 0)
       try {
         const [page, count] = await Promise.all([
@@ -150,8 +163,16 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         ])
         if (!active) return
         setItems((current) => mergeItems(current, page.items))
-        // A live arrival or a read during the request already updated the badge; don't undo it.
-        if (revisionRef.current === revision) setUnreadCount(count.unreadCount)
+        // The server count predates live arrivals; a local read already updated the badge and
+        // may not have committed when the count was fetched, so leave those to the optimistic path.
+        if (readsRef.current === readsAtStart) {
+          setUnreadCount(
+            Math.max(
+              0,
+              count.unreadCount + arrivalsRef.current - arrivalsAtStart,
+            ),
+          )
+        }
         setError(false)
       } catch {
         if (active) setError(true)
@@ -171,7 +192,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         if (!isNotification(incoming) || knownIdsRef.current.has(incoming.id))
           return
         knownIdsRef.current.add(incoming.id)
-        revisionRef.current += 1
+        arrivalsRef.current += 1
 
         setItems((current) => [
           incoming,

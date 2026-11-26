@@ -206,11 +206,40 @@ describe("NotificationsProvider", () => {
     const onNotification = mocks.subscribeNotifications.mock.calls[0][0]
     await act(async () => onNotification(notification("n1")))
     await act(async () => {
-      resolveCount({ unreadCount: 0 })
+      resolveCount({ unreadCount: 5 })
       await Promise.resolve()
     })
 
-    expect(view!.unreadCount).toBe(1)
+    expect(view!.unreadCount).toBe(6)
+  })
+
+  it("does not let a stale resync restore read rows or their count", async () => {
+    mocks.list.mockResolvedValue(
+      page([notification("n1"), notification("n2")], 2),
+    )
+    mocks.unreadCount.mockResolvedValue({ unreadCount: 2 })
+    await renderProvider()
+    expect(view!.items).toHaveLength(2)
+
+    let resolveCount: (value: { unreadCount: number }) => void
+    mocks.unreadCount.mockReturnValueOnce(
+      new Promise<{ unreadCount: number }>((resolve) => {
+        resolveCount = resolve
+      }),
+    )
+    const onReady = mocks.onReady.mock.calls[0][0]
+    await act(async () => onReady())
+
+    await act(async () => view!.markAllRead())
+    expect(view!.unreadCount).toBe(0)
+
+    await act(async () => {
+      resolveCount({ unreadCount: 2 })
+      await Promise.resolve()
+    })
+
+    expect(view!.unreadCount).toBe(0)
+    expect(view!.items.every((item) => item.readAt !== null)).toBe(true)
   })
 
   it("marks the whole inbox read", async () => {
