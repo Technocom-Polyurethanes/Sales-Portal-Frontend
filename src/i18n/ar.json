@@ -611,5 +611,76 @@
       "Sales": "ينشئ العروض. يعرض وينشئ العملاء والخامات والحسابات البنكية.",
       "Accountant": "يستخدم استيراد البيانات والكتالوج. العروض للقراءة فقط."
     }
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "empty": "لا توجد إشعارات جديدة.",
+    "markAllRead": "تعليم الكل كمقروء",
+    "markRead": "تعليم كمقروء",
+    "unread": "{count} غير مقروء",
+    "time": {
+      "justNow": "الآن",
+      "minutesAgo": "منذ {count} دقيقة",
+      "hoursAgo": "منذ {count} ساعة",
+      "daysAgo": "منذ {count} يوم"
+    },
+    "types": {
+      "offerCreated": {
+        "title": "عرض جديد",
+        "description": "أنشأ {actorName} العرض {entityLabel}."
+      },
+      "offerRevised": {
+        "title": "تعديل عرض",
+        "description": "عدّل {actorName} العرض {entityLabel}."
+      },
+      "offerStatusChanged": {
+        "title": "تغيير حالة العرض",
+        "description": "غيّر {actorName} حالة العرض {entityLabel} من {from} إلى {to}."
+      },
+      "offerDeleted": {
+        "title": "حذف عرض",
+        "description": "حذف {actorName} العرض {entityLabel}."
+      },
+      "customerCreated": {
+        "title": "عميل جديد",
+        "description": "أضاف {actorName} العميل {entityLabel}."
+      },
+      "customerDeleted": {
+        "title": "حذف عميل",
+        "description": "حذف {actorName} العميل {entityLabel}."
+      },
+      "materialCreated": {
+        "title": "خامة جديدة",
+        "description": "أضاف {actorName} الخامة {entityLabel}."
+      },
+      "materialDeleted": {
+        "title": "حذف خامة",
+        "description": "حذف {actorName} الخامة {entityLabel}."
+      },
+      "bankCreated": {
+        "title": "حساب بنكي جديد",
+        "description": "أضاف {actorName} الحساب البنكي {entityLabel}."
+      },
+      "bankDeleted": {
+        "title": "حذف حساب بنكي",
+        "description": "حذف {actorName} الحساب البنكي {entityLabel}."
+      },
+      "importCommitted": {
+        "title": "اكتمل الاستيراد",
+        "description": "استورد {actorName} {customers} عميلًا و{materials} خامة و{banks} حسابًا بنكيًا."
+      },
+      "userCreated": {
+        "title": "مستخدم جديد",
+        "description": "أضاف {actorName} المستخدم {entityLabel} بدور {role}."
+      },
+      "userDeactivated": {
+        "title": "إيقاف مستخدم",
+        "description": "أوقف {actorName} المستخدم {entityLabel}."
+      },
+      "userRoleChanged": {
+        "title": "تغيير دور مستخدم",
+        "description": "غيّر {actorName} دور المستخدم {entityLabel} من {from} إلى {to}."
+      }
+    }
   }
 }

@@ -8,8 +8,15 @@ import type { AppLanguage } from "../../i18n/direction"
 
 export type ToastTone = "success" | "info" | "warning" | "error"
 
+export type ToastAction = { label: string; onClick: () => void }
+
 type ToastContextValue = {
-  notify: (message: string, tone?: ToastTone, description?: string) => void
+  notify: (
+    message: string,
+    tone?: ToastTone,
+    description?: string,
+    action?: ToastAction,
+  ) => void
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null)
@@ -24,8 +31,20 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const position = toastPosition(language)
 
   const notify = useCallback(
-    (message: string, tone: ToastTone = "success", description?: string) => {
-      sileo[tone]({ title: message, description, position })
+    (
+      message: string,
+      tone: ToastTone = "success",
+      description?: string,
+      action?: ToastAction,
+    ) => {
+      sileo[tone]({
+        title: message,
+        description,
+        position,
+        button: action
+          ? { title: action.label, onClick: action.onClick }
+          : undefined,
+      })
     },
     [position],
   )
