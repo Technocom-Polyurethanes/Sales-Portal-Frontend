@@ -17,6 +17,22 @@ export type LiveStatus = "idle" | "connecting" | "live" | "offline" | "unsupport
 
 export type LiveListener = (topics: LiveTopic[]) => void
 
+/** The notification DTO sent in `event: notification` data. */
+export type LiveNotification = {
+  id: string
+  type: string
+  actorName: string
+  entityType: string
+  entityId: string | null
+  entityLabel: string
+  meta: Record<string, unknown>
+  createdAt: string
+  readAt: string | null
+}
+
+export type NotificationListener = (notification: LiveNotification) => void
+export type ReadyListener = () => void
+
 export type LiveClientOptions = {
   /** Opens the stream. Resolves once the response headers are in; rejects on a network failure. */
   connect: (signal: AbortSignal) => Promise<LiveConnection>
@@ -38,6 +54,10 @@ export type LiveClient = {
   stop: () => void
   /** Calls `listener` (with the topics that matched) when any of `topics` changed. */
   subscribe: (topics: readonly LiveTopic[], listener: LiveListener) => () => void
+  /** Calls `listener` for every `event: notification`, even while the tab is hidden. */
+  subscribeNotifications: (listener: NotificationListener) => () => void
+  /** Calls `listener` on the first connect and on every reconnect. */
+  onReady: (listener: ReadyListener) => () => void
   getStatus: () => LiveStatus
 }
 
@@ -57,6 +77,8 @@ export function createLiveClient(options: LiveClientOptions): LiveClient {
 
   type Subscriber = { topics: ReadonlySet<LiveTopic>; listener: LiveListener }
   const subscribers = new Set<Subscriber>()
+  const notificationListeners = new Set<NotificationListener>()
+  const readyListeners = new Set<ReadyListener>()
   const pending = new Set<LiveTopic>()
 
   let running = false
@@ -111,14 +133,62 @@ export function createLiveClient(options: LiveClientOptions): LiveClient {
     flushTimer ??= setTimeout(flush, debounceMs)
   }
 
+  function parseNotification(data: string): LiveNotification | undefined {
+    try {
+      const parsed: unknown = JSON.parse(data)
+      if (!parsed || typeof parsed !== "object") return undefined
+      const value = parsed as Record<string, unknown>
+      if (typeof value.id !== "string" || typeof value.type !== "string") return undefined
+
+      const meta =
+        value.meta && typeof value.meta === "object" && !Array.isArray(value.meta)
+          ? (value.meta as Record<string, unknown>)
+          : {}
+
+      return {
+        id: value.id,
+        type: value.type,
+        actorName: typeof value.actorName === "string" ? value.actorName : "",
+        entityType: typeof value.entityType === "string" ? value.entityType : "",
+        entityId: typeof value.entityId === "string" ? value.entityId : null,
+        entityLabel: typeof value.entityLabel === "string" ? value.entityLabel : "",
+        meta,
+        createdAt: typeof value.createdAt === "string" ? value.createdAt : "",
+        readAt: typeof value.readAt === "string" ? value.readAt : null,
+      }
+    } catch {
+      return undefined
+    }
+  }
+
   function handleMessage(message: SseMessage) {
     if (message.event === "ready") {
       attempt = 0
       stopPolling()
       setStatus("live")
+      for (const listener of [...readyListeners]) {
+        try {
+          listener()
+        } catch {
+          // One screen failing to resync must not stop the others.
+        }
+      }
       if (needsSync) {
         needsSync = false
         announce(LIVE_TOPICS)
+      }
+      return
+    }
+
+    if (message.event === "notification") {
+      const notification = parseNotification(message.data)
+      if (!notification) return
+      for (const listener of [...notificationListeners]) {
+        try {
+          listener(notification)
+        } catch {
+          // One screen failing to show a toast must not stop the others.
+        }
       }
       return
     }
@@ -297,6 +367,20 @@ export function createLiveClient(options: LiveClientOptions): LiveClient {
       subscribers.add(subscriber)
       return () => {
         subscribers.delete(subscriber)
+      }
+    },
+
+    subscribeNotifications(listener) {
+      notificationListeners.add(listener)
+      return () => {
+        notificationListeners.delete(listener)
+      }
+    },
+
+    onReady(listener) {
+      readyListeners.add(listener)
+      return () => {
+        readyListeners.delete(listener)
       }
     },
 

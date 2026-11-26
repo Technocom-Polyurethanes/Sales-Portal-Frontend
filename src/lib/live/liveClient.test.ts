@@ -23,6 +23,18 @@ function fakeStream() {
 const ready = "event: ready\ndata: {}\n\n"
 const change = (...topics: string[]) =>
   `event: change\ndata: ${JSON.stringify({ topics })}\n\n`
+const notification = {
+  id: "11111111-1111-4111-8111-111111111111",
+  type: "offer.created",
+  actorName: "Youssef Labib",
+  entityType: "offer",
+  entityId: "22222222-2222-4222-8222-222222222222",
+  entityLabel: "Loc/0378-2026/YL/AA",
+  meta: {},
+  createdAt: "2026-11-26T09:15:00Z",
+  readAt: null,
+}
+const notified = `event: notification\ndata: ${JSON.stringify(notification)}\n\n`
 
 /** Lets promise callbacks (stream reads) run without moving the fake clock. */
 const settle = async () => {
@@ -168,6 +180,53 @@ describe("live client", () => {
 
     setVisibility("visible")
     expect(listener).toHaveBeenCalledWith(["offers"])
+    client.stop()
+  })
+
+  it("delivers notifications immediately, even while the tab is hidden", async () => {
+    const { client, streams } = await open()
+    const listener = vi.fn()
+    client.subscribeNotifications(listener)
+
+    setVisibility("hidden")
+    streams[0].send(notified)
+    await settle()
+
+    expect(listener).toHaveBeenCalledTimes(1)
+    expect(listener).toHaveBeenCalledWith(notification)
+    client.stop()
+  })
+
+  it("ignores malformed notifications", async () => {
+    const { client, streams } = await open()
+    const listener = vi.fn()
+    client.subscribeNotifications(listener)
+
+    streams[0].send("event: notification\ndata: not json\n\n")
+    streams[0].send('event: notification\ndata: {"id":"x"}\n\n')
+    await settle()
+
+    expect(listener).not.toHaveBeenCalled()
+    client.stop()
+  })
+
+  it("fires ready listeners on the first connect and on every reconnect", async () => {
+    const { client, streams } = setup()
+    const onReady = vi.fn()
+    client.onReady(onReady)
+
+    client.start()
+    await settle()
+    streams[0].send(ready)
+    await settle()
+    expect(onReady).toHaveBeenCalledTimes(1)
+
+    streams[0].end()
+    await settle()
+    await vi.advanceTimersByTimeAsync(1_000)
+    streams[1].send(ready)
+    await settle()
+    expect(onReady).toHaveBeenCalledTimes(2)
     client.stop()
   })
 

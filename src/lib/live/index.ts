@@ -2,7 +2,7 @@ import { buildApiUrl, readAuthToken } from "../api/transport"
 import { createLiveClient } from "./liveClient"
 
 export { createLiveClient } from "./liveClient"
-export type { LiveClient, LiveStatus } from "./liveClient"
+export type { LiveClient, LiveNotification, LiveStatus } from "./liveClient"
 export { LIVE_TOPICS, type LiveTopic } from "./topics"
 
 /**
