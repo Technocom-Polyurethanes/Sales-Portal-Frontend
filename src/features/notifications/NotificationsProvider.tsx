@@ -33,7 +33,10 @@ export type NotificationsValue = {
 
 const NotificationsContext = createContext<NotificationsValue | null>(null)
 
-function mergeItems(current: Notification[], incoming: Notification[]): Notification[] {
+function mergeItems(
+  current: Notification[],
+  incoming: Notification[],
+): Notification[] {
   const byId = new Map(current.map((item) => [item.id, item]))
   for (const item of incoming) byId.set(item.id, item)
   return [...byId.values()].sort(
@@ -87,7 +90,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     if (previous.every((item) => item.readAt)) return
 
     const stamp = new Date().toISOString()
-    const optimistic = previous.map((item) => ({ ...item, readAt: item.readAt ?? stamp }))
+    const optimistic = previous.map((item) => ({
+      ...item,
+      readAt: item.readAt ?? stamp,
+    }))
     itemsRef.current = optimistic
     setItems(optimistic)
     setUnreadCount(0)
@@ -138,30 +144,36 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       void load()
     })
 
-    const stopNotification = live.subscribeNotifications((incoming: LiveNotification) => {
-      if (!isNotification(incoming) || knownIdsRef.current.has(incoming.id)) return
-      knownIdsRef.current.add(incoming.id)
+    const stopNotification = live.subscribeNotifications(
+      (incoming: LiveNotification) => {
+        if (!isNotification(incoming) || knownIdsRef.current.has(incoming.id))
+          return
+        knownIdsRef.current.add(incoming.id)
 
-      setItems((current) => [incoming, ...current.filter((item) => item.id !== incoming.id)])
-      setUnreadCount((count) => count + 1)
+        setItems((current) => [
+          incoming,
+          ...current.filter((item) => item.id !== incoming.id),
+        ])
+        setUnreadCount((count) => count + 1)
 
-      const formatted = formatNotification(incoming, t, locale)
-      const description = `${formatted.description} · ${formatted.time}`
-      notify(
-        formatted.title,
-        "info",
-        description,
-        formatted.route
-          ? {
-              label: t("notifications.markRead"),
-              onClick: () => {
-                void markAsRead(incoming.id)
-                navigate(formatted.route!)
-              },
-            }
-          : undefined,
-      )
-    })
+        const formatted = formatNotification(incoming, t, locale)
+        const description = `${formatted.description} · ${formatted.time}`
+        notify(
+          formatted.title,
+          "info",
+          description,
+          formatted.route
+            ? {
+                label: t("notifications.markRead"),
+                onClick: () => {
+                  void markAsRead(incoming.id)
+                  navigate(formatted.route!)
+                },
+              }
+            : undefined,
+        )
+      },
+    )
 
     return () => {
       active = false
@@ -185,6 +197,8 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
 export function useNotifications(): NotificationsValue {
   const context = useContext(NotificationsContext)
   if (!context)
-    throw new Error("useNotifications must be used inside <NotificationsProvider>")
+    throw new Error(
+      "useNotifications must be used inside <NotificationsProvider>",
+    )
   return context
 }

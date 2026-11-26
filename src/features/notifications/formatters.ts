@@ -13,10 +13,10 @@ export type FormattedNotification = {
   clickable: boolean
 }
 
-const TYPE_KEYS: Record<
-  NotificationType,
-  { title: TranslationKey; description: TranslationKey }
-> = {
+const TYPE_KEYS: Record<NotificationType, {
+  title: TranslationKey
+  description: TranslationKey
+}> = {
   "offer.created": {
     title: "notifications.types.offerCreated.title",
     description: "notifications.types.offerCreated.description",
@@ -88,7 +88,8 @@ export function formatRelativeTime(
   if (seconds < 60) return t("notifications.time.justNow")
 
   const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return t("notifications.time.minutesAgo", { count: minutes })
+  if (minutes < 60)
+    return t("notifications.time.minutesAgo", { count: minutes })
 
   const hours = Math.floor(minutes / 60)
   if (hours < 24) return t("notifications.time.hoursAgo", { count: hours })
@@ -103,7 +104,9 @@ function routeFor(notification: Notification): string | undefined {
     case "offer.created":
     case "offer.revised":
     case "offer.status_changed":
-      return notification.entityId ? `/offers/${notification.entityId}` : "/offers"
+      return notification.entityId
+        ? `/offers/${notification.entityId}`
+        : "/offers"
     case "customer.created":
       return notification.entityId
         ? `/customers/${notification.entityId}`

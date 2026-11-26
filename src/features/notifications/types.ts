@@ -18,7 +18,7 @@ export const NOTIFICATION_TYPES = [
   "user.role_changed",
 ] as const
 
-export type NotificationType = (typeof NOTIFICATION_TYPES)[number]
+export type NotificationType = typeof NOTIFICATION_TYPES[number]
 
 export type Notification = Omit<LiveNotification, "type"> & {
   type: NotificationType

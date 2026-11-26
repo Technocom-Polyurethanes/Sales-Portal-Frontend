@@ -150,7 +150,11 @@ export default function NotificationBell() {
                         )}
                         <span className="min-w-0 flex-1">
                           <span
-                            className={`block truncate text-sm ${item.readAt ? "font-normal text-muted" : "font-semibold text-ink"}`}
+                            className={`block truncate text-sm ${
+                              item.readAt
+                                ? "font-normal text-muted"
+                                : "font-semibold text-ink"
+                            }`}
                           >
                             {title}
                           </span>
