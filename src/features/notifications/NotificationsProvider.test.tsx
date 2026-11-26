@@ -185,7 +185,6 @@ describe("NotificationsProvider", () => {
     expect(view!.items).toEqual([])
 
     mocks.list.mockResolvedValue(page([notification("n1")], 1))
-    mocks.unreadCount.mockResolvedValue({ unreadCount: 1 })
     await act(async () => view!.retry())
     await settle()
 
@@ -194,11 +193,33 @@ describe("NotificationsProvider", () => {
     expect(view!.unreadCount).toBe(1)
   })
 
-  it("keeps a live unread count when a stale resync finishes", async () => {
-    let resolveCount: (value: { unreadCount: number }) => void
-    mocks.unreadCount.mockReturnValue(
-      new Promise<{ unreadCount: number }>((resolve) => {
-        resolveCount = resolve
+  it("does not double-count an arrival already in the page snapshot", async () => {
+    let resolvePage: (value: ReturnType<typeof page>) => void
+    mocks.list.mockReturnValue(
+      new Promise<ReturnType<typeof page>>((resolve) => {
+        resolvePage = resolve
+      }),
+    )
+    await renderProvider()
+
+    const onNotification = mocks.subscribeNotifications.mock.calls[0][0]
+    await act(async () => onNotification(notification("n1")))
+    expect(view!.unreadCount).toBe(1)
+
+    await act(async () => {
+      resolvePage(page([notification("n1")], 5))
+      await Promise.resolve()
+    })
+
+    expect(view!.unreadCount).toBe(5)
+    expect(view!.items).toHaveLength(1)
+  })
+
+  it("adds arrivals missing from a stale page snapshot", async () => {
+    let resolvePage: (value: ReturnType<typeof page>) => void
+    mocks.list.mockReturnValue(
+      new Promise<ReturnType<typeof page>>((resolve) => {
+        resolvePage = resolve
       }),
     )
     await renderProvider()
@@ -206,7 +227,7 @@ describe("NotificationsProvider", () => {
     const onNotification = mocks.subscribeNotifications.mock.calls[0][0]
     await act(async () => onNotification(notification("n1")))
     await act(async () => {
-      resolveCount({ unreadCount: 5 })
+      resolvePage(page([], 5))
       await Promise.resolve()
     })
 
@@ -217,14 +238,13 @@ describe("NotificationsProvider", () => {
     mocks.list.mockResolvedValue(
       page([notification("n1"), notification("n2")], 2),
     )
-    mocks.unreadCount.mockResolvedValue({ unreadCount: 2 })
     await renderProvider()
     expect(view!.items).toHaveLength(2)
 
-    let resolveCount: (value: { unreadCount: number }) => void
-    mocks.unreadCount.mockReturnValueOnce(
-      new Promise<{ unreadCount: number }>((resolve) => {
-        resolveCount = resolve
+    let resolvePage: (value: ReturnType<typeof page>) => void
+    mocks.list.mockReturnValueOnce(
+      new Promise<ReturnType<typeof page>>((resolve) => {
+        resolvePage = resolve
       }),
     )
     const onReady = mocks.onReady.mock.calls[0][0]
@@ -234,7 +254,7 @@ describe("NotificationsProvider", () => {
     expect(view!.unreadCount).toBe(0)
 
     await act(async () => {
-      resolveCount({ unreadCount: 2 })
+      resolvePage(page([notification("n1"), notification("n2")], 2))
       await Promise.resolve()
     })
 

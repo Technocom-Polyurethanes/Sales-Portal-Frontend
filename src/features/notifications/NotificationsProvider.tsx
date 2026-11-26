@@ -69,7 +69,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [retryToken, setRetryToken] = useState(0)
   const itemsRef = useRef(items)
   const knownIdsRef = useRef(new Set<string>())
-  const arrivalsRef = useRef(0)
+  const arrivalIdsRef = useRef<string[]>([])
   const readsRef = useRef(0)
 
   useEffect(() => {
@@ -153,25 +153,21 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     let active = true
 
     const load = async () => {
-      const arrivalsAtStart = arrivalsRef.current
+      const arrivalsAtStart = arrivalIdsRef.current.length
       const readsAtStart = readsRef.current
       setLoading(itemsRef.current.length === 0)
       try {
-        const [page, count] = await Promise.all([
-          notificationsApi.list(1, PAGE_SIZE),
-          notificationsApi.unreadCount(),
-        ])
+        const page = await notificationsApi.list(1, PAGE_SIZE)
         if (!active) return
         setItems((current) => mergeItems(current, page.items))
-        // The server count predates live arrivals; a local read already updated the badge and
-        // may not have committed when the count was fetched, so leave those to the optimistic path.
+        const pageIds = new Set(page.items.map((item) => item.id))
+        const uncounted = arrivalIdsRef.current
+          .slice(arrivalsAtStart)
+          .filter((id) => !pageIds.has(id)).length
+        // The page count and its rows share one snapshot; only arrivals missing from that
+        // snapshot need adding. Reads stay with the optimistic path.
         if (readsRef.current === readsAtStart) {
-          setUnreadCount(
-            Math.max(
-              0,
-              count.unreadCount + arrivalsRef.current - arrivalsAtStart,
-            ),
-          )
+          setUnreadCount(Math.max(0, page.unreadCount + uncounted))
         }
         setError(false)
       } catch {
@@ -192,7 +188,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         if (!isNotification(incoming) || knownIdsRef.current.has(incoming.id))
           return
         knownIdsRef.current.add(incoming.id)
-        arrivalsRef.current += 1
+        arrivalIdsRef.current.push(incoming.id)
 
         setItems((current) => [
           incoming,
