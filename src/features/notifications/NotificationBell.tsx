@@ -13,7 +13,7 @@ import { formatNotification } from "./formatters"
 import { useNotifications } from "./NotificationsProvider"
 
 export default function NotificationBell() {
-  const { items, unreadCount, loading, markAsRead, markAllRead } =
+  const { items, unreadCount, loading, error, retry, markAsRead, markAllRead } =
     useNotifications()
   const { t, language, direction } = useTranslation()
   const navigate = useNavigate()
@@ -28,7 +28,10 @@ export default function NotificationBell() {
 
     panel.current?.focus()
     const onPointerDown = (event: PointerEvent) => {
-      if (!wrapper.current?.contains(event.target as Node)) setOpen(false)
+      if (!wrapper.current?.contains(event.target as Node)) {
+        setOpen(false)
+        bell.current?.focus()
+      }
     }
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return
@@ -118,7 +121,26 @@ export default function NotificationBell() {
             </div>
           </div>
 
-          <div className="max-h-[min(24rem,calc(100vh-9rem))] overflow-y-auto">
+          <div
+            className="max-h-[min(24rem,calc(100vh-9rem))] overflow-y-auto"
+            aria-busy={loading}
+          >
+            {loading && (
+              <span role="status" className="sr-only">
+                {t("notifications.loading")}
+              </span>
+            )}
+            {error && !loading && (
+              <div
+                role="alert"
+                className="flex items-center justify-between gap-2 border-b border-line px-4 py-3 text-xs text-danger"
+              >
+                <span>{t("notifications.loadFailed")}</span>
+                <Button type="button" size="sm" variant="ghost" onClick={retry}>
+                  {t("common.retry")}
+                </Button>
+              </div>
+            )}
             {loading ? (
               <div className="space-y-4 p-4">
                 {[0, 1, 2, 3].map((row) => (
@@ -150,6 +172,7 @@ export default function NotificationBell() {
                         )}
                         <span className="min-w-0 flex-1">
                           <span
+                            title={title}
                             className={`block truncate text-sm ${
                               item.readAt
                                 ? "font-normal text-muted"
@@ -158,7 +181,7 @@ export default function NotificationBell() {
                           >
                             {title}
                           </span>
-                          <span className="mt-0.5 block text-xs text-muted">
+                          <span className="mt-0.5 block break-words text-xs text-muted">
                             {description}
                           </span>
                         </span>
@@ -173,13 +196,18 @@ export default function NotificationBell() {
                         {clickable && route ? (
                           <button
                             type="button"
-                            aria-label={`${title}. ${description}`}
+                            aria-label={`${
+                              item.readAt
+                                ? ""
+                                : `${t("notifications.unreadItem")}. `
+                            }${title}. ${description}`}
                             onClick={() => {
                               void markAsRead(item.id)
+                              bell.current?.focus()
                               setOpen(false)
                               navigate(route)
                             }}
-                            className="flex w-full px-4 py-3 text-start transition-colors hover:bg-page focus-visible:bg-primary-soft focus-visible:outline-none"
+                            className="flex w-full px-4 py-3 text-start transition-colors hover:bg-page focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
                           >
                             {content}
                           </button>

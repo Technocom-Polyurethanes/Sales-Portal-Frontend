@@ -619,6 +619,7 @@
     "markRead": "Mark as read",
     "unread": "{count} unread",
     "unreadItem": "Unread",
+    "loading": "Loading notifications",
     "loadFailed": "Couldn't load notifications.",
     "writeFailed": "Couldn't save that change.",
     "time": {

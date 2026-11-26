@@ -10,6 +10,8 @@ const state = vi.hoisted(() => ({
   items: [] as unknown[],
   unreadCount: 0,
   loading: false,
+  error: false,
+  retry: vi.fn(),
   language: "en",
   direction: "ltr",
   markAsRead: vi.fn(async (_id: string) => {}),
@@ -27,6 +29,8 @@ vi.mock("./NotificationsProvider", () => ({
     items: state.items,
     unreadCount: state.unreadCount,
     loading: state.loading,
+    error: state.error,
+    retry: state.retry,
     markAsRead: state.markAsRead,
     markAllRead: state.markAllRead,
   }),
@@ -87,6 +91,7 @@ describe("NotificationBell", () => {
     state.items = []
     state.unreadCount = 0
     state.loading = false
+    state.error = false
     state.language = "en"
     state.direction = "ltr"
     container = document.createElement("div")
@@ -141,6 +146,34 @@ describe("NotificationBell", () => {
 
     expect(state.markAsRead).toHaveBeenCalledWith("n1")
     expect(state.navigate).toHaveBeenCalledWith("/offers/offer-1")
+  })
+
+  it("shows a retry action when the inbox failed to load", async () => {
+    state.error = true
+    await renderBell()
+    await click(container.querySelector("button")!)
+
+    expect(container.querySelector('[role="alert"]')).not.toBeNull()
+    const retryButton = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent === "common.retry",
+    )!
+    await click(retryButton)
+    expect(state.retry).toHaveBeenCalledTimes(1)
+  })
+
+  it("restores focus to the bell when a row or the outside area closes the panel", async () => {
+    state.items = [notification("offer.created")]
+    await renderBell()
+    const bell = container.querySelector("button")!
+    await click(bell)
+    await click(container.querySelector("li button")!)
+    expect(document.activeElement).toBe(bell)
+
+    await click(bell)
+    await act(async () => {
+      document.dispatchEvent(new Event("pointerdown", { bubbles: true }))
+    })
+    expect(document.activeElement).toBe(bell)
   })
 
   it("routes import notices to a page every role can open", async () => {
