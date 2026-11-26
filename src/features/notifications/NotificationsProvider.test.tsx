@@ -1,0 +1,200 @@
+// @vitest-environment jsdom
+import { act } from "react"
+import { createRoot, type Root } from "react-dom/client"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+
+import {
+  NotificationsProvider,
+  useNotifications,
+  type NotificationsValue,
+} from "./NotificationsProvider"
+import type { Notification } from "./types"
+
+const mocks = vi.hoisted(() => ({
+  list: vi.fn(),
+  unreadCount: vi.fn(),
+  markRead: vi.fn(),
+  markAllRead: vi.fn(),
+  onReady: vi.fn<(listener: () => void) => () => void>(() => () => {}),
+  subscribeNotifications: vi.fn<(
+    listener: (notification: Notification) => void,
+  ) => () => void>(() => () => {}),
+  notify: vi.fn(),
+  navigate: vi.fn(),
+  t: vi.fn((key: string, params?: Record<string, string | number>) =>
+    key.replace(/\{(\w+)\}/g, (_, name: string) =>
+      String(params?.[name] ?? ""),
+    ),
+  ),
+}))
+
+vi.mock("./api", () => ({
+  notificationsApi: {
+    list: mocks.list,
+    unreadCount: mocks.unreadCount,
+    markRead: mocks.markRead,
+    markAllRead: mocks.markAllRead,
+  },
+}))
+
+vi.mock("../../lib/live", () => ({
+  live: {
+    onReady: mocks.onReady,
+    subscribeNotifications: mocks.subscribeNotifications,
+  },
+}))
+
+vi.mock("../../components/ui/ToastProvider", () => ({
+  useToast: () => ({ notify: mocks.notify }),
+}))
+
+vi.mock("../account/hooks/useSession", () => ({
+  useSession: () => ({ authenticated: true }),
+}))
+
+vi.mock("react-router-dom", () => ({
+  useNavigate: () => mocks.navigate,
+}))
+
+vi.mock("../../i18n/I18nProvider", () => ({
+  useTranslation: () => ({
+    t: mocks.t,
+    language: "en",
+    direction: "ltr",
+  }),
+}))
+;(globalThis as {
+  IS_REACT_ACT_ENVIRONMENT?: boolean
+}).IS_REACT_ACT_ENVIRONMENT = true
+
+function notification(id: string, readAt: string | null = null): Notification {
+  return {
+    id,
+    type: "offer.created",
+    actorName: "Actor",
+    entityType: "offer",
+    entityId: "offer-1",
+    entityLabel: "Loc/0001-2026/AA",
+    meta: {},
+    createdAt: new Date().toISOString(),
+    readAt,
+  }
+}
+
+function page(items: Notification[], unreadCount = items.length) {
+  return { items, totalCount: items.length, unreadCount, page: 1, pageSize: 20 }
+}
+
+let container: HTMLDivElement
+let root: Root | undefined
+let view: NotificationsValue | undefined
+
+function Probe() {
+  view = useNotifications()
+  return null
+}
+
+async function settle() {
+  await act(async () => {
+    await Promise.resolve()
+  })
+}
+
+async function renderProvider() {
+  container = document.createElement("div")
+  document.body.appendChild(container)
+  root = createRoot(container)
+  await act(async () => {
+    root!.render(
+      <NotificationsProvider>
+        <Probe />
+      </NotificationsProvider>,
+    )
+  })
+  await settle()
+}
+
+describe("NotificationsProvider", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubEnv("VITE_USE_MOCK", "false")
+    mocks.onReady.mockReturnValue(() => {})
+    mocks.subscribeNotifications.mockReturnValue(() => {})
+    mocks.list.mockResolvedValue(page([]))
+    mocks.unreadCount.mockResolvedValue({ unreadCount: 0 })
+  })
+
+  afterEach(async () => {
+    await act(async () => root?.unmount())
+    container.remove()
+    vi.unstubAllEnvs()
+  })
+
+  it("dedupes reconnect refetches and live notifications without a second toast", async () => {
+    const first = notification("n1")
+    mocks.list.mockResolvedValue(page([first], 1))
+    mocks.unreadCount.mockResolvedValue({ unreadCount: 1 })
+    await renderProvider()
+
+    const onNotification = mocks.subscribeNotifications.mock.calls[0][0]
+    const onReady = mocks.onReady.mock.calls[0][0]
+
+    await act(async () => onNotification(first))
+    expect(view!.items).toHaveLength(1)
+    expect(view!.unreadCount).toBe(1)
+    expect(mocks.notify).not.toHaveBeenCalled()
+
+    await act(async () => onReady())
+    await settle()
+    expect(mocks.list).toHaveBeenCalledTimes(2)
+    expect(view!.items).toHaveLength(1)
+    expect(mocks.notify).not.toHaveBeenCalled()
+
+    await act(async () => onNotification(notification("n2")))
+    expect(view!.items).toHaveLength(2)
+    expect(view!.unreadCount).toBe(2)
+    expect(mocks.notify).toHaveBeenCalledTimes(1)
+  })
+
+  it("marks one notification read and rolls back when the API fails", async () => {
+    const first = notification("n1")
+    const second = notification("n2")
+    mocks.list.mockResolvedValue(page([first, second], 2))
+    mocks.unreadCount.mockResolvedValue({ unreadCount: 2 })
+    await renderProvider()
+
+    await act(async () => view!.markAsRead("n1"))
+    expect(mocks.markRead).toHaveBeenCalledWith("n1")
+    expect(view!.unreadCount).toBe(1)
+    expect(view!.items.find((item) => item.id === "n1")!.readAt).not.toBeNull()
+
+    mocks.markRead.mockRejectedValueOnce(new Error("offline"))
+    await act(async () => view!.markAsRead("n2"))
+    expect(view!.unreadCount).toBe(1)
+    expect(view!.items.find((item) => item.id === "n2")!.readAt).toBeNull()
+  })
+
+  it("marks the whole inbox read", async () => {
+    mocks.list.mockResolvedValue(
+      page([notification("n1"), notification("n2")], 2),
+    )
+    mocks.unreadCount.mockResolvedValue({ unreadCount: 2 })
+    await renderProvider()
+
+    await act(async () => view!.markAllRead())
+    expect(mocks.markAllRead).toHaveBeenCalledTimes(1)
+    expect(view!.unreadCount).toBe(0)
+    expect(view!.items.every((item) => item.readAt !== null)).toBe(true)
+  })
+
+  it("does nothing in mock mode", async () => {
+    vi.stubEnv("VITE_USE_MOCK", "true")
+    await renderProvider()
+
+    expect(view!.items).toEqual([])
+    expect(view!.unreadCount).toBe(0)
+    expect(mocks.list).not.toHaveBeenCalled()
+    expect(mocks.unreadCount).not.toHaveBeenCalled()
+    expect(mocks.subscribeNotifications).not.toHaveBeenCalled()
+  })
+})
