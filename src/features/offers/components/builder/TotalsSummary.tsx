@@ -69,6 +69,7 @@ export default function TotalsSummary({
         {totalInWords ? (
           <div className="flex flex-col gap-1 border-t border-line pt-2">
             <dt className="text-muted">{t("common.amountInWords")}</dt>
+<<<<<<< HEAD
             <dd
               lang={documentLanguage}
               dir={documentLanguage === "ar" ? "rtl" : "ltr"}
@@ -76,6 +77,9 @@ export default function TotalsSummary({
             >
               {totalInWords}
             </dd>
+=======
+            <dd className="[overflow-wrap:anywhere] text-ink">{totalInWords}</dd>
+>>>>>>> f5980e63d092efaa11e184b56660762b7fbd60b1
           </div>
         ) : null}
       </dl>

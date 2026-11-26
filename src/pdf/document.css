@@ -460,17 +460,25 @@
   overflow-wrap: anywhere;
   line-height: 1.6;
   font-size: 8pt;
+<<<<<<< HEAD
   font-weight: 500;
+=======
+  font-weight: 400;
+>>>>>>> f5980e63d092efaa11e184b56660762b7fbd60b1
   break-inside: avoid;
 }
 
 .offer-document .doc-totals .doc-in-words__label {
   color: var(--doc-muted);
+<<<<<<< HEAD
   font-weight: 400;
 }
 
 .offer-document .doc-totals .doc-in-words__label::after {
   content: ": ";
+=======
+  font-weight: 600;
+>>>>>>> f5980e63d092efaa11e184b56660762b7fbd60b1
 }
 
 /* Payment terms sit beside the totals, on the opposite side. */

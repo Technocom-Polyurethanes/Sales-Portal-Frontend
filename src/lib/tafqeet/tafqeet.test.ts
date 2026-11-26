@@ -68,11 +68,14 @@ describe("formatAmountInWords", () => {
       }
     }
   })
+<<<<<<< HEAD
 
   it("falls back when the currency is missing", () => {
     expect(formatAmountInWords(1, undefined as any, "en")).toBe("One Unit Only")
     expect(formatAmountInWords(1, null as any, "ar")).toBe("فقط وحدة لا غير")
   })
+=======
+>>>>>>> f5980e63d092efaa11e184b56660762b7fbd60b1
 })
 
 type CurrencyRow = { code: string; rows: Row[] }
@@ -114,10 +117,14 @@ const currencyRows: CurrencyRow[] = [
       { amount: 21, ar: "فقط واحد وعشرون ريالاً سعودياً لا غير", en: "Twenty-One Saudi Riyals Only" },
       { amount: 100, ar: "فقط مائة ريال سعودي لا غير", en: "One Hundred Saudi Riyals Only" },
       { amount: 0.02, ar: "فقط هلتان لا غير", en: "Two Halalas Only" },
+<<<<<<< HEAD
       { amount: 0.05, ar: "فقط خمس هللات لا غير", en: "Five Halalas Only" },
       { amount: 0.11, ar: "فقط إحدى عشرة هللةً لا غير", en: "Eleven Halalas Only" },
       { amount: 0.21, ar: "فقط واحدة وعشرون هللةً لا غير", en: "Twenty-One Halalas Only" },
       { amount: 1250000.05, ar: "فقط مليون ومائتان وخمسون ألف ريال سعودي وخمس هللات لا غير", en: "One Million Two Hundred Fifty Thousand Saudi Riyals and Five Halalas Only" },
+=======
+      { amount: 1250000.05, ar: "فقط مليون ومائتان وخمسون ألف ريال سعودي وخمسة هللات لا غير", en: "One Million Two Hundred Fifty Thousand Saudi Riyals and Five Halalas Only" },
+>>>>>>> f5980e63d092efaa11e184b56660762b7fbd60b1
     ],
   },
   {

@@ -9,7 +9,10 @@ type CurrencyDefinition = {
   enMajor: readonly [string, string]
   enMinor: readonly [string, string]
   arFeminine: boolean
+<<<<<<< HEAD
   arMinorFeminine?: boolean
+=======
+>>>>>>> f5980e63d092efaa11e184b56660762b7fbd60b1
   arMajor: ArabicForms
   arMinor: ArabicForms
 }
@@ -70,7 +73,10 @@ const DEFINITIONS: Record<string, CurrencyDefinition> = {
     enMajor: ["Saudi Riyal", "Saudi Riyals"],
     enMinor: ["Halala", "Halalas"],
     arFeminine: false,
+<<<<<<< HEAD
     arMinorFeminine: true,
+=======
+>>>>>>> f5980e63d092efaa11e184b56660762b7fbd60b1
     arMajor: {
       one: "ريال سعودي",
       dual: "ريالان سعوديان",
@@ -170,7 +176,11 @@ const FALLBACK: CurrencyDefinition = {
 }
 
 export function currencyDefinition(code: string): CurrencyDefinition {
+<<<<<<< HEAD
   return typeof code === "string"
     ? DEFINITIONS[code.toUpperCase()] ?? FALLBACK
     : FALLBACK
+=======
+  return DEFINITIONS[code.toUpperCase()] ?? FALLBACK
+>>>>>>> f5980e63d092efaa11e184b56660762b7fbd60b1
 }
