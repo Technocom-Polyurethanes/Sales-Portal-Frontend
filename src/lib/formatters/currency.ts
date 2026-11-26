@@ -3,9 +3,9 @@ import type { Locale } from "./locale"
 /** Local abbreviations of the currencies used by the workspace. */
 const CURRENCY_NAMES_AR: Record<string, string> = {
   EGP: "ج.م",
-  USD: "دولار",
+  USD: "دولار أمريكي",
   EUR: "يورو",
-  SAR: "ريال",
+  SAR: "ريال سعودي",
   AED: "درهم",
 }
 

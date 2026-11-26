@@ -20,6 +20,7 @@ export type OfferTemplate = {
   tax: string
   otherTax: string
   itemsTotalLabel: string
+  amountInWords: string
   deliveryTotalLabel: string
   schedule: string
   batch: string
@@ -117,6 +118,7 @@ export type OfferDocumentData = {
   otherTaxPercent: number
   otherTaxAmount: number
   total: number
+  totalInWords: string
   delivery: OfferDocumentBatch[]
   banks: {
     bank: string

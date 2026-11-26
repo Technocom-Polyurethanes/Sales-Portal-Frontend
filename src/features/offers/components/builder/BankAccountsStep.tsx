@@ -61,17 +61,7 @@ export default function BankAccountsStep({
 
       {available.length === 0 ? (
         <p className="text-xs text-muted">{t("offers.builder.banks.empty")}</p>
-      ) : chosen.length === 0 ? (
-        <div
-          role="alert"
-          className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger"
-        >
-          {t("offers.builder.banks.required")}
-          <Button size="sm" onClick={() => setPicking(true)}>
-            {t("offers.builder.banks.addAccount")}
-          </Button>
-        </div>
-      ) : (
+      ) : chosen.length === 0 ? null : (
         <ul className="divide-y divide-line-soft rounded-md border border-line-soft">
           {chosen.map((bank) => {
             const { name, branch } = bankLabels(bank, language)

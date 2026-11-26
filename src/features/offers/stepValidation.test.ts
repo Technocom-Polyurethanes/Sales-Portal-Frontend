@@ -113,12 +113,11 @@ describe("step validation", () => {
     expect(issues[0]?.params).toEqual({ number: 2 })
   })
 
-  it("needs at least one bank account on the last step", () => {
-    expect(validateStep(4, filled({ bankAccountIds: [] }), ctx)).toHaveLength(1)
-    expect(validateStep(4, filled(), ctx)).toEqual([])
+  it("allows an offer without bank accounts", () => {
+    expect(validateStep(4, filled({ bankAccountIds: [] }), ctx)).toEqual([])
   })
 
-  it("lets drafts through with only a customer, a material and a bank", () => {
+  it("lets drafts through with only a customer and a material", () => {
     const draft = filled({ customerId: "", lines: [], bankAccountIds: [], issueDate: "" })
     const blocking = validateAllSteps(draft, ctx)
       .flat()
@@ -126,7 +125,6 @@ describe("step validation", () => {
     expect(blocking.map((issue) => issue.message)).toEqual([
       "offers.builder.validation.customer",
       "offers.builder.validation.lines",
-      "offers.builder.banks.required",
     ])
   })
 

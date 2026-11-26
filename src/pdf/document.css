@@ -453,6 +453,26 @@
   background-color: #1e293b;
 }
 
+/* Amount in words, printed under the grand total. */
+.offer-document .doc-totals .doc-in-words td {
+  text-align: start;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+  font-size: 8pt;
+  font-weight: 500;
+  break-inside: avoid;
+}
+
+.offer-document .doc-totals .doc-in-words__label {
+  color: var(--doc-muted);
+  font-weight: 400;
+}
+
+.offer-document .doc-totals .doc-in-words__label::after {
+  content: ": ";
+}
+
 /* Payment terms sit beside the totals, on the opposite side. */
 .offer-document .doc-summary-row {
   display: flex;

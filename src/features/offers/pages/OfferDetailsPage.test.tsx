@@ -183,6 +183,36 @@ describe("offer view document language", () => {
     expect(errors).toEqual([])
   })
 
+  it("shows the automatic amount in words in the summary and follows the document language", async () => {
+    const offer = db.offers[0]
+    offer.documentLanguage = "en"
+
+    await open(offer.id)
+
+    expect(container.textContent).toContain("Amount in Words")
+    expect(container.textContent).toMatch(/Egyptian Pounds Only/)
+
+    await act(async () => {
+      languageButton("العربية")?.click()
+    })
+    await pause(50)
+
+    expect(container.textContent).toContain("فقط")
+    expect(container.textContent).toMatch(/جنيه/)
+    expect(errors).toEqual([])
+  })
+
+  it("hides the automatic amount in words when the total is zero", async () => {
+    const offer = db.offers[0]
+    if (offer.totals) offer.totals.total = 0
+    ;(offer as any).total = 0
+
+    await open(offer.id)
+
+    expect(container.textContent).not.toContain("Amount in Words")
+    expect(container.textContent).not.toContain("المبلغ بالحروف")
+  })
+
   it("keeps edited payment conditions as they are", async () => {
     const offer = db.offers[0]
     const custom = "Custom split payment\nSecond line"

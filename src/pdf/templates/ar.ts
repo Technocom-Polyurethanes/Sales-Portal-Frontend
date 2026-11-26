@@ -21,6 +21,7 @@ export const arabicTemplate: OfferTemplate = {
   tax: "ضريبة القيمه المضافة",
   otherTax: "ضريبة أرباح تجارية و صناعية (1%)",
   itemsTotalLabel: "صافي القيمة",
+  amountInWords: "المبلغ بالحروف",
   deliveryTotalLabel: "صافي الكمية",
   schedule: "مواعيد التسليم",
   batch: "الدفعة",

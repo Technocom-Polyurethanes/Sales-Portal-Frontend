@@ -35,6 +35,7 @@
     "status": "Status",
     "date": "Date",
     "total": "Total",
+    "amountInWords": "Amount in Words",
     "notes": "Notes",
     "seeAll": "See all",
     "showing": "Showing {count} of {total}",
