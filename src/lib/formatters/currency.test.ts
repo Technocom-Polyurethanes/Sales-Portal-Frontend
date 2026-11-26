@@ -11,7 +11,8 @@ describe("currency labels", () => {
 
   it("uses the local abbreviation in Arabic", () => {
     expect(formatCurrencyLabel("EGP", "ar-EG")).toBe("ج.م")
-    expect(formatCurrencyLabel("USD", "ar-EG")).toBe("دولار")
+    expect(formatCurrencyLabel("USD", "ar-EG")).toBe("دولار أمريكي")
+    expect(formatCurrencyLabel("SAR", "ar-EG")).toBe("ريال سعودي")
   })
 
   it("falls back to the code for an unknown currency", () => {

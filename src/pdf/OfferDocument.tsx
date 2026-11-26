@@ -307,21 +307,23 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
                 <TextBlock heading={template.deliveryPlace} text={data.deliveryPlace} />
               </div>
 
-              <div data-doc-unit data-doc-keep>
-                <BankAccountsTable
-                  heading={template.bankDetails}
-                  headings={{
-                    bank: template.bank,
-                    branch: template.branch,
-                    accountNumber: template.accountNumber,
-                    swift: template.swift,
-                    iban: template.iban,
-                    currency: template.currency,
-                  }}
-                  banks={data.banks}
-                  formatCurrency={(value) => formatDocumentCurrency(value, language)}
-                />
-              </div>
+              {data.banks.length > 0 && (
+                <div data-doc-unit data-doc-keep>
+                  <BankAccountsTable
+                    heading={template.bankDetails}
+                    headings={{
+                      bank: template.bank,
+                      branch: template.branch,
+                      accountNumber: template.accountNumber,
+                      swift: template.swift,
+                      iban: template.iban,
+                      currency: template.currency,
+                    }}
+                    banks={data.banks}
+                    formatCurrency={(value) => formatDocumentCurrency(value, language)}
+                  />
+                </div>
+              )}
 
               <div data-doc-unit>
                 <NotesBlock heading={template.notes} notes={data.notes} />

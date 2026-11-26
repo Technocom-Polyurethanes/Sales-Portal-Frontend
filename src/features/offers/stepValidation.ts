@@ -1,6 +1,5 @@
 import type { TranslationKey } from "../../i18n/types"
 import { isPriceOnly } from "../../lib/calculations/packaging"
-import { hasBankSelection } from "./bankSelection"
 import type { OfferDraft } from "./types"
 
 /** The five steps of the builder, in order. */
@@ -15,7 +14,7 @@ export const BUILDER_STEPS = [
 export type StepIssue = {
   /**
    * DOM id of the field to focus and mark as invalid, or `summary` when the
-   * problem belongs to the step as a whole (a missing material, a bank, ...).
+   * problem belongs to the step as a whole (for example, a missing material).
    */
   field: string
   message: TranslationKey
@@ -183,18 +182,6 @@ function delivery(draft: OfferDraft): StepIssue[] {
     }))
 }
 
-function notes(draft: OfferDraft): StepIssue[] {
-  return hasBankSelection(draft.bankAccountIds)
-    ? []
-    : [
-        {
-          field: SUMMARY_FIELD,
-          message: "offers.builder.banks.required",
-          blocksDraft: true,
-        },
-      ]
-}
-
 /** What is still missing before the user may leave the given step. */
 export function validateStep(
   step: number,
@@ -211,7 +198,7 @@ export function validateStep(
     case 3:
       return delivery(draft)
     case 4:
-      return notes(draft)
+      return []
     default:
       return []
   }

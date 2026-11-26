@@ -153,6 +153,24 @@ describe("offer document", () => {
     expect(text).toContain("002145890012")
   })
 
+  it("prints no bank details when the offer has no bank accounts", () => {
+    const data = buildDocumentData(source, {
+      customer,
+      company,
+      banks: [],
+      packageTypes,
+      language: "en",
+      paymentTermLabel: "Cheque — 30 days",
+    })
+
+    act(() => {
+      createRoot(container).render(<OfferDocument data={data} language="en" />)
+    })
+
+    expect(container.querySelector(".doc-banks")).toBeNull()
+    expect(container.textContent).not.toContain("Bank Details")
+  })
+
   it("prints the packaging on a sub-row under the material", () => {
     render("en")
 

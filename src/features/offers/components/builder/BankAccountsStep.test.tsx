@@ -82,8 +82,9 @@ describe("BankAccountsStep", () => {
     expect(ids).toContain("b29")
   })
 
-  it("warns when nothing is selected", () => {
+  it("allows no bank accounts to be selected", () => {
     const root = mount([], vi.fn())
-    expect(root.querySelector("[role=alert]")).not.toBeNull()
+    expect(root.querySelector("[role=alert]")).toBeNull()
+    expect(root.querySelectorAll("li")).toHaveLength(0)
   })
 })
