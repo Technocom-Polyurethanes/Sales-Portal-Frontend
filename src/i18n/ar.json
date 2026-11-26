@@ -618,6 +618,9 @@
     "markAllRead": "تعليم الكل كمقروء",
     "markRead": "تعليم كمقروء",
     "unread": "{count} غير مقروء",
+    "unreadItem": "غير مقروء",
+    "loadFailed": "تعذّر تحميل الإشعارات.",
+    "writeFailed": "تعذّر حفظ هذا التغيير.",
     "time": {
       "justNow": "الآن",
       "minutesAgo": "منذ {count} دقيقة",

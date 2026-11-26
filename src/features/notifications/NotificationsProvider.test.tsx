@@ -172,6 +172,45 @@ describe("NotificationsProvider", () => {
     await act(async () => view!.markAsRead("n2"))
     expect(view!.unreadCount).toBe(1)
     expect(view!.items.find((item) => item.id === "n2")!.readAt).toBeNull()
+    expect(mocks.notify).toHaveBeenCalledWith(
+      "notifications.writeFailed",
+      "error",
+    )
+  })
+
+  it("reports a failed load and reloads on retry", async () => {
+    mocks.list.mockRejectedValueOnce(new Error("offline"))
+    await renderProvider()
+    expect(view!.error).toBe(true)
+    expect(view!.items).toEqual([])
+
+    mocks.list.mockResolvedValue(page([notification("n1")], 1))
+    mocks.unreadCount.mockResolvedValue({ unreadCount: 1 })
+    await act(async () => view!.retry())
+    await settle()
+
+    expect(view!.error).toBe(false)
+    expect(view!.items).toHaveLength(1)
+    expect(view!.unreadCount).toBe(1)
+  })
+
+  it("keeps a live unread count when a stale resync finishes", async () => {
+    let resolveCount: (value: { unreadCount: number }) => void
+    mocks.unreadCount.mockReturnValue(
+      new Promise<{ unreadCount: number }>((resolve) => {
+        resolveCount = resolve
+      }),
+    )
+    await renderProvider()
+
+    const onNotification = mocks.subscribeNotifications.mock.calls[0][0]
+    await act(async () => onNotification(notification("n1")))
+    await act(async () => {
+      resolveCount({ unreadCount: 0 })
+      await Promise.resolve()
+    })
+
+    expect(view!.unreadCount).toBe(1)
   })
 
   it("marks the whole inbox read", async () => {
@@ -185,6 +224,17 @@ describe("NotificationsProvider", () => {
     expect(mocks.markAllRead).toHaveBeenCalledTimes(1)
     expect(view!.unreadCount).toBe(0)
     expect(view!.items.every((item) => item.readAt !== null)).toBe(true)
+  })
+
+  it("marks all read even when unread rows are outside the loaded page", async () => {
+    mocks.list.mockResolvedValue(page([], 0))
+    mocks.unreadCount.mockResolvedValue({ unreadCount: 3 })
+    await renderProvider()
+
+    await act(async () => view!.markAllRead())
+
+    expect(mocks.markAllRead).toHaveBeenCalledTimes(1)
+    expect(view!.unreadCount).toBe(0)
   })
 
   it("does nothing in mock mode", async () => {

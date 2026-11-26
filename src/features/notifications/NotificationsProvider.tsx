@@ -27,6 +27,8 @@ export type NotificationsValue = {
   items: Notification[]
   unreadCount: number
   loading: boolean
+  error: boolean
+  retry: () => void
   markAsRead: (id: string) => Promise<void>
   markAllRead: () => Promise<void>
 }
@@ -54,43 +56,55 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(false)
+  const [retryToken, setRetryToken] = useState(0)
   const itemsRef = useRef(items)
   const knownIdsRef = useRef(new Set<string>())
+  const revisionRef = useRef(0)
 
   useEffect(() => {
     itemsRef.current = items
     knownIdsRef.current = new Set(items.map((item) => item.id))
   }, [items])
 
-  const markAsRead = useCallback(async (id: string) => {
-    const previous = itemsRef.current.find((item) => item.id === id)
-    if (!previous || previous.readAt) return
+  const markAsRead = useCallback(
+    async (id: string) => {
+      const previous = itemsRef.current.find((item) => item.id === id)
+      if (!previous || previous.readAt) return
+      revisionRef.current += 1
 
-    const stamp = new Date().toISOString()
-    const optimistic = itemsRef.current.map((item) =>
-      item.id === id ? { ...item, readAt: stamp } : item,
-    )
-    itemsRef.current = optimistic
-    setItems(optimistic)
-    setUnreadCount((count) => Math.max(0, count - 1))
-
-    try {
-      await notificationsApi.markRead(id)
-    } catch {
-      itemsRef.current = itemsRef.current.map((item) =>
-        item.id === id ? { ...item, readAt: previous.readAt } : item,
+      const stamp = new Date().toISOString()
+      const optimistic = itemsRef.current.map((item) =>
+        item.id === id ? { ...item, readAt: stamp } : item,
       )
-      setItems(itemsRef.current)
-      setUnreadCount((count) => count + 1)
-    }
-  }, [])
+      itemsRef.current = optimistic
+      setItems(optimistic)
+      setUnreadCount((count) => Math.max(0, count - 1))
+
+      try {
+        await notificationsApi.markRead(id)
+      } catch {
+        // Revert only this row: a notification may have arrived while the request was in flight.
+        const reverted = itemsRef.current.map((item) =>
+          item.id === id ? { ...item, readAt: previous.readAt } : item,
+        )
+        itemsRef.current = reverted
+        setItems(reverted)
+        setUnreadCount((count) => count + 1)
+        notify(t("notifications.writeFailed"), "error")
+      }
+    },
+    [notify, t],
+  )
 
   const markAllRead = useCallback(async () => {
-    const previous = itemsRef.current
-    if (previous.every((item) => item.readAt)) return
+    const changedIds = new Set(
+      itemsRef.current.filter((item) => !item.readAt).map((item) => item.id),
+    )
+    revisionRef.current += 1
 
     const stamp = new Date().toISOString()
-    const optimistic = previous.map((item) => ({
+    const optimistic = itemsRef.current.map((item) => ({
       ...item,
       readAt: item.readAt ?? stamp,
     }))
@@ -101,11 +115,15 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     try {
       await notificationsApi.markAllRead()
     } catch {
-      itemsRef.current = previous
-      setItems(previous)
-      setUnreadCount(previous.filter((item) => !item.readAt).length)
+      const reverted = itemsRef.current.map((item) =>
+        changedIds.has(item.id) ? { ...item, readAt: null } : item,
+      )
+      itemsRef.current = reverted
+      setItems(reverted)
+      setUnreadCount((count) => count + changedIds.size)
+      notify(t("notifications.writeFailed"), "error")
     }
-  }, [])
+  }, [notify, t])
 
   const disabled = isMockApi() || !authenticated
 
@@ -116,13 +134,15 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       setItems([])
       setUnreadCount(0)
       setLoading(false)
+      setError(false)
       return
     }
 
     let active = true
-    setLoading(true)
 
     const load = async () => {
+      const revision = revisionRef.current
+      setLoading(itemsRef.current.length === 0)
       try {
         const [page, count] = await Promise.all([
           notificationsApi.list(1, PAGE_SIZE),
@@ -130,9 +150,11 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         ])
         if (!active) return
         setItems((current) => mergeItems(current, page.items))
-        setUnreadCount(count.unreadCount)
+        // A live arrival or a read during the request already updated the badge; don't undo it.
+        if (revisionRef.current === revision) setUnreadCount(count.unreadCount)
+        setError(false)
       } catch {
-        // A failed resync leaves the last known inbox intact.
+        if (active) setError(true)
       } finally {
         if (active) setLoading(false)
       }
@@ -149,6 +171,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         if (!isNotification(incoming) || knownIdsRef.current.has(incoming.id))
           return
         knownIdsRef.current.add(incoming.id)
+        revisionRef.current += 1
 
         setItems((current) => [
           incoming,
@@ -180,11 +203,21 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       stopReady()
       stopNotification()
     }
-  }, [disabled, t, locale, notify, navigate, markAsRead])
+  }, [disabled, t, locale, notify, navigate, markAsRead, retryToken])
+
+  const retry = useCallback(() => setRetryToken((token) => token + 1), [])
 
   const value = useMemo(
-    () => ({ items, unreadCount, loading, markAsRead, markAllRead }),
-    [items, unreadCount, loading, markAsRead, markAllRead],
+    () => ({
+      items,
+      unreadCount,
+      loading,
+      error,
+      retry,
+      markAsRead,
+      markAllRead,
+    }),
+    [items, unreadCount, loading, error, retry, markAsRead, markAllRead],
   )
 
   return (

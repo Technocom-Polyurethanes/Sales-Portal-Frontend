@@ -618,6 +618,9 @@
     "markAllRead": "Mark all read",
     "markRead": "Mark as read",
     "unread": "{count} unread",
+    "unreadItem": "Unread",
+    "loadFailed": "Couldn't load notifications.",
+    "writeFailed": "Couldn't save that change.",
     "time": {
       "justNow": "Just now",
       "minutesAgo": "{count} min ago",
