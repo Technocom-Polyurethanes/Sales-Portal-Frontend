@@ -30,6 +30,7 @@ const data: OfferDocumentData = {
   otherTaxPercent: 0,
   otherTaxAmount: 0,
   total: 0,
+  totalInWords: "",
   delivery: [],
   banks: [],
   notes: "",
