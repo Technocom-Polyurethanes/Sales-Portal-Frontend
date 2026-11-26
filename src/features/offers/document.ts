@@ -1,5 +1,6 @@
 
 import { roundMoney } from "../../lib/calculations/round"
+import { formatAmountInWords } from "../../lib/tafqeet"
 import { expiryDateFrom, normalizeValidityDays } from "../../lib/calculations/validity"
 import { translateCategory } from "../../pdf/format"
 import { formatPackagingSummaryDocument } from "../../pdf/format"
@@ -197,6 +198,7 @@ export function buildDocumentData(source: DocumentSource,
     otherTaxPercent: source.otherTaxPercent,
     otherTaxAmount: source.otherTaxAmount,
     total: source.total,
+    totalInWords: formatAmountInWords(source.total, source.currency, options.language),
     delivery,
     banks: (options.banks ?? []).map((bank) => ({
       bank: arabic ? (bank.bankAr ?? bank.bank) : bank.bank,

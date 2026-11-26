@@ -117,6 +117,7 @@ export type OfferDocumentData = {
   otherTaxPercent: number
   otherTaxAmount: number
   total: number
+  totalInWords: string
   delivery: OfferDocumentBatch[]
   banks: {
     bank: string
