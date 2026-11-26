@@ -173,10 +173,72 @@ describe("offer document", () => {
     render("en")
 
     const rows = container.querySelectorAll(".doc-totals tr")
-    const last = rows[rows.length - 1]
-    expect(last.className).toContain("doc-grand")
-    expect(last.textContent).toContain("Total")
+    const grand = rows[rows.length - 2]
+    expect(grand.className).toContain("doc-grand")
+    expect(grand.textContent).toContain("Total")
     expect(container.textContent).not.toContain("Balance")
+  })
+
+  it("derives the amount in words from the final total and document language", () => {
+    expect(build("en").totalInWords).toBe(
+      "Forty-Five Thousand Four Hundred Eighty-Six Egyptian Pounds Only",
+    )
+    expect(build("ar").totalInWords).toBe(
+      "فقط خمسة وأربعون ألف وأربعمائة وستة وثمانون جنيهاً مصرياً لا غير",
+    )
+
+    const zero = buildDocumentData({ ...(source as DocumentSource), total: 0 }, {
+      customer,
+      company,
+      banks,
+      packageTypes,
+      language: "en",
+      paymentTermLabel: "Cheque — 30 days",
+    })
+    expect(zero.totalInWords).toBe("")
+  })
+
+  it("prints the amount in words directly under the grand total in English", () => {
+    render("en")
+
+    const rows = Array.from(container.querySelectorAll(".doc-totals tr"))
+    const words = rows[rows.length - 1]
+    expect(words?.className).toContain("doc-in-words")
+    expect(words?.querySelector(".doc-in-words__label")?.textContent).toBe(
+      "Amount in Words",
+    )
+    expect(words?.textContent).toContain(
+      "Forty-Five Thousand Four Hundred Eighty-Six Egyptian Pounds Only",
+    )
+  })
+
+  it("mirrors the amount in words in the Arabic document", () => {
+    render("ar")
+
+    const words = container.querySelector(".doc-totals .doc-in-words")
+    expect(words?.querySelector(".doc-in-words__label")?.textContent).toBe(
+      "المبلغ بالحروف",
+    )
+    expect(words?.textContent).toContain(
+      "فقط خمسة وأربعون ألف وأربعمائة وستة وثمانون جنيهاً مصرياً لا غير",
+    )
+  })
+
+  it("prints no amount in words when the total is zero", () => {
+    const zero = buildDocumentData({ ...(source as DocumentSource), total: 0 }, {
+      customer,
+      company,
+      banks,
+      packageTypes,
+      language: "en",
+      paymentTermLabel: "Cheque — 30 days",
+    })
+    const root = createRoot(container)
+    act(() => {
+      root.render(<OfferDocument data={zero} language="en" />)
+    })
+
+    expect(container.querySelector(".doc-in-words")).toBeNull()
   })
 
   it("prints prices and totals with two decimals but keeps the quantity compact", () => {
