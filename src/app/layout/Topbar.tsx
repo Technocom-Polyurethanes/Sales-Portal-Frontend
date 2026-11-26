@@ -5,6 +5,7 @@ import Icon from "../../components/ui/Icon"
 import { labelForPath } from "../navigation"
 import { useTranslation } from "../../i18n/I18nProvider"
 import { useSession } from "../../features/account/hooks/useSession"
+import NotificationBell from "../../features/notifications/NotificationBell"
 
 export type TopbarProps = {
   onOpenMenu?: () => void
@@ -58,6 +59,8 @@ export default function Topbar({ onOpenMenu, onOpenHelp }: TopbarProps) {
             className="h-9 w-72 rounded-md border border-line bg-page ps-9 pe-3 text-sm text-ink placeholder:text-muted/70 focus:border-primary focus:bg-surface"
           />
         </div>
+
+        <NotificationBell />
 
         <button
           type="button"
