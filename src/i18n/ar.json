@@ -35,6 +35,7 @@
     "status": "الحالة",
     "date": "التاريخ",
     "total": "الإجمالي",
+    "amountInWords": "المبلغ بالحروف",
     "notes": "ملاحظات",
     "seeAll": "عرض الكل",
     "showing": "عرض {count} من {total}",
