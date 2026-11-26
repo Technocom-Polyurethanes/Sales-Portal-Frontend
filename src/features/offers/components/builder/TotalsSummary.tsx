@@ -1,6 +1,7 @@
 import { useTranslation } from "../../../../i18n/I18nProvider"
 import { localeForLanguage } from "../../../../lib/formatters/locale"
 import { formatCurrency, formatNumber } from "../../../../lib/formatters/number"
+import { formatAmountInWords } from "../../../../lib/tafqeet"
 import type { DocumentLanguage } from "../../../../pdf/PdfLanguageProvider"
 import { getTemplate } from "../../../../pdf/templates"
 import type { ServerCalculations } from "../../hooks/useOfferBuilder"
@@ -22,6 +23,11 @@ export default function TotalsSummary({
   const { t, language } = useTranslation()
   const locale = localeForLanguage(language)
   const safeTotals = totals || {}
+  const totalInWords = formatAmountInWords(
+    Number(safeTotals.total ?? 0),
+    currency,
+    documentLanguage,
+  )
 
   return (
     <div className="rounded-md border border-line bg-surface p-4">
@@ -59,6 +65,13 @@ export default function TotalsSummary({
             {formatCurrency(safeTotals.total ?? 0, currency, locale)}
           </dd>
         </div>
+
+        {totalInWords ? (
+          <div className="flex flex-col gap-1 border-t border-line pt-2">
+            <dt className="text-muted">{t("common.amountInWords")}</dt>
+            <dd className="[overflow-wrap:anywhere] text-ink">{totalInWords}</dd>
+          </div>
+        ) : null}
       </dl>
     </div>
   )
