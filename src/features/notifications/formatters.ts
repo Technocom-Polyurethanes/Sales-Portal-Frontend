@@ -116,7 +116,8 @@ function routeFor(notification: Notification): string | undefined {
     case "bank.created":
       return "/banks"
     case "import.committed":
-      return "/import"
+      // Sales receives import notices but cannot open /import; the dashboard is allowed for all.
+      return "/"
     case "user.created":
     case "user.deactivated":
     case "user.role_changed":

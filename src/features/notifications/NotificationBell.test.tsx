@@ -143,6 +143,15 @@ describe("NotificationBell", () => {
     expect(state.navigate).toHaveBeenCalledWith("/offers/offer-1")
   })
 
+  it("routes import notices to a page every role can open", async () => {
+    state.items = [notification("import.committed")]
+    await renderBell()
+    await click(container.querySelector("button")!)
+
+    await click(container.querySelector("li button")!)
+    expect(state.navigate).toHaveBeenCalledWith("/")
+  })
+
   it("renders deleted notifications without a click action", async () => {
     state.items = [notification("offer.deleted")]
     await renderBell()
