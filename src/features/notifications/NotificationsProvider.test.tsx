@@ -231,6 +231,57 @@ describe("NotificationsProvider", () => {
     expect(view!.unreadCount).toBe(1)
   })
 
+  it("ignores a resync snapshot when a second read starts during the wait", async () => {
+    mocks.list.mockResolvedValue(
+      page([notification("n1"), notification("n2")], 2),
+    )
+    await renderProvider()
+    expect(view!.unreadCount).toBe(2)
+
+    let resolveA: () => void
+    let resolveB: () => void
+    mocks.markRead
+      .mockReturnValueOnce(
+        new Promise<void>((resolve) => {
+          resolveA = resolve
+        }),
+      )
+      .mockReturnValueOnce(
+        new Promise<void>((resolve) => {
+          resolveB = resolve
+        }),
+      )
+
+    let readA: Promise<void>
+    await act(async () => {
+      readA = view!.markAsRead("n1")
+    })
+    expect(view!.unreadCount).toBe(1)
+
+    const onReady = mocks.onReady.mock.calls[0][0]
+    await act(async () => onReady())
+    expect(mocks.list).toHaveBeenCalledTimes(1)
+
+    let readB: Promise<void>
+    await act(async () => {
+      readB = view!.markAsRead("n2")
+    })
+    expect(view!.unreadCount).toBe(0)
+
+    await act(async () => {
+      resolveA()
+      await readA
+    })
+    await settle()
+    expect(mocks.list).toHaveBeenCalledTimes(2)
+    expect(view!.unreadCount).toBe(0)
+
+    await act(async () => {
+      resolveB()
+      await readB
+    })
+  })
+
   it("reports a failed load and reloads on retry", async () => {
     mocks.list.mockRejectedValueOnce(new Error("offline"))
     await renderProvider()

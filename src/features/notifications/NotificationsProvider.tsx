@@ -169,12 +169,13 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     let active = true
 
     const load = async () => {
+      // Capture generations first: a write started during the wait must invalidate the snapshot.
+      const arrivalsAtStart = arrivalIdsRef.current.length
+      const readsAtStart = readsRef.current
       const pendingWrites = [...pendingWritesRef.current]
       if (pendingWrites.length > 0) await Promise.allSettled(pendingWrites)
       if (!active) return
 
-      const arrivalsAtStart = arrivalIdsRef.current.length
-      const readsAtStart = readsRef.current
       setLoading(itemsRef.current.length === 0)
       try {
         const page = await notificationsApi.list(1, PAGE_SIZE)
