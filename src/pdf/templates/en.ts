@@ -21,6 +21,7 @@ export const englishTemplate: OfferTemplate = {
   tax: "(VAT)",
   otherTax: "Commercial and industrial profit tax (Withholding Tax - 1%)",
   itemsTotalLabel: "Total",
+  amountInWords: "Amount in Words",
   deliveryTotalLabel: "Total",
   schedule: "Delivery Schedule",
   batch: "Batch #",

@@ -266,7 +266,11 @@ function OfferDocument({ data, language }: OfferDocumentProps) {
                   term={data.paymentTerm}
                   conditions={data.paymentTermsText}
                 />
-                <TotalsBlock rows={totalsRows} />
+                <TotalsBlock
+                  rows={totalsRows}
+                  totalInWords={data.totalInWords}
+                  amountInWordsLabel={template.amountInWords}
+                />
               </div>
             </div>
           )}

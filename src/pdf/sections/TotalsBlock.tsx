@@ -9,6 +9,8 @@ export type TotalsRow = {
 
 export type TotalsBlockProps = {
   rows: TotalsRow[]
+  totalInWords?: string
+  amountInWordsLabel?: string
 }
 
 const VARIANTS: Record<string, string> = {
@@ -17,7 +19,11 @@ const VARIANTS: Record<string, string> = {
 }
 
 /** Subtotal, discount, taxes and the total of the offer. */
-export default function TotalsBlock({ rows }: TotalsBlockProps) {
+export default function TotalsBlock({
+  rows,
+  totalInWords,
+  amountInWordsLabel,
+}: TotalsBlockProps) {
   return (
     <table className="doc-totals">
       <tbody>
@@ -33,6 +39,14 @@ export default function TotalsBlock({ rows }: TotalsBlockProps) {
             </td>
           </tr>
         ))}
+        {totalInWords ? (
+          <tr className="doc-in-words">
+            <td colSpan={2}>
+              <span className="doc-in-words__label">{amountInWordsLabel}</span>{" "}
+              {totalInWords}
+            </td>
+          </tr>
+        ) : null}
       </tbody>
     </table>
   )
