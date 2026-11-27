@@ -51,6 +51,8 @@ export type NotificationListener = (notification: LiveNotification) => void
 
 export type ReadyListener = () => void
 
+export type StatusListener = (status: LiveStatus) => void
+
 export type LiveClientOptions = {
   /** Opens the stream. Resolves once the response headers are in; rejects on a network failure. */
 
@@ -99,6 +101,9 @@ export type LiveClient = {
 
   onReady: (listener: ReadyListener) => () => void
 
+  /** Calls `listener` whenever the connection status changes. */
+  onStatus: (listener: StatusListener) => () => void
+
   getStatus: () => LiveStatus
 }
 
@@ -135,6 +140,8 @@ export function createLiveClient(options: LiveClientOptions): LiveClient {
   const notificationListeners = new Set<NotificationListener>()
 
   const readyListeners = new Set<ReadyListener>()
+
+  const statusListeners = new Set<StatusListener>()
 
   const pending = new Set<LiveTopic>()
 
@@ -317,6 +324,14 @@ export function createLiveClient(options: LiveClientOptions): LiveClient {
 
   function setStatus(next: LiveStatus) {
     status = next
+
+    for (const listener of [...statusListeners]) {
+      try {
+        listener(next)
+      } catch {
+        // One screen failing to update its status must not stop the connection.
+      }
+    }
   }
 
   function armSilenceWatchdog() {
@@ -561,6 +576,14 @@ export function createLiveClient(options: LiveClientOptions): LiveClient {
 
       return () => {
         readyListeners.delete(listener)
+      }
+    },
+
+    onStatus(listener) {
+      statusListeners.add(listener)
+
+      return () => {
+        statusListeners.delete(listener)
       }
     },
 

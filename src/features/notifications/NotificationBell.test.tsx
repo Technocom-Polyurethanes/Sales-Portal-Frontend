@@ -3,6 +3,8 @@ import { act } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+import { formatDateTime } from "../../lib/formatters/date"
+
 import NotificationBell from "./NotificationBell"
 import type { Notification } from "./types"
 
@@ -18,9 +20,11 @@ const state = vi.hoisted(() => ({
   markAllRead: vi.fn(async () => {}),
   navigate: vi.fn(),
   t: vi.fn((key: string, params?: Record<string, string | number>) =>
-    key.replace(/\{(\w+)\}/g, (_, name: string) =>
-      String(params?.[name] ?? ""),
-    ),
+    key === "notifications.time.minutesAgo"
+      ? `${params?.count} min ago`
+      : key.replace(/\{(\w+)\}/g, (_, name: string) =>
+          String(params?.[name] ?? ""),
+        ),
   ),
 }))
 
@@ -205,5 +209,45 @@ describe("NotificationBell", () => {
     expect(
       container.querySelector('[role="dialog"]')!.getAttribute("dir"),
     ).toBe("rtl")
+  })
+
+  it("row_shows_full_date_time_in_title", async () => {
+    const item = notification("offer.created")
+    item.createdAt = "2026-11-27T09:15:00Z"
+    state.items = [item]
+    await renderBell()
+    await click(container.querySelector("button")!)
+
+    const time = Array.from(container.querySelectorAll("span[title]")).find(
+      (element) =>
+        element.getAttribute("title") === formatDateTime(item.createdAt, "en-US"),
+    )!
+    expect(time.textContent).toContain("notifications.time.")
+  })
+
+  it("relative_time_updates_after_a_minute", async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date("2026-11-27T12:00:00Z"))
+    const clearIntervalSpy = vi.spyOn(globalThis, "clearInterval")
+    try {
+      const item = notification("offer.created")
+      item.createdAt = "2026-11-27T11:59:30Z"
+      state.items = [item]
+      await renderBell()
+      await click(container.querySelector("button")!)
+
+      expect(container.textContent).toContain("notifications.time.justNow")
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(60_000)
+      })
+      expect(container.textContent).toContain("1 min ago")
+
+      await click(container.querySelector("button")!)
+      expect(clearIntervalSpy).toHaveBeenCalled()
+    } finally {
+      clearIntervalSpy.mockRestore()
+      vi.useRealTimers()
+    }
   })
 })

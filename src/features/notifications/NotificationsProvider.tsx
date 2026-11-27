@@ -153,6 +153,21 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     }
   }, [notify, t])
 
+  // Route changes under BrowserRouter give a new navigate; keep the fetch effect stable.
+  const navigateRef = useRef(navigate)
+  const tRef = useRef(t)
+  const localeRef = useRef(locale)
+  const notifyRef = useRef(notify)
+  const markAsReadRef = useRef(markAsRead)
+
+  useEffect(() => {
+    navigateRef.current = navigate
+    tRef.current = t
+    localeRef.current = locale
+    notifyRef.current = notify
+    markAsReadRef.current = markAsRead
+  })
+
   const disabled = isMockApi() || !authenticated
 
   useEffect(() => {
@@ -204,6 +219,11 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       void load()
     })
 
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") void load()
+    }
+    document.addEventListener("visibilitychange", onVisibilityChange)
+
     const stopNotification = live.subscribeNotifications(
       (incoming: LiveNotification) => {
         if (!isNotification(incoming) || knownIdsRef.current.has(incoming.id))
@@ -217,18 +237,21 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         ])
         setUnreadCount((count) => count + 1)
 
-        const formatted = formatNotification(incoming, t, locale)
-        const description = `${formatted.description} · ${formatted.time}`
-        notify(
+        const formatted = formatNotification(
+          incoming,
+          tRef.current,
+          localeRef.current,
+        )
+        notifyRef.current(
           formatted.title,
           "info",
-          description,
+          formatted.description,
           formatted.route
             ? {
-                label: t("notifications.markRead"),
+                label: tRef.current("notifications.open"),
                 onClick: () => {
-                  void markAsRead(incoming.id)
-                  navigate(formatted.route!)
+                  void markAsReadRef.current(incoming.id)
+                  navigateRef.current(formatted.route!)
                 },
               }
             : undefined,
@@ -239,9 +262,10 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     return () => {
       active = false
       stopReady()
+      document.removeEventListener("visibilitychange", onVisibilityChange)
       stopNotification()
     }
-  }, [disabled, t, locale, notify, navigate, markAsRead, retryToken])
+  }, [disabled, retryToken])
 
   const retry = useCallback(() => setRetryToken((token) => token + 1), [])
 

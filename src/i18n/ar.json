@@ -103,13 +103,18 @@
     "greetingMorning": "صباح الخير، {name}",
     "greetingAfternoon": "مساء الخير، {name}",
     "greetingEvening": "مساء الخير، {name}",
-    "subtitle": "إليك ملخص عروض الأسعار اليوم.",
-    "offersThisMonth": "عروض هذا الشهر",
-    "moreThanLastMonth": "{count} أكثر من الشهر الماضي",
-    "totalValue": "إجمالي القيمة",
+    "subtitle": "نظرة سريعة على مستنداتك اليوم.",
+    "documentsThisMonth": "مستندات هذا الشهر",
     "acceptanceRate": "نسبة القبول",
-    "awaitingResponse": "بانتظار الرد",
-    "recentOffers": "أحدث العروض",
+    "acceptedThisMonth": "المقبولة هذا الشهر",
+    "document": "المستند",
+    "type": "النوع",
+    "offer": "عرض سعر",
+    "purchaseOrder": "أمر شراء",
+    "recentDocuments": "المستندات الأخيرة",
+    "emptyDocuments": "لا توجد مستندات بعد",
+    "emptyDocumentsHint": "أنشئ عرض سعر وسيظهر هنا.",
+    "loadFailed": "تعذّر تحميل مستنداتك.",
     "createNewOffer": "إنشاء عرض سعر جديد"
   },
   "offers": {
@@ -548,7 +553,13 @@
     "phone": "الهاتف",
     "preferences": "التفضيلات",
     "largeText": "خط أكبر",
-    "largeTextHint": "زيادة حجم النص في جميع أنحاء مساحة العمل."
+    "largeTextHint": "زيادة حجم النص في جميع أنحاء مساحة العمل.",
+    "liveUpdates": "التحديثات المباشرة: {status}",
+    "liveStatus": {
+      "connected": "متصل",
+      "reconnecting": "جارٍ إعادة الاتصال",
+      "unavailable": "غير متاحة"
+    }
   },
   "notFound": {
     "title": "الصفحة غير موجودة",
@@ -618,6 +629,7 @@
     "empty": "لا توجد إشعارات جديدة.",
     "markAllRead": "تعليم الكل كمقروء",
     "markRead": "تعليم كمقروء",
+    "open": "فتح",
     "unread": "{count} غير مقروء",
     "unreadItem": "غير مقروء",
     "loading": "جارٍ تحميل الإشعارات",

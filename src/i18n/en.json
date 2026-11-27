@@ -103,13 +103,18 @@
     "greetingMorning": "Good morning, {name}",
     "greetingAfternoon": "Good afternoon, {name}",
     "greetingEvening": "Good evening, {name}",
-    "subtitle": "Here's what's happening with your quotations today.",
-    "offersThisMonth": "Offers this month",
-    "moreThanLastMonth": "{count} more than last month",
-    "totalValue": "Total value",
+    "subtitle": "A quick look at your documents today.",
+    "documentsThisMonth": "Documents this month",
     "acceptanceRate": "Acceptance rate",
-    "awaitingResponse": "Awaiting response",
-    "recentOffers": "Recent offers",
+    "acceptedThisMonth": "Accepted this month",
+    "document": "Document",
+    "type": "Type",
+    "offer": "Offer",
+    "purchaseOrder": "Purchase order",
+    "recentDocuments": "Recent documents",
+    "emptyDocuments": "No documents yet",
+    "emptyDocumentsHint": "Create an offer and it will appear here.",
+    "loadFailed": "Could not load your documents.",
     "createNewOffer": "Create new offer"
   },
   "offers": {
@@ -548,7 +553,13 @@
     "phone": "Phone",
     "preferences": "Preferences",
     "largeText": "Larger text",
-    "largeTextHint": "Increase the text size across the workspace."
+    "largeTextHint": "Increase the text size across the workspace.",
+    "liveUpdates": "Live updates: {status}",
+    "liveStatus": {
+      "connected": "connected",
+      "reconnecting": "reconnecting",
+      "unavailable": "unavailable"
+    }
   },
   "notFound": {
     "title": "Page not found",
@@ -618,6 +629,7 @@
     "empty": "You're all caught up.",
     "markAllRead": "Mark all read",
     "markRead": "Mark as read",
+    "open": "Open",
     "unread": "{count} unread",
     "unreadItem": "Unread",
     "loading": "Loading notifications",
