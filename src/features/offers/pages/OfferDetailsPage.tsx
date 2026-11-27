@@ -215,66 +215,72 @@ export default function OfferDetailsPage() {
     <>
       <PageHeader
         title={offer.reference}
-        subtitle={customer?.name ?? offer.customerName}
+        subtitle={
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span>{customer?.name ?? offer.customerName}</span>
+            <span className="flex flex-wrap items-center gap-2">
+              <Badge variant={offer.status}>
+                {t(`offers.status.${offer.status}`)}
+              </Badge>
+              {offer.version > 1 && (
+                <span className="rounded bg-page px-2 py-1 text-xs">
+                  v{offer.version}
+                </span>
+              )}
+              {versionCount > 1 && (
+                <span className="rounded bg-page px-2 py-1 text-xs">
+                  {t("offers.details.versionCount", { count: versionCount })}
+                </span>
+              )}
+            </span>
+          </span>
+        }
         action={
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={offer.status}>
-              {t(`offers.status.${offer.status}`)}
-            </Badge>
-            {offer.version > 1 && (
-              <span className="rounded bg-page px-2 py-1 text-xs text-muted">
-                v{offer.version}
-              </span>
-            )}
-            {versionCount > 1 && (
-              <span className="rounded bg-page px-2 py-1 text-xs text-muted">
-                {t("offers.details.versionCount", { count: versionCount })}
-              </span>
-            )}
-
+          canWrite ? (
             <Button
-              variant="secondary"
-              icon={<Icon name="print" size={16} />}
-              onClick={() =>
-                documentData &&
-                print({ data: documentData, language: documentLanguage })
-              }
+              variant="primary"
+              icon={<Icon name="check" size={16} />}
+              onClick={() => setStatusOpen(true)}
             >
-              {t("common.print")}
+              {t("offers.details.changeStatus")}
             </Button>
-
-            {canDelete && (
-              <Button
-                variant="danger"
-                icon={<Icon name="trash" size={18} />}
-                onClick={() => deletion.setTarget(offer)}
-              >
-                {t("common.delete")}
-              </Button>
-            )}
-
-            {canWrite && (
-              <>
-                <Button
-                  variant="secondary"
-                  icon={<Icon name="edit" size={16} />}
-                  onClick={() => navigate(`/offers/new?from=${offer.id}`)}
-                >
-                  {t("offers.details.newVersion")}
-                </Button>
-
-                <Button
-                  variant="primary"
-                  icon={<Icon name="check" size={16} />}
-                  onClick={() => setStatusOpen(true)}
-                >
-                  {t("offers.details.changeStatus")}
-                </Button>
-              </>
-            )}
-          </div>
+          ) : undefined
         }
       />
+
+      <div className="no-print mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-line-soft bg-surface px-3 py-2">
+        <Button
+          variant="ghost"
+          icon={<Icon name="print" size={16} />}
+          onClick={() =>
+            documentData &&
+            print({ data: documentData, language: documentLanguage })
+          }
+        >
+          {t("common.print")}
+        </Button>
+
+        {canWrite && (
+          <Button
+            variant="ghost"
+            icon={<Icon name="edit" size={16} />}
+            onClick={() => navigate(`/offers/new?from=${offer.id}`)}
+          >
+            {t("offers.details.newVersion")}
+          </Button>
+        )}
+
+        {canDelete && (
+          <Button
+            variant="danger"
+            icon={<Icon name="trash" size={16} />}
+            className="ms-auto"
+            onClick={() => deletion.setTarget(offer)}
+          >
+            {t("common.delete")}
+          </Button>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
         <div className="min-w-0 space-y-4">

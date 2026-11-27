@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 
 export type PageHeaderProps = {
   title: string
-  subtitle?: string
+  subtitle?: ReactNode
   eyebrow?: string
   action?: ReactNode
 }
