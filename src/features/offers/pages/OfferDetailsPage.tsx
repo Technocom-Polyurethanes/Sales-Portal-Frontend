@@ -214,79 +214,77 @@ export default function OfferDetailsPage() {
   return (
     <>
       <PageHeader
-        title={offer.reference}
-        subtitle={
-          <span className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <span>{customer?.name ?? offer.customerName}</span>
-            <span className="flex flex-wrap items-center gap-2">
+        title={<bdi dir="ltr">{offer.reference}</bdi>}
+        subtitle={customer?.name ?? offer.customerName}
+        action={
+          <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:items-end">
+            <div className="flex flex-wrap items-center gap-2 sm:justify-end">
               <Badge variant={offer.status}>
                 {t(`offers.status.${offer.status}`)}
               </Badge>
               {offer.version > 1 && (
-                <span className="rounded bg-page px-2 py-1 text-xs">
+                <span className="rounded bg-page px-2 py-1 text-xs text-muted">
                   v{offer.version}
                 </span>
               )}
               {versionCount > 1 && (
-                <span className="rounded bg-page px-2 py-1 text-xs">
+                <span className="rounded bg-page px-2 py-1 text-xs text-muted">
                   {t("offers.details.versionCount", { count: versionCount })}
                 </span>
               )}
-            </span>
-          </span>
-        }
-        action={
-          <>
-            <Button
-              variant="secondary"
-              className="grow shrink-0 sm:grow-0"
-              aria-label={t("offers.details.printTitle")}
-              title={t("offers.details.printTitle")}
-              icon={<Icon name="print" size={16} />}
-              onClick={() =>
-                documentData &&
-                print({ data: documentData, language: documentLanguage })
-              }
-            >
-              {t("common.print")}
-            </Button>
-            {canWrite && (
+            </div>
+            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
+              {canWrite && (
+                <Button
+                  variant="primary"
+                  className="basis-full grow shrink-0 sm:basis-auto sm:grow-0"
+                  aria-label={t("offers.details.statusTitle")}
+                  title={t("offers.details.statusTitle")}
+                  icon={<Icon name="check" size={16} />}
+                  onClick={() => setStatusOpen(true)}
+                >
+                  {t("offers.details.changeStatus")}
+                </Button>
+              )}
               <Button
                 variant="secondary"
                 className="grow shrink-0 sm:grow-0"
-                aria-label={t("offers.details.editTitle")}
-                title={t("offers.details.editTitle")}
-                icon={<Icon name="edit" size={16} />}
-                onClick={() => navigate(`/offers/new?from=${offer.id}`)}
+                aria-label={t("offers.details.printTitle")}
+                title={t("offers.details.printTitle")}
+                icon={<Icon name="print" size={16} />}
+                onClick={() =>
+                  documentData &&
+                  print({ data: documentData, language: documentLanguage })
+                }
               >
-                {t("common.edit")}
+                {t("common.print")}
               </Button>
-            )}
-            {canDelete && (
-              <Button
-                variant="danger"
-                className="grow shrink-0 sm:grow-0"
-                aria-label={t("offers.details.deleteTitle")}
-                title={t("offers.details.deleteTitle")}
-                icon={<Icon name="trash" size={16} />}
-                onClick={() => deletion.setTarget(offer)}
-              >
-                {t("common.delete")}
-              </Button>
-            )}
-            {canWrite && (
-              <Button
-                variant="primary"
-                className="grow shrink-0 sm:grow-0"
-                aria-label={t("offers.details.statusTitle")}
-                title={t("offers.details.statusTitle")}
-                icon={<Icon name="check" size={16} />}
-                onClick={() => setStatusOpen(true)}
-              >
-                {t("offers.details.changeStatus")}
-              </Button>
-            )}
-          </>
+              {canWrite && (
+                <Button
+                  variant="secondary"
+                  className="grow shrink-0 sm:grow-0"
+                  aria-label={t("offers.details.editTitle")}
+                  title={t("offers.details.editTitle")}
+                  icon={<Icon name="edit" size={16} />}
+                  onClick={() => navigate(`/offers/new?from=${offer.id}`)}
+                >
+                  {t("common.edit")}
+                </Button>
+              )}
+              {canDelete && (
+                <Button
+                  variant="danger"
+                  className="grow shrink-0 sm:grow-0"
+                  aria-label={t("offers.details.deleteTitle")}
+                  title={t("offers.details.deleteTitle")}
+                  icon={<Icon name="trash" size={16} />}
+                  onClick={() => deletion.setTarget(offer)}
+                >
+                  {t("common.delete")}
+                </Button>
+              )}
+            </div>
+          </div>
         }
       />
 
