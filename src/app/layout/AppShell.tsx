@@ -23,6 +23,7 @@ export default function AppShell() {
   const { t } = useTranslation()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [drawerClosing, setDrawerClosing] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(
     () => localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true",
@@ -32,11 +33,24 @@ export default function AppShell() {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, String(sidebarCollapsed))
   }, [sidebarCollapsed])
 
+  const closeMenu = () => setDrawerClosing(true)
+
+  // Keep the drawer mounted until its exit animation has finished, like Dialog.
+  useEffect(() => {
+    if (!drawerClosing) return
+
+    const timer = window.setTimeout(() => {
+      setMenuOpen(false)
+      setDrawerClosing(false)
+    }, 220)
+    return () => window.clearTimeout(timer)
+  }, [drawerClosing])
+
   useEffect(() => {
     if (!menuOpen) return
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMenuOpen(false)
+      if (event.key === "Escape") closeMenu()
     }
     const previousOverflow = document.body.style.overflow
 
@@ -65,20 +79,20 @@ export default function AppShell() {
       {menuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="absolute inset-0 bg-ink/50 motion-safe:animate-fade-in"
+            className={`absolute inset-0 bg-ink/50 ${drawerClosing ? "motion-safe:animate-fade-out" : "motion-safe:animate-fade-in"}`}
             role="presentation"
-            onClick={() => setMenuOpen(false)}
+            onClick={closeMenu}
           />
           <div
             role="dialog"
             aria-modal="true"
             aria-label={t("shell.toggleNavigation")}
-            className="mobile-drawer absolute inset-y-0 start-0 w-[min(17rem,85vw)] motion-safe:animate-drawer-in"
+            className={`mobile-drawer absolute inset-y-0 start-0 w-[min(17rem,85vw)] ${drawerClosing ? "motion-safe:animate-drawer-out" : "motion-safe:animate-drawer-in"}`}
           >
             <Sidebar
-              onNavigate={() => setMenuOpen(false)}
+              onNavigate={closeMenu}
               onOpenHelp={() => {
-                setMenuOpen(false)
+                closeMenu()
                 setHelpOpen(true)
               }}
             />
@@ -92,7 +106,10 @@ export default function AppShell() {
         }`}
       >
         <Topbar
-          onOpenMenu={() => setMenuOpen(true)}
+          onOpenMenu={() => {
+            setMenuOpen(true)
+            setDrawerClosing(false)
+          }}
           onOpenHelp={() => setHelpOpen(true)}
         />
         <main className="w-full flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
