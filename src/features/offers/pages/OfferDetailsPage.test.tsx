@@ -231,4 +231,22 @@ describe("offer view document language", () => {
     expect(offer.paymentTermsText).toBe(custom)
     expect(errors).toEqual([])
   })
+
+  it("names and titles every offer action", async () => {
+    await open(db.offers[0].id)
+
+    const action = (label: string, title: string) => {
+      const button = Array.from(container.querySelectorAll("button")).find(
+        (item) => item.textContent?.trim() === label,
+      )
+      expect(button?.getAttribute("aria-label")).toBe(title)
+      expect(button?.getAttribute("title")).toBe(title)
+    }
+
+    action("Print", "Print this offer")
+    action("Edit", "Edit this offer as a new version")
+    action("Delete", "Delete this offer permanently")
+    action("Change status", "Change status for this offer")
+    expect(errors).toEqual([])
+  })
 })
