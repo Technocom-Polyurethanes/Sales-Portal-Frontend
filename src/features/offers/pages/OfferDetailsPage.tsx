@@ -213,12 +213,20 @@ export default function OfferDetailsPage() {
 
   return (
     <>
-      <PageHeader
-        title={<bdi dir="ltr">{offer.reference}</bdi>}
-        subtitle={customer?.name ?? offer.customerName}
-        action={
+      <section className="no-print mb-6 rounded-xl border border-line-soft bg-surface p-4 sm:p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+              <bdi dir="ltr">{offer.reference}</bdi>
+            </h1>
+            <p className="mt-1 break-words text-sm text-muted">
+              {customer?.name ?? offer.customerName}
+            </p>
+          </div>
+
           <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:items-end">
             <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+              <span className="text-xs text-muted">{t("common.status")}</span>
               <Badge variant={offer.status}>
                 {t(`offers.status.${offer.status}`)}
               </Badge>
@@ -233,11 +241,12 @@ export default function OfferDetailsPage() {
                 </span>
               )}
             </div>
-            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
+
+            <div className="grid grid-cols-3 gap-2 sm:flex sm:w-auto sm:justify-end">
               {canWrite && (
                 <Button
                   variant="primary"
-                  className="basis-full grow shrink-0 sm:basis-auto sm:grow-0"
+                  className="col-span-3 w-full sm:col-span-1 sm:w-auto"
                   aria-label={t("offers.details.statusTitle")}
                   title={t("offers.details.statusTitle")}
                   icon={<Icon name="check" size={16} />}
@@ -248,7 +257,7 @@ export default function OfferDetailsPage() {
               )}
               <Button
                 variant="secondary"
-                className="grow shrink-0 sm:grow-0"
+                className="w-full gap-1.5 px-2 sm:w-auto sm:gap-2 sm:px-4"
                 aria-label={t("offers.details.printTitle")}
                 title={t("offers.details.printTitle")}
                 icon={<Icon name="print" size={16} />}
@@ -262,7 +271,7 @@ export default function OfferDetailsPage() {
               {canWrite && (
                 <Button
                   variant="secondary"
-                  className="grow shrink-0 sm:grow-0"
+                  className="w-full gap-1.5 px-2 sm:w-auto sm:gap-2 sm:px-4"
                   aria-label={t("offers.details.editTitle")}
                   title={t("offers.details.editTitle")}
                   icon={<Icon name="edit" size={16} />}
@@ -274,7 +283,7 @@ export default function OfferDetailsPage() {
               {canDelete && (
                 <Button
                   variant="danger"
-                  className="grow shrink-0 sm:grow-0"
+                  className="w-full gap-1.5 px-2 sm:w-auto sm:gap-2 sm:px-4"
                   aria-label={t("offers.details.deleteTitle")}
                   title={t("offers.details.deleteTitle")}
                   icon={<Icon name="trash" size={16} />}
@@ -285,8 +294,8 @@ export default function OfferDetailsPage() {
               )}
             </div>
           </div>
-        }
-      />
+        </div>
+      </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
         <div className="min-w-0 space-y-4">
