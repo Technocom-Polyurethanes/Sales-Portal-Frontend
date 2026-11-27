@@ -548,7 +548,13 @@
     "phone": "الهاتف",
     "preferences": "التفضيلات",
     "largeText": "خط أكبر",
-    "largeTextHint": "زيادة حجم النص في جميع أنحاء مساحة العمل."
+    "largeTextHint": "زيادة حجم النص في جميع أنحاء مساحة العمل.",
+    "liveUpdates": "التحديثات المباشرة: {status}",
+    "liveStatus": {
+      "connected": "متصل",
+      "reconnecting": "جارٍ إعادة الاتصال",
+      "unavailable": "غير متاحة"
+    }
   },
   "notFound": {
     "title": "الصفحة غير موجودة",
@@ -618,6 +624,7 @@
     "empty": "لا توجد إشعارات جديدة.",
     "markAllRead": "تعليم الكل كمقروء",
     "markRead": "تعليم كمقروء",
+    "open": "فتح",
     "unread": "{count} غير مقروء",
     "unreadItem": "غير مقروء",
     "loading": "جارٍ تحميل الإشعارات",

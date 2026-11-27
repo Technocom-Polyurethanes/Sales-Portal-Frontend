@@ -548,7 +548,13 @@
     "phone": "Phone",
     "preferences": "Preferences",
     "largeText": "Larger text",
-    "largeTextHint": "Increase the text size across the workspace."
+    "largeTextHint": "Increase the text size across the workspace.",
+    "liveUpdates": "Live updates: {status}",
+    "liveStatus": {
+      "connected": "connected",
+      "reconnecting": "reconnecting",
+      "unavailable": "unavailable"
+    }
   },
   "notFound": {
     "title": "Page not found",
@@ -618,6 +624,7 @@
     "empty": "You're all caught up.",
     "markAllRead": "Mark all read",
     "markRead": "Mark as read",
+    "open": "Open",
     "unread": "{count} unread",
     "unreadItem": "Unread",
     "loading": "Loading notifications",

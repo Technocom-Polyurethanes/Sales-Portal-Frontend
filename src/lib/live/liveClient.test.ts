@@ -583,4 +583,45 @@ describe("live client", () => {
 
     client.stop()
   })
+
+  it("notifies status listeners on every transition and stops after unsubscribe", async () => {
+    const { client, streams } = setup()
+
+    const onStatus = vi.fn()
+
+    const stop = client.onStatus(onStatus)
+
+    client.start()
+
+    await settle()
+
+    streams[0].send(ready)
+
+    await settle()
+
+    expect(onStatus.mock.calls.map((call) => call[0])).toEqual([
+      "connecting",
+      "live",
+    ])
+
+    streams[0].end()
+
+    await settle()
+
+    expect(onStatus).toHaveBeenLastCalledWith("offline")
+
+    await vi.advanceTimersByTimeAsync(1_000)
+
+    streams[1].send(ready)
+
+    await settle()
+
+    expect(onStatus).toHaveBeenLastCalledWith("live")
+
+    stop()
+
+    client.stop()
+
+    expect(onStatus).toHaveBeenCalledTimes(4)
+  })
 })

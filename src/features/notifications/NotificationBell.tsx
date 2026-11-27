@@ -7,6 +7,7 @@ import Icon from "../../components/ui/Icon"
 import Skeleton from "../../components/ui/Skeleton"
 import { useTranslation } from "../../i18n/I18nProvider"
 import { isMockApi } from "../../lib/api/mode"
+import { formatDateTime } from "../../lib/formatters/date"
 import { localeForLanguage } from "../../lib/formatters/locale"
 
 import { formatNotification } from "./formatters"
@@ -18,6 +19,7 @@ export default function NotificationBell() {
   const { t, language, direction } = useTranslation()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const [now, setNow] = useState(Date.now())
   const wrapper = useRef<HTMLDivElement>(null)
   const bell = useRef<HTMLButtonElement>(null)
   const panel = useRef<HTMLDivElement>(null)
@@ -46,10 +48,21 @@ export default function NotificationBell() {
     }
   }, [open])
 
+  useEffect(() => {
+    if (!open) return
+
+    setNow(Date.now())
+    const timer = setInterval(() => setNow(Date.now()), 60_000)
+    return () => clearInterval(timer)
+  }, [open])
+
   const formatted = useMemo(
     () =>
-      items.map((item) => ({ item, ...formatNotification(item, t, locale) })),
-    [items, t, locale],
+      items.map((item) => ({
+        item,
+        ...formatNotification(item, t, locale, now),
+      })),
+    [items, t, locale, now],
   )
 
   if (isMockApi()) return null
@@ -185,7 +198,10 @@ export default function NotificationBell() {
                             {description}
                           </span>
                         </span>
-                        <span className="shrink-0 text-[11px] text-muted">
+                        <span
+                          title={formatDateTime(item.createdAt, locale)}
+                          className="shrink-0 text-[11px] text-muted"
+                        >
                           {time}
                         </span>
                       </span>
