@@ -103,7 +103,7 @@ export default function NotificationBell() {
           aria-label={t("notifications.title")}
           dir={direction}
           tabIndex={-1}
-          className="fixed inset-x-4 top-16 z-40 max-h-[min(30rem,calc(100vh-5rem))] overflow-hidden rounded-lg border border-line bg-surface shadow-xl focus:outline-none sm:absolute sm:start-auto sm:end-0 sm:top-11 sm:w-96"
+          className="fixed inset-x-4 top-16 z-40 max-h-[min(30rem,calc(100vh-5rem))] overflow-hidden rounded-lg border border-line bg-surface shadow-xl focus:outline-none motion-safe:animate-panel-in sm:absolute sm:start-auto sm:end-0 sm:top-11 sm:w-96"
         >
           <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-3">
             <strong className="text-sm font-semibold text-ink">
