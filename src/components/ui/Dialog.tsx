@@ -31,6 +31,11 @@ export default function Dialog({
   const [visible, setVisible] = useState(open)
   const titleId = useId()
   const panelRef = useRef<HTMLElement>(null)
+  const onCloseRef = useRef(onClose)
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   useEffect(() => {
     if (open) {
@@ -49,7 +54,7 @@ export default function Dialog({
     panelRef.current?.focus()
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose()
+      if (event.key === "Escape") onCloseRef.current()
     }
 
     document.addEventListener("keydown", onKeyDown)
@@ -57,7 +62,7 @@ export default function Dialog({
       document.removeEventListener("keydown", onKeyDown)
       previousFocus?.focus()
     }
-  }, [open, onClose])
+  }, [open])
 
   if (!visible) return null
   const closing = !open
