@@ -63,7 +63,7 @@ describe("application shell", () => {
     const text = container.textContent ?? ""
     expect(text).toContain("TECHNOCOM")
     expect(text.toLowerCase()).toContain("good")
-    expect(text).toContain("Recent offers")
+    expect(text).toContain("Recent documents")
     expect(text).toContain("Loc/3089-2026/YL/AA")
   })
 
@@ -110,8 +110,8 @@ describe("application shell", () => {
         sortDir: "desc",
       }),
     )
-    const references = Array.from(container.querySelectorAll("tbody tr button")).map(
-      (button) => button.textContent,
+    const references = Array.from(container.querySelectorAll("li button")).map(
+      (button) => button.querySelector('span[dir="ltr"]')?.textContent,
     )
     expect(references).toEqual([
       "REF-0",
@@ -137,7 +137,7 @@ describe("application shell", () => {
     await settle()
 
     const text = container.textContent ?? ""
-    expect(text).toContain("Recent offers")
+    expect(text).toContain("Recent documents")
     expect(text).not.toContain("Welcome back")
     expect(window.location.pathname).toBe("/")
   })
@@ -171,7 +171,7 @@ describe("application shell", () => {
 
     expect(window.location.pathname).toBe("/")
     const text = container.textContent ?? ""
-    expect(text).toContain("Recent offers")
+    expect(text).toContain("Recent documents")
     expect(text.toLowerCase()).not.toContain("not found")
   })
 
