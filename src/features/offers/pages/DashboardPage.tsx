@@ -18,11 +18,16 @@ import { useOffers } from "../hooks/useOffers"
 import type { OfferListItem } from "../types"
 
 const RECENT_COUNT = 6
+const DOCUMENT_COLUMNS =
+  "grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,0.9fr)_minmax(0,0.8fr)] sm:items-center sm:gap-4"
+
+type DocumentKind = "offer" | "purchaseOrder"
 
 type DashboardDocument = {
   id: string
   reference: string
   customer: string
+  kind: DocumentKind
   status: OfferListItem["status"]
   total: number
   currency: string
@@ -53,6 +58,7 @@ export default function DashboardPage() {
       id: offer.id,
       reference: offer.reference,
       customer: offer.customerName,
+      kind: "offer",
       status: offer.status,
       total: offer.total,
       currency: offer.currency,
@@ -62,7 +68,6 @@ export default function DashboardPage() {
   const monthKey = new Date().toISOString().slice(0, 7)
   const thisMonth = (doc: DashboardDocument) =>
     doc.issueDate.startsWith(monthKey)
-  const awaiting = documents.filter((doc) => doc.status === "issued").length
   const accepted = documents.filter(
     (doc) => doc.status === "accepted" && thisMonth(doc),
   ).length
@@ -74,16 +79,18 @@ export default function DashboardPage() {
   ).length
   const stats = [
     {
-      label: t("dashboard.offersThisMonth"),
+      label: t("dashboard.documentsThisMonth"),
       value: String(documents.filter(thisMonth).length),
     },
-    { label: t("dashboard.awaitingResponse"), value: String(awaiting) },
     { label: t("dashboard.acceptedThisMonth"), value: String(accepted) },
     {
       label: t("dashboard.acceptanceRate"),
       value: formatPercent(closed ? (acceptedTotal / closed) * 100 : 0, locale),
     },
   ]
+
+  const documentType = (doc: DashboardDocument) =>
+    t(doc.kind === "offer" ? "dashboard.offer" : "dashboard.purchaseOrder")
 
   const hour = new Date().getHours()
   const title = t(
@@ -113,7 +120,7 @@ export default function DashboardPage() {
         }
       />
 
-      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-4">
+      <dl className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-3">
         {stats.map((stat) => (
           <div key={stat.label} className="bg-surface px-4 py-4">
             <dt className="text-xs text-muted">{stat.label}</dt>
@@ -123,22 +130,6 @@ export default function DashboardPage() {
           </div>
         ))}
       </dl>
-
-      {awaiting > 0 && (
-        <section className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary-soft px-4 py-3">
-          <p className="flex items-center gap-2 text-sm text-ink">
-            <Icon name="clock" size={16} className="shrink-0 text-primary" />
-            {t("dashboard.needsAttention", { count: awaiting })}
-          </p>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/offers?status=issued")}
-          >
-            {t("dashboard.review")}
-          </Button>
-        </section>
-      )}
 
       <section className="mt-6" aria-labelledby="dashboard-documents">
         <header className="mb-3 flex items-center justify-between gap-3">
@@ -153,20 +144,21 @@ export default function DashboardPage() {
           </Button>
         </header>
 
+        <div
+          aria-hidden="true"
+          className={`hidden border-b border-line bg-surface px-4 py-2 text-xs font-semibold tracking-wide text-muted uppercase sm:grid ${DOCUMENT_COLUMNS}`}
+        >
+          <span>{t("dashboard.document")}</span><span>{t("dashboard.type")}</span><span>{t("common.status")}</span><span className="text-end">{t("common.total")}</span><span className="text-end">{t("common.date")}</span>
+        </div>
+
+
         {error ? (
           <div
             role="alert"
             className="rounded-lg border border-line bg-surface px-4 py-10 text-center"
           >
             <p className="text-sm text-ink">{t("dashboard.loadFailed")}</p>
-            <Button
-              variant="secondary"
-              size="sm"
-              className="mt-3"
-              onClick={reload}
-            >
-              {t("common.retry")}
-            </Button>
+            <Button variant="secondary" size="sm" className="mt-3" onClick={reload}>{t("common.retry")}</Button>
           </div>
         ) : loading ? (
           <ul
@@ -174,13 +166,15 @@ export default function DashboardPage() {
             className="divide-y divide-line-soft overflow-hidden rounded-lg border border-line bg-surface"
           >
             {Array.from({ length: RECENT_COUNT }, (_, index) => (
-              <li key={index} className="flex items-center gap-3 px-4 py-3">
-                <Skeleton className="h-8 w-8 shrink-0 rounded-md" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-3 w-1/3" />
+              <li key={index} className={`px-4 py-3 ${DOCUMENT_COLUMNS}`}>
+                <div className="space-y-2">
+                  <Skeleton className="h-3 w-2/3" />
                   <Skeleton className="h-2.5 w-1/2" />
                 </div>
-                <Skeleton className="hidden h-3 w-20 sm:block" />
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-6 w-16 rounded-full" />
+                <Skeleton className="h-3 w-24 justify-self-end" />
+                <Skeleton className="h-3 w-16 justify-self-end" />
               </li>
             ))}
           </ul>
@@ -213,14 +207,11 @@ export default function DashboardPage() {
               <li key={doc.id}>
                 <button
                   type="button"
-                  aria-label={`${doc.reference}, ${doc.customer}, ${t(`offers.status.${doc.status}`)}`}
+                  aria-label={`${doc.reference}, ${documentType(doc)}, ${doc.customer}, ${t(`offers.status.${doc.status}`)}`}
                   onClick={() => navigate(`/offers/${doc.id}`)}
-                  className="flex w-full items-center gap-3 px-4 py-3 text-start transition-colors hover:bg-page focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  className={`w-full px-4 py-3 text-start transition-colors hover:bg-page focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${DOCUMENT_COLUMNS}`}
                 >
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary">
-                    <Icon name="offers" size={16} />
-                  </span>
-                  <span className="min-w-0 flex-1">
+                  <span className="min-w-0">
                     <span
                       dir="ltr"
                       className="block truncate text-start text-sm font-medium text-ink"
@@ -231,20 +222,18 @@ export default function DashboardPage() {
                       {doc.customer}
                     </span>
                   </span>
-                  <span className="hidden sm:block">
+                  <span className="text-xs text-muted sm:text-sm sm:text-ink">
+                    {documentType(doc)}
+                  </span>
+                  <span>
                     <Badge variant={doc.status}>
                       {t(`offers.status.${doc.status}`)}
                     </Badge>
                   </span>
-                  <span className="hidden w-32 text-end text-sm font-medium text-ink md:block">
+                  <span className="text-sm font-medium text-ink sm:text-end">
                     {formatCurrency(doc.total, doc.currency, locale)}
                   </span>
-                  <span
-                    dir="ltr"
-                    className="hidden w-20 text-right text-xs text-muted lg:block"
-                  >
-                    {formatIsoDay(doc.issueDate, locale)}
-                  </span>
+                  <span dir="ltr" className="text-xs text-muted sm:text-end">{formatIsoDay(doc.issueDate, locale)}</span>
                 </button>
               </li>
             ))}

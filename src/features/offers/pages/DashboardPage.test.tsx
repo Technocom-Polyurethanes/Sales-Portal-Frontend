@@ -117,34 +117,38 @@ describe("dashboard", () => {
     ]
     await renderPage()
 
-    expect(stat("Offers this month")).toBe("3")
-    expect(stat("Awaiting reply")).toBe("2")
+    expect(stat("Documents this month")).toBe("3")
     expect(stat("Accepted this month")).toBe("1")
     expect(stat("Acceptance rate")).toBe("50%")
+    expect(container.querySelectorAll("dt")).toHaveLength(3)
     expect(container.textContent).not.toContain("Total value")
   })
 
-  it("links the attention strip to the offers waiting for a reply", async () => {
+  it("does not surface an awaiting-reply action", async () => {
     state.items = [offer("1", "issued", `${month}-05`)]
     await renderPage()
 
-    expect(container.textContent).toContain("1 offers waiting for a reply")
-    const review = Array.from(container.querySelectorAll("button")).find(
-      (button) => button.textContent === "Review",
-    )!
-    await click(review)
-
-    expect(state.navigate).toHaveBeenCalledWith("/offers?status=issued")
+    expect(container.textContent).not.toContain("Awaiting reply")
+    expect(container.textContent).not.toContain("waiting for a reply")
+    expect(container.textContent).not.toContain("Review")
   })
 
   it("opens a document from the recent list", async () => {
     state.items = [offer("7", "accepted", `${month}-05`)]
     await renderPage()
 
+    expect(container.textContent).toContain("Document")
+    expect(container.textContent).toContain("Type")
+    expect(container.textContent).toContain("Status")
+    expect(container.textContent).toContain("Total")
+    expect(container.textContent).toContain("Date")
+
     const rows = container.querySelectorAll("li button")
     expect(rows).toHaveLength(1)
     expect(rows[0].textContent).toContain("Loc/7-2026/AA")
     expect(rows[0].textContent).toContain("Customer 7")
+    expect(rows[0].textContent).toContain("Offer")
+    expect(rows[0].getAttribute("aria-label")).toContain("Offer")
     expect(rows[0].getAttribute("aria-label")).toContain("Accepted")
 
     await click(rows[0])
