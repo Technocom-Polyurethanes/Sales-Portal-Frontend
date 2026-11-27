@@ -240,11 +240,8 @@ export default function DashboardPage() {
                 >
                   <span className="flex min-w-0 items-start justify-between gap-3">
                     <span className="min-w-0">
-                      <span
-                        dir="ltr"
-                        className="block truncate text-start text-sm font-semibold text-ink"
-                      >
-                        {doc.reference}
+                      <span className="block truncate text-start text-sm font-semibold text-ink">
+                        <bdi dir="ltr">{doc.reference}</bdi>
                       </span>
                       <span className="mt-0.5 block truncate text-xs text-muted">
                         {doc.customer}
@@ -282,11 +279,8 @@ export default function DashboardPage() {
                   <span className="hidden truncate text-sm font-medium text-ink lg:block lg:text-end">
                     {formatCurrency(doc.total, doc.currency, locale)}
                   </span>
-                  <span
-                    dir="ltr"
-                    className="hidden text-xs text-muted lg:block lg:text-end"
-                  >
-                    {formatIsoDay(doc.issueDate, locale)}
+                  <span className="hidden text-xs text-muted lg:block lg:text-end">
+                    <bdi dir="ltr">{formatIsoDay(doc.issueDate, locale)}</bdi>
                   </span>
                 </button>
               </li>

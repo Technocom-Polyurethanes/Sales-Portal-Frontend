@@ -49,8 +49,8 @@ export default function UserCard({
               </span>
             )}
           </h3>
-          <p dir="ltr" className="truncate text-start text-xs text-muted">
-            @{user.username}
+          <p className="truncate text-start text-xs text-muted">
+            <bdi dir="ltr">@{user.username}</bdi>
           </p>
         </div>
         <RoleBadge role={user.role} />
@@ -58,8 +58,8 @@ export default function UserCard({
 
       <dl className="grid gap-2 text-sm sm:flex sm:flex-row sm:justify-between sm:gap-4">
         {subtitle && <dd className="min-w-0 truncate text-ink">{subtitle}</dd>}
-        <dd dir="ltr" className="min-w-0 truncate text-start text-muted">
-          {user.email || ""}
+        <dd className="min-w-0 truncate text-start text-muted">
+          <bdi dir="ltr">{user.email || ""}</bdi>
         </dd>
         <dd className="min-w-0 text-xs text-muted sm:text-sm">
           {t("users.createdOn")}{" "}

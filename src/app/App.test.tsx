@@ -138,7 +138,7 @@ describe("application shell", () => {
       }),
     )
     const references = Array.from(container.querySelectorAll("li button")).map(
-      (button) => button.querySelector('span[dir="ltr"]')?.textContent,
+      (button) => button.querySelector('bdi[dir="ltr"]')?.textContent,
     )
     expect(references).toEqual([
       "REF-0",

@@ -2,7 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
 } from "react"
@@ -39,7 +39,8 @@ const I18nContext = createContext<I18nContextValue | null>(null)
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<AppLanguage>(readStoredLanguage)
 
-  useEffect(() => {
+  // Set direction before paint so an Arabic session never flashes left-to-right.
+  useLayoutEffect(() => {
     storeLanguage(language)
     document.documentElement.lang = language
     document.documentElement.dir = getDirection(language)
