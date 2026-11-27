@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import "@/mock"
 import { accountApi } from "../features/account/api"
+import { offersApi } from "../features/offers/api"
 import { clearCache } from "../lib/cache/queryCache"
 import App from "./App"
 
@@ -64,6 +65,67 @@ describe("application shell", () => {
     expect(text.toLowerCase()).toContain("good")
     expect(text).toContain("Recent offers")
     expect(text).toContain("Loc/3089-2026/YL/AA")
+  })
+
+  it("shows six recent offers, newest first", async () => {
+    clearCache()
+    const items = Array.from({ length: 7 }, (_, index) => ({
+      id: `offer-${index}`,
+      reference: `REF-${index}`,
+      serialNumber: 3089 - index,
+      version: 1,
+      customerId: "cust-1",
+      customerName: "Customer",
+      customerNameAr: null,
+      issueDate: "2026-10-21",
+      dueDate: "2026-10-28",
+      currency: "EGP",
+      status: "draft" as const,
+      total: 1000,
+      createdByName: "User",
+      createdAt: `2026-10-2${index}T09:30:00Z`,
+      updatedAt: `2026-10-2${index}T09:30:00Z`,
+      lastModifiedByName: "User",
+      lastModifiedAt: `2026-10-2${index}T09:30:00Z`,
+    }))
+    const list = vi.spyOn(offersApi, "list").mockResolvedValue({
+      items,
+      page: 1,
+      pageSize: 200,
+      totalCount: items.length,
+      totalPages: 1,
+    })
+
+    const root = createRoot(container)
+    await act(async () => {
+      root.render(<App />)
+    })
+    await settle()
+
+    expect(list).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pageSize: 200,
+        latestOnly: true,
+        sortBy: "updatedAt",
+        sortDir: "desc",
+      }),
+    )
+    const references = Array.from(container.querySelectorAll("tbody tr button")).map(
+      (button) => button.textContent,
+    )
+    expect(references).toEqual([
+      "REF-0",
+      "REF-1",
+      "REF-2",
+      "REF-3",
+      "REF-4",
+      "REF-5",
+    ])
+    expect(container.textContent).not.toContain("REF-6")
+
+    await act(async () => {
+      root.unmount()
+    })
   })
 
   it("shows the home page instead of 'not found' when a signed in user is on /login", async () => {

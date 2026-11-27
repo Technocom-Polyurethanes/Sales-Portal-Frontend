@@ -225,6 +225,9 @@ export type OfferListParams = {
   search?: string
   page?: number
   pageSize?: number
+  latestOnly?: boolean
+  sortBy?: string
+  sortDir?: string
 }
 
 /** Payload used when a new offer is issued. */

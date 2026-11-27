@@ -36,7 +36,7 @@ export default function DashboardPage() {
     latestOnly: true,
     sortBy: "updatedAt",
     sortDir: "desc",
-  } as any)
+  })
   const { user } = useSession()
   const locale = localeForLanguage(language)
 
@@ -210,12 +210,12 @@ export default function DashboardPage() {
           onCreate={canWriteOffers ? () => navigate("/offers/new") : undefined}
           emptyTitle={t("offers.list.empty")}
           emptyDescription={t("dashboard.subtitle")}
-          skeletonRows={5}
+          skeletonRows={6}
           skeletonColumns={5}
         >
           <DataTable
             columns={columns}
-            rows={offersList.slice(0, 5)}
+            rows={offersList.slice(0, 6)}
             rowKey={(offer) => offer.id}
             onRowClick={(offer) => navigate(`/offers/${offer.id}`)}
           />
