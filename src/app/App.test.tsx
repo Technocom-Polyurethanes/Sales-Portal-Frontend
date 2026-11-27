@@ -30,10 +30,17 @@ function typeInto(input: HTMLInputElement, value: string) {
   input.dispatchEvent(new Event("input", { bubbles: true }))
 }
 
-const settle = async (ms = 400) => {
+const settle = async (ms = 1000) => {
   await act(async () => {
     await new Promise((resolve) => setTimeout(resolve, ms))
   })
+}
+
+async function waitForText(container: HTMLElement, text: string) {
+  for (let tries = 0; tries < 50; tries += 1) {
+    if ((container.textContent ?? "").includes(text)) return
+    await settle(100)
+  }
 }
 
 describe("application shell", () => {
@@ -59,6 +66,7 @@ describe("application shell", () => {
       root.render(<App />)
     })
     await settle()
+    await waitForText(container, "Loc/3089-2026/YL/AA")
 
     const text = container.textContent ?? ""
     expect(text).toContain("TECHNOCOM")
@@ -218,6 +226,7 @@ describe("application shell", () => {
         root.render(<App />)
       })
       await settle()
+      await waitForText(container, expected)
       expect(container.textContent ?? "").toContain(expected)
       await act(async () => {
         root.unmount()
@@ -238,4 +247,4 @@ describe("application shell", () => {
     expect(text).toContain("Welcome back")
     expect(text).toContain("Log in")
   })
-})
+}, 15000)

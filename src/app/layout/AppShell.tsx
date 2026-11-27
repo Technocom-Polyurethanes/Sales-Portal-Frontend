@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useRef, useState } from "react"
 import { Outlet, useLocation } from "react-router-dom"
 
 import Button from "../../components/ui/Button"
 import Dialog from "../../components/ui/Dialog"
 import Icon from "../../components/ui/Icon"
+import Skeleton from "../../components/ui/Skeleton"
 import { useTranslation } from "../../i18n/I18nProvider"
 import type { TranslationKey } from "../../i18n/types"
+import { useFocusTrap } from "../../lib/hooks/useFocusTrap"
+import RouteErrorBoundary from "../RouteErrorBoundary"
 import AppFooter from "./AppFooter"
 import Sidebar from "./Sidebar"
 import Topbar from "./Topbar"
@@ -28,6 +31,8 @@ export default function AppShell() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(
     () => localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true",
   )
+  const drawerRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(menuOpen, drawerRef)
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, String(sidebarCollapsed))
@@ -87,9 +92,11 @@ export default function AppShell() {
             onClick={closeMenu}
           />
           <div
+            ref={drawerRef}
             role="dialog"
             aria-modal="true"
             aria-label={t("shell.toggleNavigation")}
+            tabIndex={-1}
             className={`mobile-drawer absolute inset-y-0 start-0 w-[min(17rem,85vw)] ${drawerClosing ? "motion-safe:animate-drawer-out" : "motion-safe:animate-drawer-in"}`}
           >
             <Sidebar
@@ -117,7 +124,21 @@ export default function AppShell() {
         />
         <main className="w-full flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
           <div key={location.pathname} className="mx-auto w-full max-w-[1500px] motion-safe:animate-fade-in">
-            <Outlet />
+            <RouteErrorBoundary
+              message={t("common.somethingWrong")}
+              retryLabel={t("common.retry")}
+            >
+              <Suspense
+                fallback={
+                  <div role="status" aria-busy="true" className="space-y-4">
+                    <Skeleton className="h-8 w-48" />
+                    <Skeleton className="h-64 w-full" />
+                  </div>
+                }
+              >
+                <Outlet />
+              </Suspense>
+            </RouteErrorBoundary>
           </div>
         </main>
         <AppFooter />

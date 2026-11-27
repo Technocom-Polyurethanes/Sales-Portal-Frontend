@@ -222,4 +222,4 @@ describe("offer builder", () => {
     expect(paymentTermsText().value).toBe(saved)
     expect(errors).toEqual([])
   })
-})
+}, 15000)
