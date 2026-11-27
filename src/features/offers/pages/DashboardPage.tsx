@@ -158,7 +158,7 @@ export default function DashboardPage() {
 
         <div
           aria-hidden="true"
-          className={`hidden border-b border-line-soft bg-surface px-5 py-2 text-xs font-semibold text-muted lg:grid ${DOCUMENT_COLUMNS}`}
+          className={`hidden border-b border-line-soft bg-surface px-5 py-2 text-xs font-semibold text-muted lg:grid lg:rounded-t-lg ${DOCUMENT_COLUMNS}`}
         >
           <span>{t("dashboard.document")}</span>
           <span>{t("dashboard.type")}</span>
@@ -170,7 +170,7 @@ export default function DashboardPage() {
         {error ? (
           <div
             role="alert"
-            className="rounded-lg border border-line-soft bg-surface px-4 py-10 text-center"
+            className="rounded-lg border border-line-soft bg-surface px-4 py-10 text-center lg:rounded-t-none lg:border-t-0"
           >
             <p className="text-sm text-ink">{t("dashboard.loadFailed")}</p>
             <Button
@@ -185,13 +185,16 @@ export default function DashboardPage() {
         ) : loading ? (
           <ul
             aria-busy="true"
-            className="divide-y divide-line-soft overflow-hidden rounded-lg border border-line-soft bg-surface"
+            className="divide-y divide-line-soft overflow-hidden rounded-lg border border-line-soft bg-surface lg:rounded-t-none lg:border-t-0"
           >
             {Array.from({ length: RECENT_COUNT }, (_, index) => (
               <li key={index} className={`px-4 py-3 sm:px-5 ${DOCUMENT_COLUMNS}`}>
-                <div className="space-y-2">
-                  <Skeleton className="h-3 w-2/3" />
-                  <Skeleton className="h-2.5 w-1/2" />
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-2">
+                    <Skeleton className="h-3 w-2/3" />
+                    <Skeleton className="h-2.5 w-1/2" />
+                  </div>
+                  <Skeleton className="h-6 w-16 shrink-0 rounded-full lg:hidden" />
                 </div>
                 <Skeleton className="hidden h-3 w-16 lg:block" />
                 <Skeleton className="hidden h-6 w-16 rounded-full lg:block" />
@@ -200,7 +203,9 @@ export default function DashboardPage() {
                 <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:hidden">
                   <Skeleton className="h-8" />
                   <Skeleton className="h-8" />
-                  <Skeleton className="h-8" />
+                  <span className="col-span-2 sm:col-span-1">
+                    <Skeleton className="h-8" />
+                  </span>
                 </div>
               </li>
             ))}
@@ -208,7 +213,7 @@ export default function DashboardPage() {
         ) : documents.length === 0 ? (
           <div
             role="status"
-            className="rounded-lg border border-line-soft bg-surface px-4 py-10 text-center"
+            className="rounded-lg border border-line-soft bg-surface px-4 py-10 text-center lg:rounded-t-none lg:border-t-0"
           >
             <Icon name="offers" size={28} className="mx-auto text-muted" />
             <p className="mt-3 text-sm font-medium text-ink">
@@ -229,12 +234,12 @@ export default function DashboardPage() {
             )}
           </div>
         ) : (
-          <ul className="divide-y divide-line-soft overflow-hidden rounded-lg border border-line-soft bg-surface">
+          <ul className="divide-y divide-line-soft overflow-hidden rounded-lg border border-line-soft bg-surface lg:rounded-t-none lg:border-t-0">
             {documents.slice(0, RECENT_COUNT).map((doc) => (
               <li key={doc.id} className="px-4 py-3 sm:px-5">
                 <button
                   type="button"
-                  aria-label={`${doc.reference}, ${documentType(doc)}, ${doc.customer}, ${t(`offers.status.${doc.status}`)}`}
+                  aria-label={`${doc.reference}, ${documentType(doc)}, ${doc.customer}, ${t(`offers.status.${doc.status}`)}, ${formatCurrency(doc.total, doc.currency, locale)}, ${formatIsoDay(doc.issueDate, locale)}`}
                   onClick={() => navigate(`/offers/${doc.id}`)}
                   className={`w-full rounded-lg text-start transition-colors hover:bg-page focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${DOCUMENT_COLUMNS}`}
                 >
@@ -243,7 +248,10 @@ export default function DashboardPage() {
                       <span className="block truncate text-start text-sm font-semibold text-ink">
                         <bdi dir="ltr">{doc.reference}</bdi>
                       </span>
-                      <span className="mt-0.5 block truncate text-xs text-muted">
+                      <span
+                        dir="auto"
+                        className="mt-0.5 block truncate text-xs text-muted"
+                      >
                         {doc.customer}
                       </span>
                     </span>
@@ -261,11 +269,13 @@ export default function DashboardPage() {
                     <DashboardMeta label={t("common.total")}>
                       {formatCurrency(doc.total, doc.currency, locale)}
                     </DashboardMeta>
-                    <DashboardMeta label={t("common.date")}>
-                      <span dir="ltr">
-                        {formatIsoDay(doc.issueDate, locale)}
-                      </span>
-                    </DashboardMeta>
+                    <span className="col-span-2 sm:col-span-1">
+                      <DashboardMeta label={t("common.date")}>
+                        <span dir="ltr">
+                          {formatIsoDay(doc.issueDate, locale)}
+                        </span>
+                      </DashboardMeta>
+                    </span>
                   </span>
 
                   <span className="hidden min-w-0 truncate text-sm text-muted lg:block">
