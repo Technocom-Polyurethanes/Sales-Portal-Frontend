@@ -208,6 +208,7 @@ export default function CustomersPage() {
         columns={visibleColumns}
         rowKey={(customer) => customer.id}
         onRowClick={(customer) => navigate(`/customers/${customer.id}`)}
+        rowActionLabel={(customer) => t("common.open", { name: customer.name })}
         onPageChange={setPage}
         onRetry={reload}
         query={search}

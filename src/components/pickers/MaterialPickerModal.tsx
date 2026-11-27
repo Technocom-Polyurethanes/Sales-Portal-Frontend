@@ -89,6 +89,7 @@ export default function MaterialPickerModal({
       onClose()
       return
     }
+    if (event.target !== inputRef.current) return
     if (event.key === "ArrowDown") {
       event.preventDefault()
       if (items.length === 0) return

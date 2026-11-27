@@ -49,4 +49,40 @@ describe("Dialog animations", () => {
     expect(container.querySelector('[role="dialog"]')).toBeNull()
     root.unmount()
   })
+
+  it("traps focus when opened after mount and restores it on close", async () => {
+    vi.useFakeTimers()
+    container = document.createElement("div")
+    document.body.append(container)
+    const trigger = document.createElement("button")
+    document.body.append(trigger)
+    trigger.focus()
+
+    const root = createRoot(container)
+    const render = (open: boolean) =>
+      act(() => {
+        root.render(
+          <I18nProvider>
+            <Dialog open={open} title="Title" onClose={vi.fn()}>
+              Body
+            </Dialog>
+          </I18nProvider>,
+        )
+      })
+
+    render(false)
+    expect(document.activeElement).toBe(trigger)
+
+    render(true)
+    const dialog = container.querySelector<HTMLElement>('[role="dialog"]')!
+    expect(dialog.contains(document.activeElement)).toBe(true)
+
+    render(false)
+    expect(document.activeElement).toBe(trigger)
+
+    await act(async () => {
+      vi.advanceTimersByTime(200)
+    })
+    root.unmount()
+  })
 })

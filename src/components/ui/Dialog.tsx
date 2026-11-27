@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react"
 import type { ReactNode } from "react"
 
 import { useTranslation } from "../../i18n/I18nProvider"
+import { useFocusTrap } from "../../lib/hooks/useFocusTrap"
 import Button from "./Button"
 import Icon from "./Icon"
 
@@ -50,21 +51,17 @@ export default function Dialog({
     return () => window.clearTimeout(timer)
   }, [open])
 
+  useFocusTrap(open && visible, panelRef)
+
   useEffect(() => {
     if (!open) return
-
-    const previousFocus = document.activeElement as HTMLElement | null
-    panelRef.current?.focus()
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onCloseRef.current()
     }
 
     document.addEventListener("keydown", onKeyDown)
-    return () => {
-      document.removeEventListener("keydown", onKeyDown)
-      previousFocus?.focus()
-    }
+    return () => document.removeEventListener("keydown", onKeyDown)
   }, [open])
 
   if (!visible) return null

@@ -9,6 +9,7 @@ import { useTranslation } from "../../i18n/I18nProvider"
 import { isMockApi } from "../../lib/api/mode"
 import { formatDateTime } from "../../lib/formatters/date"
 import { localeForLanguage } from "../../lib/formatters/locale"
+import { useFocusTrap } from "../../lib/hooks/useFocusTrap"
 
 import { formatNotification } from "./formatters"
 import { useNotifications } from "./NotificationsProvider"
@@ -24,21 +25,16 @@ export default function NotificationBell() {
   const bell = useRef<HTMLButtonElement>(null)
   const panel = useRef<HTMLDivElement>(null)
   const locale = localeForLanguage(language)
+  useFocusTrap(open, panel)
 
   useEffect(() => {
     if (!open) return
 
-    panel.current?.focus()
     const onPointerDown = (event: PointerEvent) => {
-      if (!wrapper.current?.contains(event.target as Node)) {
-        setOpen(false)
-        bell.current?.focus()
-      }
+      if (!wrapper.current?.contains(event.target as Node)) setOpen(false)
     }
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return
-      setOpen(false)
-      bell.current?.focus()
+      if (event.key === "Escape") setOpen(false)
     }
     document.addEventListener("pointerdown", onPointerDown)
     document.addEventListener("keydown", onKeyDown)
@@ -81,7 +77,10 @@ export default function NotificationBell() {
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-controls="notifications-panel"
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          bell.current?.focus()
+          setOpen((current) => !current)
+        }}
         className="relative flex h-9 w-9 items-center justify-center rounded-md border border-line text-muted transition-colors hover:bg-page hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         <Icon name="bell" size={18} />
@@ -123,10 +122,7 @@ export default function NotificationBell() {
               <button
                 type="button"
                 aria-label={t("common.close")}
-                onClick={() => {
-                  setOpen(false)
-                  bell.current?.focus()
-                }}
+                onClick={() => setOpen(false)}
                 className="flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-page hover:text-ink focus-visible:outline-2 focus-visible:outline-primary"
               >
                 <Icon name="close" size={16} />
@@ -219,7 +215,6 @@ export default function NotificationBell() {
                             }${title}. ${description}`}
                             onClick={() => {
                               void markAsRead(item.id)
-                              bell.current?.focus()
                               setOpen(false)
                               navigate(route)
                             }}

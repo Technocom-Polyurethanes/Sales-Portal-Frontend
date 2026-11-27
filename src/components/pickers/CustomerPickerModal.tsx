@@ -88,11 +88,13 @@ export default function CustomerPickerModal({
   }, [items.length])
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (creating) return
     if (event.key === "Escape") {
       event.preventDefault()
       onClose()
       return
     }
+    if (event.target !== inputRef.current) return
     if (event.key === "ArrowDown") {
       event.preventDefault()
       if (items.length === 0) return
