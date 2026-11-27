@@ -130,7 +130,7 @@ export default function CustomersPage() {
         header: t("common.actions"),
         align: "end",
         render: (customer) => (
-          <div className="flex justify-end gap-1">
+          <div className="flex flex-wrap justify-end gap-1">
             {canEdit && (
               <Button
                 variant="ghost"

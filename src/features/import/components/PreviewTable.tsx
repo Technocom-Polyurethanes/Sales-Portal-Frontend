@@ -117,7 +117,7 @@ export default function PreviewTable({
             onChange={(event) =>
               setFilter(event.target.value as ImportRowStatus | "all")
             }
-            className="w-48"
+            className="w-full sm:w-48"
           >
             {FILTERS.map((status) => (
               <option key={status} value={status}>
@@ -157,7 +157,7 @@ function Details({ row }: { row: ImportRow }) {
 
   if (row.errors.length > 0) {
     return (
-      <ul className="flex list-disc flex-col gap-0.5 ps-4 text-xs text-danger">
+      <ul className="flex max-h-32 list-disc flex-col gap-0.5 overflow-y-auto ps-4 text-sm text-danger">
         {row.errors.map((error) => (
           <li key={error}>{error}</li>
         ))}
@@ -167,7 +167,7 @@ function Details({ row }: { row: ImportRow }) {
 
   if (row.changes.length > 0) {
     return (
-      <ul className="flex flex-col gap-0.5 text-xs text-muted">
+      <ul className="flex max-h-32 flex-col gap-0.5 overflow-y-auto text-sm text-muted">
         {row.changes.map((change) => (
           <li key={change.field}>
             <span className="font-medium text-ink">
@@ -180,5 +180,5 @@ function Details({ row }: { row: ImportRow }) {
     )
   }
 
-  return <span className="text-xs text-muted">—</span>
+  return <span className="text-sm text-muted">—</span>
 }

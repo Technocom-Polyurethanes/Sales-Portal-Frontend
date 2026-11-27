@@ -148,7 +148,7 @@ export default function UsersPage() {
           }}
           placeholder={t("users.search")}
         />
-        <div className="w-full sm:w-44">
+        <div className="min-w-0 flex-1 sm:w-44 sm:flex-none">
           <Select
             aria-label={t("users.fields.role")}
             value={role}
@@ -166,7 +166,7 @@ export default function UsersPage() {
             ))}
           </Select>
         </div>
-        <div className="w-full sm:w-44">
+        <div className="min-w-0 flex-1 sm:w-44 sm:flex-none">
           <Select
             aria-label={t("common.status")}
             value={status}
