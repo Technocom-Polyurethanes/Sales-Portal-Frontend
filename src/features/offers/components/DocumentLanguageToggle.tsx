@@ -27,7 +27,7 @@ export default function DocumentLanguageToggle({
           aria-pressed={language === option}
           className={`px-2.5 py-1 text-xs font-medium transition-colors ${
             language === option
-              ? "bg-primary text-white"
+              ? "bg-primary text-on-primary"
               : "bg-surface text-muted hover:text-ink"
           }`}
         >

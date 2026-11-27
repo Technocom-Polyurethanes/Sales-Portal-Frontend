@@ -101,7 +101,7 @@ export default function HistoryTable({
           />
 
           {history.totalPages > 1 && (
-            <div className="mt-4 flex items-center justify-end gap-2">
+            <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
               <Button
                 variant="secondary"
                 size="sm"
@@ -110,7 +110,7 @@ export default function HistoryTable({
               >
                 {t("common.previous")}
               </Button>
-              <span className="text-xs text-muted">
+              <span className="text-sm text-muted">
                 {t("common.page", {
                   page: history.page,
                   pages: history.totalPages,

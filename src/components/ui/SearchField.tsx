@@ -23,7 +23,7 @@ export default function SearchField({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         aria-label={placeholder}
-        className="h-10 w-full rounded-md border border-line bg-surface ps-9 pe-3 text-sm text-ink placeholder:text-muted/70 transition-colors focus:border-primary"
+        className="h-11 w-full rounded-lg border border-line bg-surface ps-9 pe-3 text-sm text-ink placeholder:text-muted transition-colors focus:border-primary sm:h-10"
       />
     </div>
   )

@@ -1,11 +1,14 @@
-import { useState } from "react"
+import { Suspense, useEffect, useRef, useState } from "react"
 import { Outlet, useLocation } from "react-router-dom"
 
 import Button from "../../components/ui/Button"
 import Dialog from "../../components/ui/Dialog"
 import Icon from "../../components/ui/Icon"
+import Skeleton from "../../components/ui/Skeleton"
 import { useTranslation } from "../../i18n/I18nProvider"
 import type { TranslationKey } from "../../i18n/types"
+import { useFocusTrap } from "../../lib/hooks/useFocusTrap"
+import RouteErrorBoundary from "../RouteErrorBoundary"
 import AppFooter from "./AppFooter"
 import Sidebar from "./Sidebar"
 import Topbar from "./Topbar"
@@ -17,30 +20,89 @@ const HELP_TIPS: TranslationKey[] = [
   "offers.builder.saveIssue",
 ]
 
+const SIDEBAR_STORAGE_KEY = "sales_portal_sidebar_collapsed"
+
 export default function AppShell() {
   const { t } = useTranslation()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [drawerClosing, setDrawerClosing] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    () => localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true",
+  )
+  const drawerRef = useRef<HTMLDivElement>(null)
+  useFocusTrap(menuOpen, drawerRef)
+
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, String(sidebarCollapsed))
+  }, [sidebarCollapsed])
+
+  const closeMenu = () => setDrawerClosing(true)
+
+  // Keep the drawer mounted until its exit animation has finished, like Dialog.
+  useEffect(() => {
+    if (!drawerClosing) return
+
+    const delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? 0
+      : 220
+    const timer = window.setTimeout(() => {
+      setMenuOpen(false)
+      setDrawerClosing(false)
+    }, delay)
+    return () => window.clearTimeout(timer)
+  }, [drawerClosing])
+
+  useEffect(() => {
+    if (!menuOpen) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeMenu()
+    }
+    const previousOverflow = document.body.style.overflow
+
+    document.addEventListener("keydown", onKeyDown)
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.removeEventListener("keydown", onKeyDown)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [menuOpen])
 
   return (
-    <div className="min-h-screen bg-page">
-      <div className="fixed inset-y-0 start-0 z-40 hidden lg:block no-print">
-        <Sidebar onOpenHelp={() => setHelpOpen(true)} />
+    <div className="min-h-dvh bg-page">
+      <div
+        className={`fixed inset-y-0 start-0 z-40 hidden transition-[width] duration-200 lg:block no-print ${
+          sidebarCollapsed ? "w-18" : "w-60"
+        }`}
+      >
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggleCollapsed={() => setSidebarCollapsed((current) => !current)}
+          onOpenHelp={() => setHelpOpen(true)}
+        />
       </div>
 
       {menuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="absolute inset-0 bg-ink/40 motion-safe:animate-fade-in"
+            className={`absolute inset-0 bg-ink/50 ${drawerClosing ? "motion-safe:animate-fade-out" : "motion-safe:animate-fade-in"}`}
             role="presentation"
-            onClick={() => setMenuOpen(false)}
+            onClick={closeMenu}
           />
-          <div className="mobile-drawer absolute inset-y-0 start-0 w-64 motion-safe:animate-drawer-in">
+          <div
+            ref={drawerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("shell.toggleNavigation")}
+            tabIndex={-1}
+            className={`mobile-drawer absolute inset-y-0 start-0 w-[min(17rem,85vw)] ${drawerClosing ? "motion-safe:animate-drawer-out" : "motion-safe:animate-drawer-in"}`}
+          >
             <Sidebar
-              onNavigate={() => setMenuOpen(false)}
+              onNavigate={closeMenu}
               onOpenHelp={() => {
-                setMenuOpen(false)
+                closeMenu()
                 setHelpOpen(true)
               }}
             />
@@ -48,14 +110,35 @@ export default function AppShell() {
         </div>
       )}
 
-      <div className="app-shell flex min-h-screen flex-col lg:ms-60">
+      <div
+        className={`app-shell flex min-h-dvh flex-col transition-[margin] duration-200 ${
+          sidebarCollapsed ? "lg:ms-18" : "lg:ms-60"
+        }`}
+      >
         <Topbar
-          onOpenMenu={() => setMenuOpen(true)}
+          onOpenMenu={() => {
+            setMenuOpen(true)
+            setDrawerClosing(false)
+          }}
           onOpenHelp={() => setHelpOpen(true)}
         />
-        <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 lg:pb-10">
-          <div key={location.pathname} className="motion-safe:animate-fade-in">
-            <Outlet />
+        <main className="w-full flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+          <div key={location.pathname} className="mx-auto w-full max-w-[1500px] motion-safe:animate-fade-in">
+            <RouteErrorBoundary
+              message={t("common.somethingWrong")}
+              retryLabel={t("common.retry")}
+            >
+              <Suspense
+                fallback={
+                  <div role="status" aria-busy="true" className="space-y-4">
+                    <Skeleton className="h-8 w-48" />
+                    <Skeleton className="h-64 w-full" />
+                  </div>
+                }
+              >
+                <Outlet />
+              </Suspense>
+            </RouteErrorBoundary>
           </div>
         </main>
         <AppFooter />

@@ -84,7 +84,7 @@ export default function DeliveryScheduleEditor({
                 className="rounded-md border border-line bg-surface p-4"
               >
                 <header className="flex flex-wrap items-end justify-between gap-3 border-b border-line-soft pb-3">
-                  <label className="flex flex-col gap-1 text-[13px] font-medium text-ink">
+                  <label className="flex flex-col gap-1 text-sm font-medium text-ink">
                     {t("offers.builder.delivery.batch", {
                       number: batch.batchNumber,
                     })}
@@ -97,8 +97,8 @@ export default function DeliveryScheduleEditor({
                     />
                   </label>
 
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-muted">
+                  <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
+                    <span className="min-w-0 break-words text-xs text-muted sm:text-sm">
                       {(() => {
                         const map = new Map<string, number>()
                         for (const a of batch.allocations) {
@@ -118,6 +118,7 @@ export default function DeliveryScheduleEditor({
                     <Button
                       variant="ghost"
                       size="sm"
+                      aria-label={t("offers.builder.delivery.removeBatch")}
                       className="text-danger hover:bg-danger/10"
                       onClick={() => onRemoveBatch(batch.id)}
                     >
@@ -144,7 +145,7 @@ export default function DeliveryScheduleEditor({
                             {line.materialName}
                           </p>
                           <p
-                            className={`text-[11px] ${
+                            className={`text-xs ${
                               complete ? "text-success" : "text-muted"
                             }`}
                           >
@@ -190,7 +191,7 @@ export default function DeliveryScheduleEditor({
                             return (
                               <div
                                 key={row.id}
-                                className="flex items-center justify-between gap-3 rounded-md border border-line bg-surface px-2.5 py-2"
+                                className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-line bg-surface px-2.5 py-2"
                               >
                                 <div className="min-w-0 flex-1">
                                   <p className="truncate text-sm font-semibold text-ink">
@@ -206,6 +207,7 @@ export default function DeliveryScheduleEditor({
                                 <div className="inline-flex shrink-0 items-center overflow-hidden rounded-lg border border-line bg-surface">
                                   <button
                                     type="button"
+                                    aria-label={`${t("common.decrease")} ${label}`}
                                     className="flex h-9 w-9 items-center justify-center hover:bg-page disabled:opacity-40 disabled:cursor-not-allowed"
                                     disabled={current <= 0}
                                     onClick={() => onSetAllocation(batch.id, productId || "", Math.max(0, current - 1), row.id)}
@@ -219,6 +221,7 @@ export default function DeliveryScheduleEditor({
                                   />
                                   <button
                                     type="button"
+                                    aria-label={`${t("common.increase")} ${label}`}
                                     className="flex h-9 w-9 items-center justify-center hover:bg-page disabled:opacity-40 disabled:cursor-not-allowed"
                                     disabled={current >= maxForBatch}
                                     onClick={() => onSetAllocation(batch.id, productId || "", Math.min(maxForBatch, current + 1), row.id)}

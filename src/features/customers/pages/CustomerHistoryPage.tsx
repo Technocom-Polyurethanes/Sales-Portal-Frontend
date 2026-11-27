@@ -5,6 +5,7 @@ import PageHeader from "../../../app/layout/PageHeader"
 import PagedTable from "../../../components/PagedTable"
 import Badge from "../../../components/ui/Badge"
 import Button from "../../../components/ui/Button"
+import Card from "../../../components/ui/Card"
 import type { Column } from "../../../components/ui/DataTable"
 import Icon from "../../../components/ui/Icon"
 import TableSkeleton from "../../../components/ui/TableSkeleton"
@@ -135,24 +136,24 @@ export default function CustomerHistoryPage() {
       />
 
       <div className="mb-6 grid gap-4 lg:grid-cols-3">
-        <div className="rounded-lg border border-line bg-surface p-4">
-          <p className="text-xs font-semibold tracking-wide text-muted uppercase">
+        <Card>
+          <p className="text-xs font-semibold text-muted">
             {t("customers.offers")}
           </p>
           <p className="mt-1 text-2xl font-semibold text-ink">
             {customer.offersCount ?? 0}
           </p>
-        </div>
-        <div className="rounded-lg border border-line bg-surface p-4">
-          <p className="text-xs font-semibold tracking-wide text-muted uppercase">
+        </Card>
+        <Card>
+          <p className="text-xs font-semibold text-muted">
             {t("customers.totalValue")}
           </p>
           <p className="mt-1 text-2xl font-semibold text-ink">
             {formatCurrency(customer.totalValue ?? 0, "EGP", locale)}
           </p>
-        </div>
-        <div className="rounded-lg border border-line bg-surface p-4">
-          <p className="text-xs font-semibold tracking-wide text-muted uppercase">
+        </Card>
+        <Card>
+          <p className="text-xs font-semibold text-muted">
             {t("customers.lastOffer")}
           </p>
           <p className="mt-1 text-2xl font-semibold text-ink">
@@ -160,10 +161,10 @@ export default function CustomerHistoryPage() {
               ? formatIsoDay(customer.lastOfferDate, locale)
               : "—"}
           </p>
-        </div>
+        </Card>
       </div>
 
-      <div className="mb-6 rounded-lg border border-line bg-surface p-4 text-sm">
+      <Card className="mb-6 text-sm">
         <div className="grid gap-3 sm:grid-cols-2">
           <Detail
             label={t("customers.contact")}
@@ -177,7 +178,7 @@ export default function CustomerHistoryPage() {
             <Detail label={t("customers.address")} value={customer.address} />
           </div>
         </div>
-      </div>
+      </Card>
 
       <h2 className="mb-3 text-sm font-semibold text-ink">
         {t("customers.history")}
@@ -189,6 +190,7 @@ export default function CustomerHistoryPage() {
         columns={columns}
         rowKey={(offer) => offer.id}
         onRowClick={(offer) => navigate(`/offers/${offer.id}`)}
+        rowActionLabel={(offer) => t("common.open", { name: offer.reference })}
         onPageChange={setPage}
         onRetry={reloadOffers}
         emptyTitle={t("customers.noHistory")}

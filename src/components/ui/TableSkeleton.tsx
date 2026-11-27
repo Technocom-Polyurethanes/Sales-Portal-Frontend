@@ -30,7 +30,7 @@ export default function TableSkeleton({
     return (
       <>
         {rowIds.map((row) => (
-          <tr key={row} className={`border-b border-slate-100 ${rowClassName}`}>
+          <tr key={row} className={`border-b border-line-soft ${rowClassName}`}>
             {columnIds.map((column) => (
               <td key={column} className="px-4">
                 <Skeleton className={`h-3.5 ${cellWidth(row, column)} max-w-full`} />

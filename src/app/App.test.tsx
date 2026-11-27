@@ -30,10 +30,17 @@ function typeInto(input: HTMLInputElement, value: string) {
   input.dispatchEvent(new Event("input", { bubbles: true }))
 }
 
-const settle = async (ms = 400) => {
+const settle = async (ms = 1000) => {
   await act(async () => {
     await new Promise((resolve) => setTimeout(resolve, ms))
   })
+}
+
+async function waitForText(container: HTMLElement, text: string) {
+  for (let tries = 0; tries < 50; tries += 1) {
+    if ((container.textContent ?? "").includes(text)) return
+    await settle(100)
+  }
 }
 
 describe("application shell", () => {
@@ -59,12 +66,40 @@ describe("application shell", () => {
       root.render(<App />)
     })
     await settle()
+    await waitForText(container, "Loc/3089-2026/YL/AA")
 
     const text = container.textContent ?? ""
     expect(text).toContain("TECHNOCOM")
     expect(text.toLowerCase()).toContain("good")
     expect(text).toContain("Recent documents")
     expect(text).toContain("Loc/3089-2026/YL/AA")
+  })
+
+  it("collapses the desktop sidebar and remembers the choice", async () => {
+    localStorage.setItem("sales_portal_sidebar_collapsed", "true")
+    const root = createRoot(container)
+    await act(async () => {
+      root.render(<App />)
+    })
+    await settle()
+
+    const shell = container.querySelector(".app-shell") as HTMLElement
+    expect(shell.className).toContain("lg:ms-18")
+
+    const expand = container.querySelector(
+      '[aria-label="Expand sidebar"]',
+    ) as HTMLButtonElement
+    expect(expand).toBeTruthy()
+
+    await act(async () => {
+      expand.click()
+    })
+    expect(shell.className).toContain("lg:ms-60")
+    expect(localStorage.getItem("sales_portal_sidebar_collapsed")).toBe("false")
+
+    await act(async () => {
+      root.unmount()
+    })
   })
 
   it("shows six recent offers, newest first", async () => {
@@ -111,7 +146,7 @@ describe("application shell", () => {
       }),
     )
     const references = Array.from(container.querySelectorAll("li button")).map(
-      (button) => button.querySelector('span[dir="ltr"]')?.textContent,
+      (button) => button.querySelector('bdi[dir="ltr"]')?.textContent,
     )
     expect(references).toEqual([
       "REF-0",
@@ -191,6 +226,7 @@ describe("application shell", () => {
         root.render(<App />)
       })
       await settle()
+      await waitForText(container, expected)
       expect(container.textContent ?? "").toContain(expected)
       await act(async () => {
         root.unmount()
@@ -211,4 +247,4 @@ describe("application shell", () => {
     expect(text).toContain("Welcome back")
     expect(text).toContain("Log in")
   })
-})
+}, 15000)

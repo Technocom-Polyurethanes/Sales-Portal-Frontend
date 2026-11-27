@@ -19,6 +19,7 @@ export const NAV_ITEMS: NavItem[] = [
   { to: "/banks", labelKey: "nav.banks", icon: "bank" },
   { to: "/import", labelKey: "nav.import", icon: "import", permission: "import.use" },
   { to: "/users", labelKey: "nav.users", icon: "user", permission: "users.manage" },
+  { to: "/system-status", labelKey: "nav.system", icon: "check", permission: "system.view" },
   { to: "/settings", labelKey: "nav.settings", icon: "settings" },
 ]
 
@@ -44,6 +45,7 @@ const PATH_LABELS: PathLabel[] = [
   { prefix: "/banks", labelKey: "banks.title" },
   { prefix: "/import", labelKey: "import.title" },
   { prefix: "/users", labelKey: "users.title" },
+  { prefix: "/system-status", labelKey: "system.title" },
   { prefix: "/settings", labelKey: "settings.title" },
   { prefix: "/account", labelKey: "account.title" },
 ]

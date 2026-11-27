@@ -92,7 +92,7 @@ export default function BankAccountPicker({
                 onClick={() => setCurrency(code)}
                 className={`h-7 rounded-full border px-3 text-xs font-medium ${
                   currency === code
-                    ? "border-primary bg-primary text-white"
+                    ? "border-primary bg-primary text-on-primary"
                     : "border-line text-ink hover:bg-page"
                 }`}
               >
@@ -139,7 +139,7 @@ export default function BankAccountPicker({
                     </span>
                     <span
                       className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
-                        added ? "bg-primary text-white" : "border border-line text-ink"
+                        added ? "bg-primary text-on-primary" : "border border-line text-ink"
                       }`}
                     >
                       <Icon name={added ? "check" : "plus"} size={12} />

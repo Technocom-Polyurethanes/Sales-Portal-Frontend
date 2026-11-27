@@ -30,6 +30,7 @@ import { localeForLanguage } from "../../../lib/formatters/locale"
 
 import { formatCurrency } from "../../../lib/formatters/number"
 
+import { isApiError } from "../../../lib/api/errors"
 import { useDelete } from "../../../lib/hooks/useDelete"
 
 import OfferDocumentPreview from "../../../pdf/OfferDocumentPreview"
@@ -196,7 +197,24 @@ export default function OfferDetailsPage() {
     )
   }
 
-  if (error || !data) {
+  if (error && !(isApiError(error) && error.status === 404)) {
+    return (
+      <>
+        <PageHeader title={t("offers.details.title")} />
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
+        >
+          <span>{t("common.somethingWrong")}</span>
+          <Button size="sm" variant="secondary" onClick={reload}>
+            {t("common.retry")}
+          </Button>
+        </div>
+      </>
+    )
+  }
+
+  if (!data) {
     return (
       <>
         <PageHeader title={t("offers.details.title")} />
@@ -210,76 +228,120 @@ export default function OfferDetailsPage() {
   const { offer, versions, customer } = data
 
   const versionCount = versions?.length ?? (offer.version > 0 ? 1 : 0)
+  const actionButtonClass = "min-h-[44px] w-full md:w-auto"
 
   return (
     <>
-      <PageHeader
-        title={offer.reference}
-        subtitle={customer?.name ?? offer.customerName}
-        action={
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={offer.status}>
-              {t(`offers.status.${offer.status}`)}
-            </Badge>
-            {offer.version > 1 && (
-              <span className="rounded bg-page px-2 py-1 text-xs text-muted">
-                v{offer.version}
+      <section className="no-print mb-6 rounded-xl border border-line-soft bg-surface p-4 sm:p-5 lg:p-6">
+        <div className="flex flex-col gap-5 text-start lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+          <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
+            <div className="min-w-0">
+              <h1 className="text-xl font-semibold tracking-tight text-ink sm:text-2xl lg:text-3xl">
+                <bdi dir="ltr" className="block break-all tabular-nums">
+                  {offer.reference}
+                </bdi>
+              </h1>
+              <p dir="auto" className="mt-1.5 break-words text-sm text-muted">
+                {customer?.name ?? offer.customerName}
+              </p>
+            </div>
+
+            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted sm:border-s sm:border-line-soft sm:ps-5">
+              <span className="inline-flex items-center gap-1.5">
+                <span>{t("common.status")}</span>
+                <Badge variant={offer.status}>
+                  {t(`offers.status.${offer.status}`)}
+                </Badge>
               </span>
-            )}
-            {versionCount > 1 && (
-              <span className="rounded bg-page px-2 py-1 text-xs text-muted">
-                {t("offers.details.versionCount", { count: versionCount })}
-              </span>
-            )}
+              {(offer.version > 1 || versionCount > 1) && (
+                <span className="inline-flex flex-wrap items-center gap-1.5">
+                  {offer.version > 1 && (
+                    <span className="inline-flex items-center rounded-full border border-line-soft bg-page/60 px-2 py-0.5 text-xs text-muted tabular-nums">
+                      v{offer.version}
+                    </span>
+                  )}
+                  {versionCount > 1 && (
+                    <span className="inline-flex items-center whitespace-nowrap rounded-full border border-line-soft bg-page/60 px-2 py-0.5 text-xs text-muted tabular-nums">
+                      {t("offers.details.versionCount", {
+                        count: versionCount,
+                      })}
+                    </span>
+                  )}
+                </span>
+              )}
+            </div>
+          </div>
 
-            <Button
-              variant="secondary"
-              icon={<Icon name="print" size={16} />}
-              onClick={() =>
-                documentData &&
-                print({ data: documentData, language: documentLanguage })
-              }
-            >
-              {t("common.print")}
-            </Button>
-
-            {canDelete && (
-              <Button
-                variant="danger"
-                icon={<Icon name="trash" size={18} />}
-                onClick={() => deletion.setTarget(offer)}
-              >
-                {t("common.delete")}
-              </Button>
-            )}
-
-            {canWrite && (
-              <>
+          <div className="w-full shrink-0 border-t border-line-soft pt-4 lg:w-auto lg:border-t-0 lg:pt-0">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-3 lg:justify-end lg:gap-4">
+              {canWrite && (
                 <Button
-                  variant="secondary"
-                  icon={<Icon name="edit" size={16} />}
-                  onClick={() => navigate(`/offers/new?from=${offer.id}`)}
-                >
-                  {t("offers.details.newVersion")}
-                </Button>
-
-                <Button
+                  size="sm"
                   variant="primary"
+                  className={actionButtonClass}
+                  aria-label={t("offers.details.statusTitle")}
+                  title={t("offers.details.statusTitle")}
                   icon={<Icon name="check" size={16} />}
                   onClick={() => setStatusOpen(true)}
                 >
                   {t("offers.details.changeStatus")}
                 </Button>
-              </>
-            )}
+              )}
+              <div className="grid grid-cols-3 gap-2 md:flex md:items-center md:gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className={actionButtonClass}
+                  aria-label={t("offers.details.printTitle")}
+                  title={t("offers.details.printTitle")}
+                  icon={<Icon name="print" size={16} />}
+                  onClick={() =>
+                    documentData &&
+                    print({ data: documentData, language: documentLanguage })
+                  }
+                >
+                  {t("common.print")}
+                </Button>
+                {canWrite && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className={actionButtonClass}
+                    aria-label={t("offers.details.editTitle")}
+                    title={t("offers.details.editTitle")}
+                    icon={<Icon name="edit" size={16} />}
+                    onClick={() => navigate(`/offers/new?from=${offer.id}`)}
+                  >
+                    {t("common.edit")}
+                  </Button>
+                )}
+                <span
+                  aria-hidden="true"
+                  className="hidden h-5 w-px bg-line-soft md:block md:me-1"
+                />
+                {canDelete && (
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    className={actionButtonClass}
+                    aria-label={t("offers.details.deleteTitle")}
+                    title={t("offers.details.deleteTitle")}
+                    icon={<Icon name="trash" size={16} />}
+                    onClick={() => deletion.setTarget(offer)}
+                  >
+                    {t("common.delete")}
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
-        }
-      />
+        </div>
+      </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
         <div className="min-w-0 space-y-4">
           <Card title={t("offers.details.summary")}>
-            <dl className="mb-4 grid gap-3 rounded-md border border-line-soft bg-page/50 p-4 text-sm sm:grid-cols-4">
+            <dl className="mb-4 grid gap-3 rounded-md border border-line-soft bg-page/50 p-4 text-sm sm:grid-cols-2 xl:grid-cols-4">
               <div>
                 <dt className="text-xs text-muted">
                   {t("offers.list.issueDate")}
@@ -392,7 +454,7 @@ export default function OfferDetailsPage() {
               }
             />
           </div>
-          <div className="max-h-[calc(100vh-8rem)] overflow-auto rounded-md border border-line p-3">
+          <div className="max-h-[70dvh] overflow-auto rounded-md border border-line p-3 lg:max-h-[calc(100vh-8rem)]">
             {documentData && (
               <OfferDocumentPreview
                 data={documentData}

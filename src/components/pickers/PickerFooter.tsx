@@ -27,7 +27,7 @@ export default function PickerFooter({
   const ar = language === "ar"
 
   return (
-    <div className="flex h-12 items-center justify-between border-t border-slate-200 px-4 text-sm text-slate-600">
+    <div className="flex min-h-12 flex-wrap items-center justify-between gap-2 border-t border-line-soft px-4 text-sm text-muted">
       <div>
         {pending ? (
           <Skeleton className="h-3.5 w-32" />

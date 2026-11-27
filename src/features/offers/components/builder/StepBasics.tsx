@@ -100,7 +100,7 @@ export default function StepBasics({
       <section aria-labelledby="basics-customer-heading" className="space-y-4">
         <h3
           id="basics-customer-heading"
-          className="text-xs font-semibold uppercase tracking-wide text-muted"
+          className="text-xs font-semibold text-muted"
         >
           {t("offers.builder.basics.sectionCustomer")}
         </h3>
@@ -249,7 +249,7 @@ export default function StepBasics({
       >
         <h3
           id="basics-terms-heading"
-          className="text-xs font-semibold uppercase tracking-wide text-muted"
+          className="text-xs font-semibold text-muted"
         >
           {t("offers.builder.basics.sectionTerms")}
         </h3>

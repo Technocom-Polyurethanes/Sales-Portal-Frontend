@@ -1,22 +1,34 @@
+import { lazy } from "react"
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom"
+
+import SystemStatusPage from "../features/system/pages/SystemStatusPage"
 
 import AppShell from "./layout/AppShell"
 import LoginScreen from "./layout/LoginScreen"
 import NotFoundPage from "./pages/NotFoundPage"
 import RequirePermission from "./RequirePermission"
 import { useSession } from "../features/account/hooks/useSession"
-import AccountPage from "../features/account/pages/AccountPage"
-import BanksPage from "../features/banks/pages/BanksPage"
-import CustomersPage from "../features/customers/pages/CustomersPage"
-import CustomerHistoryPage from "../features/customers/pages/CustomerHistoryPage"
-import ImportPage from "../features/import/pages/ImportPage"
-import OfferBuilderPage from "../features/offers/pages/OfferBuilderPage"
-import OfferDetailsPage from "../features/offers/pages/OfferDetailsPage"
-import OffersListPage from "../features/offers/pages/OffersListPage"
-import DashboardPage from "../features/offers/pages/DashboardPage"
-import ProductsPage from "../features/products/pages/ProductsPage"
-import SettingsPage from "../features/settings/pages/SettingsPage"
-import UsersPage from "../features/users/pages/UsersPage"
+
+const AccountPage = lazy(() => import("../features/account/pages/AccountPage"))
+const BanksPage = lazy(() => import("../features/banks/pages/BanksPage"))
+const CustomersPage = lazy(() => import("../features/customers/pages/CustomersPage"))
+const CustomerHistoryPage = lazy(
+  () => import("../features/customers/pages/CustomerHistoryPage"),
+)
+const ImportPage = lazy(() => import("../features/import/pages/ImportPage"))
+const OfferBuilderPage = lazy(
+  () => import("../features/offers/pages/OfferBuilderPage"),
+)
+const OfferDetailsPage = lazy(
+  () => import("../features/offers/pages/OfferDetailsPage"),
+)
+const OffersListPage = lazy(
+  () => import("../features/offers/pages/OffersListPage"),
+)
+const DashboardPage = lazy(() => import("../features/offers/pages/DashboardPage"))
+const ProductsPage = lazy(() => import("../features/products/pages/ProductsPage"))
+const SettingsPage = lazy(() => import("../features/settings/pages/SettingsPage"))
+const UsersPage = lazy(() => import("../features/users/pages/UsersPage"))
 
 export function AppRouter() {
   const { authenticated, signIn } = useSession()
@@ -67,6 +79,14 @@ export function AppRouter() {
           element={
             <RequirePermission permission="users.manage">
               <UsersPage />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="system-status"
+          element={
+            <RequirePermission permission="system.view">
+              <SystemStatusPage />
             </RequirePermission>
           }
         />

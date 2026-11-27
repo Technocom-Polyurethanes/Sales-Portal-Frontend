@@ -27,6 +27,28 @@ describe("translation helpers", () => {
     expect(interpolate("Page {page}", {})).toBe("Page {page}")
   })
 
+  it("interpolates the versions count in both languages", () => {
+    const params = { count: 4 }
+    const key = "offers.details.versionCount"
+
+    expect(
+      translate(
+        en as Record<string, unknown>,
+        en as Record<string, unknown>,
+        key,
+        params,
+      ),
+    ).toBe("4 versions")
+    expect(
+      translate(
+        ar as Record<string, unknown>,
+        en as Record<string, unknown>,
+        key,
+        params,
+      ),
+    ).toBe("4 إصدارات")
+  })
+
   it("translates using the active tree", () => {
     expect(
       translate(

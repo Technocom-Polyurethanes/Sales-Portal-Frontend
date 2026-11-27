@@ -1,3 +1,4 @@
+import DataTable from "../../../components/ui/DataTable"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import { formatIsoDay } from "../../../lib/formatters/date"
 import { localeForLanguage } from "../../../lib/formatters/locale"
@@ -48,6 +49,95 @@ export default function OfferSummary({ offer }: { offer: Offer }) {
   const { t, language } = useTranslation()
   const locale = localeForLanguage(language)
 
+  const materialRows = (offer.lines || []).map((line: any) => {
+    const doc = (offer as any).document || (offer as any).documentDto
+    const docLine =
+      (doc?.lines || doc?.items || []).find(
+        (di: any) =>
+          di.offerLineId === line.id ||
+          di.id === line.id ||
+          di.productId === (line.materialId || line.productId) ||
+          di.materialId === (line.materialId || line.productId),
+      ) || {}
+    const packaging = line.packaging || docLine.packaging || []
+    const quantityKg =
+      line.quantityKg ??
+      docLine.quantityKg ??
+      packaging.reduce(
+        (sum: number, pkg: any) =>
+          sum + (pkg.packages ?? 0) * (pkg.weightPerPackageKg ?? 0),
+        0,
+      )
+    const ratePerKg = line.ratePerKg ?? docLine.ratePerKg ?? 0
+
+    return {
+      id: line.id || line.productId || line.materialName || "line",
+      materialName:
+        line.materialName ||
+        line.productName ||
+        docLine.materialName ||
+        docLine.name ||
+        "Material",
+      category: line.category || docLine.category || "",
+      packagingSummary:
+        line.packagingSummary ||
+        docLine.packagingSummary ||
+        formatPackagingSummary(packaging),
+      quantityKg,
+      ratePerKg,
+      amount:
+        line.amount ??
+        docLine.amount ??
+        (quantityKg && ratePerKg ? quantityKg * ratePerKg : 0),
+    }
+  })
+
+  const materialColumns = [
+    {
+      key: "material",
+      header: t("offers.details.materials"),
+      render: (row: (typeof materialRows)[number]) => (
+        <span className="block min-w-0">
+          <span className="block font-medium text-ink">{row.materialName}</span>
+          {row.category && (
+            <span className="block text-xs text-muted">{row.category}</span>
+          )}
+        </span>
+      ),
+    },
+    {
+      key: "packaging",
+      header: t("offers.builder.packaging.packaging"),
+      render: (row: (typeof materialRows)[number]) => (
+        <span className="block break-words text-muted">
+          {row.packagingSummary || "—"}
+        </span>
+      ),
+    },
+    {
+      key: "quantity",
+      header: t("offers.builder.packaging.quantity"),
+      align: "end" as const,
+      render: (row: (typeof materialRows)[number]) =>
+        `${formatNumber(row.quantityKg)} kg`,
+    },
+    {
+      key: "rate",
+      header: t("offers.builder.packaging.rate"),
+      align: "end" as const,
+      render: (row: (typeof materialRows)[number]) =>
+        formatNumber(row.ratePerKg),
+    },
+    {
+      key: "amount",
+      header: t("offers.builder.packaging.amount"),
+      align: "end" as const,
+      render: (row: (typeof materialRows)[number]) => (
+        <span className="font-medium">{formatNumber(row.amount)}</span>
+      ),
+    },
+  ]
+
   return (
     <div className="space-y-5">
       <section>
@@ -55,94 +145,13 @@ export default function OfferSummary({ offer }: { offer: Offer }) {
           {t("offers.details.materials")}
         </h3>
 
-        <div className="overflow-x-auto rounded-md border border-line">
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-line bg-page/60 text-xs tracking-wide text-muted uppercase">
-                <th scope="col" className="px-3 py-2 text-start">
-                  {t("offers.details.materials")}
-                </th>
-                <th scope="col" className="px-3 py-2 text-start">
-                  {t("offers.builder.packaging.packaging")}
-                </th>
-                <th scope="col" className="px-3 py-2 text-end">
-                  {t("offers.builder.packaging.quantity")}
-                </th>
-                <th scope="col" className="px-3 py-2 text-end">
-                  {t("offers.builder.packaging.rate")}
-                </th>
-                <th scope="col" className="px-3 py-2 text-end">
-                  {t("offers.builder.packaging.amount")}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {(offer.lines || []).map((line: any) => {
-                const doc = (offer as any).document || (offer as any).documentDto
-                const docLine =
-                  (doc?.lines || doc?.items || []).find(
-                    (di: any) =>
-                      di.offerLineId === line.id ||
-                      di.id === line.id ||
-                      di.productId === (line.materialId || line.productId) ||
-                      di.materialId === (line.materialId || line.productId),
-                  ) || {}
-                const materialName =
-                  line.materialName ||
-                  line.productName ||
-                  docLine.materialName ||
-                  docLine.name ||
-                  "Material"
-                const category = line.category || docLine.category || ""
-                const packaging = line.packaging || docLine.packaging || []
-                const packagingSummary =
-                  line.packagingSummary ||
-                  docLine.packagingSummary ||
-                  formatPackagingSummary(packaging)
-                const calculatedQtyKg = Array.isArray(packaging)
-                  ? packaging.reduce(
-                      (sum: number, pkg: any) =>
-                        sum + (pkg.packages ?? 0) * (pkg.weightPerPackageKg ?? 0),
-                      0,
-                    )
-                  : 0
-                const quantityKg =
-                  line.quantityKg ?? docLine.quantityKg ?? calculatedQtyKg ?? 0
-                const ratePerKg = line.ratePerKg ?? docLine.ratePerKg ?? 0
-                const amount =
-                  line.amount ??
-                  docLine.amount ??
-                  (quantityKg && ratePerKg ? quantityKg * ratePerKg : 0)
-                return (
-                  <tr
-                    key={line.id || line.productId || materialName}
-                    className="border-b border-line-soft last:border-0"
-                  >
-                    <td className="px-3 py-2">
-                      <span className="block font-medium text-ink">
-                        {materialName}
-                      </span>
-                      {category && (
-                        <span className="text-[11px] text-muted">{category}</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2 text-muted">
-                      {packagingSummary}
-                    </td>
-                    <td className="px-3 py-2 text-end tabular-nums">
-                      {formatNumber(quantityKg)} kg
-                    </td>
-                    <td className="px-3 py-2 text-end tabular-nums">
-                      {formatNumber(ratePerKg)}
-                    </td>
-                    <td className="px-3 py-2 text-end font-medium tabular-nums">
-                      {formatNumber(amount)}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+        <div className="overflow-hidden rounded-lg border border-line-soft bg-surface">
+          <DataTable
+            columns={materialColumns}
+            rows={materialRows}
+            rowKey={(row) => row.id}
+            empty={t("offers.builder.packaging.empty")}
+          />
         </div>
       </section>
 

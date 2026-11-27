@@ -15,9 +15,12 @@
     "edit": "Edit",
     "add": "Add",
     "close": "Close",
+    "open": "Open {name}",
     "back": "Back",
     "next": "Next",
     "previous": "Previous",
+    "decrease": "Decrease",
+    "increase": "Increase",
     "search": "Search",
     "filter": "Filter",
     "all": "All",
@@ -68,7 +71,8 @@
     "settings": "Settings",
     "account": "My Account",
     "workspace": "WORKSPACE",
-    "users": "Users"
+    "users": "Users",
+    "system": "System"
   },
   "shell": {
     "searchPlaceholder": "Search offers or customers…",
@@ -81,6 +85,8 @@
     "languageSwitch": "Switch application language",
     "skipToContent": "Skip to content",
     "toggleNavigation": "Toggle navigation",
+    "collapseNavigation": "Collapse sidebar",
+    "expandNavigation": "Expand sidebar",
     "helpTitle": "Help center",
     "helpBody": "Use the search box to find an offer, or create a new one from scratch."
   },
@@ -244,6 +250,7 @@
         "fullyScheduled": "Fully scheduled",
         "remaining": "{scheduled} scheduled · {remaining} of {total} still open",
         "addBatch": "Add delivery batch",
+        "removeBatch": "Remove delivery batch",
         "modeLabel": "How to describe the delivery",
         "modeBatches": "Delivery schedule",
         "modeBatchesHint": "Dated batches built from the ordered packages.",
@@ -326,12 +333,16 @@
       "changeStatus": "Change status",
       "downloadPdf": "Download PDF",
       "print": "Print",
+      "printTitle": "Print this offer",
+      "editTitle": "Edit this offer as a new version",
+      "deleteTitle": "Delete this offer permanently",
+      "statusTitle": "Change status for this offer",
       "notFound": "This offer could not be found.",
       "summary": "Offer summary",
       "materials": "Materials",
       "versions": "Version history",
       "noVersions": "This offer has no other versions yet.",
-      "versionCount": "{{count}} versions",
+      "versionCount": "{count} versions",
       "newVersion": "New version",
       "createdBy": "Created by",
       "createdAt": "Created on",
@@ -622,6 +633,39 @@
       "Admin": "Full access to everything, including Users.",
       "Sales": "Creates offers. Views and creates customers, materials and bank accounts.",
       "Accountant": "Uses data import and the catalogue. Offers are read only."
+    }
+  },
+  "system": {
+    "title": "System status",
+    "subtitle": "Diagnostics for the current deployment.",
+    "refresh": "Refresh",
+    "overall": "Overall status",
+    "checkedAt": "Checked at",
+    "version": "Version",
+    "environment": "Environment",
+    "uptime": "Uptime",
+    "database": "Database",
+    "latency": "Latency",
+    "live": "Live updates",
+    "liveState": "Listener state",
+    "changes": "Changes listener",
+    "notifications": "Notifications listener",
+    "pollingFallback": "Polling fallback",
+    "states": {
+      "overall": {
+        "Healthy": "Healthy",
+        "Degraded": "Degraded",
+        "Unhealthy": "Unhealthy"
+      },
+      "database": {
+        "Up": "Up",
+        "Down": "Down"
+      },
+      "live": {
+        "connected": "Connected",
+        "disconnected": "Disconnected",
+        "disabled": "Disabled"
+      }
     }
   },
   "notifications": {

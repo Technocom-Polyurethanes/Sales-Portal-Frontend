@@ -138,7 +138,7 @@ export default function BanksPage() {
         align: "end",
 
         render: (bank) => (
-          <div className="flex justify-end gap-1">
+          <div className="flex flex-wrap justify-end gap-1">
             {canEdit && (
               <Button variant="ghost" size="sm" onClick={() => openEdit(bank)}>
                 <Icon name="edit" size={15} />

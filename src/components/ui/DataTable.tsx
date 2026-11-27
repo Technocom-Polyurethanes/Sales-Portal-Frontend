@@ -15,6 +15,8 @@ export type DataTableProps<T,> = {
   rows: T[]
   rowKey: (row: T) => string
   onRowClick?: (row: T) => void
+  /** Accessible name for the hidden action button in the first cell. */
+  rowActionLabel?: (row: T) => string
   empty?: ReactNode
   className?: string
 }
@@ -28,12 +30,15 @@ export default function DataTable<T>({
   rows,
   rowKey,
   onRowClick,
+  rowActionLabel = (row) => `${columns[0].header}: ${rowKey(row)}`,
   empty,
   className = "",
 }: DataTableProps<T>) {
   if (rows.length === 0 && empty) {
     return (
-      <div className="px-5 py-10 text-center text-sm text-muted">{empty}</div>
+      <div className="rounded-xl border border-line-soft bg-surface px-5 py-10 text-center text-sm text-muted">
+        {empty}
+      </div>
     )
   }
 
@@ -46,7 +51,7 @@ export default function DataTable<T>({
               <th
                 key={column.key}
                 scope="col"
-                className={`px-4 py-3 text-xs font-semibold tracking-wide text-muted uppercase ${
+                className={`px-4 py-3 text-xs font-semibold text-muted ${
                   column.align === "end" ? "text-end" : "text-start"
                 }`}
               >
@@ -60,11 +65,11 @@ export default function DataTable<T>({
             <tr
               key={rowKey(row)}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
-              className={`border-b border-line-soft last:border-0 max-md:block max-md:border-b max-md:border-line max-md:py-2 ${
+              className={`border-b border-line-soft last:border-0 max-md:block max-md:border-b max-md:border-line-soft max-md:py-2 ${
                 onRowClick ? "cursor-pointer hover:bg-page" : ""
               }`}
             >
-              {columns.map((column) => (
+              {columns.map((column, index) => (
                 <td
                   key={column.key}
                   data-label={column.header}
@@ -72,7 +77,22 @@ export default function DataTable<T>({
                     column.align === "end" ? "md:text-end" : "md:text-start"
                   } ${column.className ?? ""}`}
                 >
-                  <span className="md:hidden text-xs text-muted">{column.header}</span>
+                  <span className="text-xs font-medium text-muted md:hidden">
+                    {column.header}
+                  </span>
+                  {onRowClick && index === 0 && (
+                    <button
+                      type="button"
+                      aria-label={rowActionLabel(row)}
+                      className="sr-only focus:not-sr-only focus:me-2 focus:rounded focus:bg-primary-soft focus:px-2 focus:py-1 focus:text-ink"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        onRowClick(row)
+                      }}
+                    >
+                      {rowActionLabel(row)}
+                    </button>
+                  )}
                   <span className={column.align === "end" ? "text-end" : "text-start"}>
                     {column.render(row)}
                   </span>

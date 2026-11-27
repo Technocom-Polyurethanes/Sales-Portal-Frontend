@@ -5,8 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import "@/mock"
 import App from "../../../app/App"
+import { ApiError } from "../../../lib/api/types"
 import { clearCache } from "../../../lib/cache/queryCache"
 import { db } from "../../../mock/db"
+import { offersApi } from "../api"
 
 // Sileo reads the system theme; jsdom has no matchMedia.
 if (!window.matchMedia) {
@@ -120,6 +122,22 @@ describe("offer view document language", () => {
     vi.restoreAllMocks()
   })
 
+  it("shows a retryable error when the offer cannot be loaded", async () => {
+    vi.spyOn(offersApi, "get").mockRejectedValueOnce(new ApiError("offline", 500))
+
+    await open(db.offers[0].id)
+
+    expect(container.querySelector('[role="alert"]')?.textContent).toContain(
+      "Something went wrong.",
+    )
+    expect(container.textContent).not.toContain("This offer could not be found.")
+    expect(
+      Array.from(container.querySelectorAll("button")).some(
+        (button) => button.textContent === "Retry",
+      ),
+    ).toBe(true)
+  })
+
   it("opens in the language the offer was saved in", async () => {
     const offer = db.offers[0]
     offer.documentLanguage = "ar"
@@ -229,6 +247,37 @@ describe("offer view document language", () => {
     expect(previewConditions()).toBe(custom)
     expect(summaryConditions()).toBe(custom)
     expect(offer.paymentTermsText).toBe(custom)
+    expect(errors).toEqual([])
+  })
+
+  it("names and titles every offer action", async () => {
+    const offer = db.offers[0]
+    await open(offer.id)
+
+    const reference = container.querySelector("h1 bdi")
+    expect(reference?.textContent).toBe(offer.reference)
+    expect(reference?.getAttribute("dir")).toBe("ltr")
+    expect(reference?.classList.contains("tabular-nums")).toBe(true)
+
+    const client = Array.from(container.querySelectorAll('[dir="auto"]')).find(
+      (item) => item.textContent === offer.customerName,
+    )
+    expect(client).toBeTruthy()
+
+    const action = (label: string, title: string) => {
+      const button = Array.from(container.querySelectorAll("button")).find(
+        (item) => item.textContent?.trim() === label,
+      )
+      expect(button?.getAttribute("aria-label")).toBe(title)
+      expect(button?.getAttribute("title")).toBe(title)
+      expect(button?.classList.contains("min-h-[44px]")).toBe(true)
+      expect(button?.classList.contains("md:w-auto")).toBe(true)
+    }
+
+    action("Print", "Print this offer")
+    action("Edit", "Edit this offer as a new version")
+    action("Delete", "Delete this offer permanently")
+    action("Change status", "Change status for this offer")
     expect(errors).toEqual([])
   })
 })

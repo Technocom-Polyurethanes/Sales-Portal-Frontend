@@ -1,6 +1,11 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react"
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger"
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "ghost"
+  | "danger"
+  | "subtle-danger"
 export type ButtonSize = "sm" | "md"
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -11,16 +16,16 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 }
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: "bg-primary text-white hover:bg-primary-hover border border-primary",
+  primary: "bg-primary text-on-primary border border-primary hover:bg-primary-hover",
   secondary: "bg-surface text-ink border border-line hover:bg-page",
-  ghost:
-    "bg-transparent text-primary border border-transparent hover:bg-primary-soft",
-  danger: "bg-danger text-white border border-danger hover:opacity-90",
+  ghost: "bg-transparent text-primary border border-transparent hover:bg-primary-soft",
+  danger: "bg-danger/5 text-danger border border-danger/30 hover:bg-danger hover:text-on-danger",
+  "subtle-danger": "bg-transparent text-danger border border-line-soft hover:bg-danger/10 hover:border-danger/40 hover:text-danger",
 }
 
 const SIZES: Record<ButtonSize, string> = {
-  sm: "h-8 px-3",
-  md: "h-10 px-4 text-sm",
+  sm: "h-9 px-3 text-sm",
+  md: "h-11 px-4 text-sm sm:h-10",
 }
 
 export default function Button({
@@ -36,7 +41,7 @@ export default function Button({
   return (
     <button
       aria-busy={loading}
-      className={`inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-lg font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
       disabled={disabled || loading}
       {...rest}
     >

@@ -1,4 +1,5 @@
 
+import { localizeTypedDates } from "../../lib/formatters/date"
 import { roundMoney } from "../../lib/calculations/round"
 import { formatAmountInWords } from "../../lib/tafqeet"
 import { expiryDateFrom, normalizeValidityDays } from "../../lib/calculations/validity"
@@ -76,6 +77,7 @@ export function buildDocumentData(source: DocumentSource,
   },
 ): OfferDocumentData {
   const arabic = options.language === "ar"
+  const dateLocale = arabic ? "ar-EG" : "en-US"
   const names = new Map(
     (options.packageTypes ?? []).map((type) => [type.id, type.nameAr]),
   )
@@ -177,13 +179,21 @@ export function buildDocumentData(source: DocumentSource,
     issueDate: source.issueDate,
     dueDate: source.dueDate,
     paymentTerm: options.paymentTermLabel,
-    paymentTermsText: (source.paymentTermsText ?? "").trim(),
+    paymentTermsText: localizeTypedDates(
+      (source.paymentTermsText ?? "").trim(),
+      dateLocale,
+    ),
     deliveryMode: source.deliveryMode ?? "batches",
-    deliveryText:
+    deliveryText: localizeTypedDates(
       source.deliveryMode === "text"
         ? deliveryTextIn(source.deliveryText, options.language)
         : "",
-    deliveryPlace: (source.deliveryPlace ?? "").trim(),
+      dateLocale,
+    ),
+    deliveryPlace: localizeTypedDates(
+      (source.deliveryPlace ?? "").trim(),
+      dateLocale,
+    ),
     validityDays: normalizeValidityDays(source.validityDays),
     expiryDate: expiryDateFrom(source.issueDate, source.validityDays ?? 0),
     currency: source.currency,
@@ -208,7 +218,7 @@ export function buildDocumentData(source: DocumentSource,
       iban: bank.iban,
       currency: bank.currency,
     })),
-    notes: source.notes ?? "",
+    notes: localizeTypedDates(source.notes ?? "", dateLocale),
     priceOnly: isPriceOnly(source.lines ?? []),
   }
 }

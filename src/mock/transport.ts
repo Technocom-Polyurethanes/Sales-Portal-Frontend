@@ -36,6 +36,8 @@ import { commit, history, preview, template } from "./import"
 
 import { userRoutes } from "./users"
 
+import { systemRoutes } from "./system"
+
 import type { ImportSource } from "../features/import/types"
 
 function removeOfferChains(ids: string[]) {
@@ -804,6 +806,8 @@ const routes: Route[] = [
   },
 
   ...userRoutes,
+
+  ...systemRoutes,
 ]
 
 function listProducts(query: Query) {

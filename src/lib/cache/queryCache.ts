@@ -7,6 +7,9 @@
 /** The server also caches and invalidates on every write, so this only bounds cross-user staleness. */
 export const DEFAULT_TTL_MS = 2 * 60 * 1000
 
+/** Lookup keys are unbounded, so the cache keeps a fixed number of entries. */
+export const MAX_ENTRIES = 200
+
 export type CacheTag = "customers" | "materials" | "banks" | "catalog"
 
 type Entry = {
@@ -23,6 +26,19 @@ function isFresh(entry: Entry): boolean {
   return entry.hasValue && entry.expiresAt > Date.now()
 }
 
+function pruneExpired(): void {
+  const now = Date.now()
+  for (const [key, entry] of entries) {
+    if (entry.hasValue && entry.expiresAt <= now) entries.delete(key)
+  }
+}
+
+function evictOldest(): void {
+  if (entries.size < MAX_ENTRIES) return
+  const oldest = entries.keys().next()
+  if (!oldest.done) entries.delete(oldest.value)
+}
+
 /** The cached value when it is still fresh, so a component can render it on its first paint. */
 export function peek<T>(key: string): T | undefined {
   const entry = entries.get(key)
@@ -36,12 +52,14 @@ export function cached<T>(
   load: () => Promise<T>,
   ttlMs: number = DEFAULT_TTL_MS,
 ): Promise<T> {
+  pruneExpired()
   const existing = entries.get(key)
   if (existing) {
     if (isFresh(existing)) return Promise.resolve(existing.value as T)
     if (existing.promise) return existing.promise as Promise<T>
   }
 
+  evictOldest()
   const entry: Entry = { tags, expiresAt: 0, hasValue: false }
   const promise = load().then(
     (value) => {

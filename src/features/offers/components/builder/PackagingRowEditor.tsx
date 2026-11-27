@@ -24,8 +24,8 @@ export default function PackagingRowEditor({
   const { t, language } = useTranslation()
 
   return (
-    <div className="grid gap-3 rounded-md border border-line-soft bg-page/60 p-3 sm:grid-cols-[1fr_1.4fr_1fr_auto] sm:items-end">
-      <label className="flex flex-col gap-1 text-[13px] font-medium text-ink">
+    <div className="grid gap-3 rounded-md border border-line-soft bg-page/60 p-3 sm:grid-cols-2 sm:items-end md:grid-cols-[1fr_1.4fr_1fr_auto]">
+      <label className="flex flex-col gap-1 text-sm font-medium text-ink">
         {t("offers.builder.packaging.type")}
         <Select
           value={row.packageTypeId}
@@ -49,7 +49,7 @@ export default function PackagingRowEditor({
         </Select>
       </label>
 
-      <label className="flex flex-col gap-1 text-[13px] font-medium text-ink">
+      <label className="flex flex-col gap-1 text-sm font-medium text-ink">
         {t("offers.builder.packaging.weight")}
         <DecimalInput
           value={row.weightPerPackageKg}
@@ -57,7 +57,7 @@ export default function PackagingRowEditor({
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-[13px] font-medium text-ink">
+      <label className="flex flex-col gap-1 text-sm font-medium text-ink">
         {t("offers.builder.packaging.packages")}
         <Stepper
           value={row.packages}
@@ -72,7 +72,7 @@ export default function PackagingRowEditor({
         size="sm"
         onClick={onRemove}
         aria-label={t("offers.builder.packaging.removeRow")}
-        className="justify-self-start text-danger hover:bg-danger/10 sm:justify-self-end"
+        className="justify-self-start text-danger hover:bg-danger/10 md:justify-self-end"
       >
         <Icon name="trash" size={16} />
       </Button>

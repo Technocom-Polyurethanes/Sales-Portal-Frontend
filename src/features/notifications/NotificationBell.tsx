@@ -9,6 +9,7 @@ import { useTranslation } from "../../i18n/I18nProvider"
 import { isMockApi } from "../../lib/api/mode"
 import { formatDateTime } from "../../lib/formatters/date"
 import { localeForLanguage } from "../../lib/formatters/locale"
+import { useFocusTrap } from "../../lib/hooks/useFocusTrap"
 
 import { formatNotification } from "./formatters"
 import { useNotifications } from "./NotificationsProvider"
@@ -24,21 +25,16 @@ export default function NotificationBell() {
   const bell = useRef<HTMLButtonElement>(null)
   const panel = useRef<HTMLDivElement>(null)
   const locale = localeForLanguage(language)
+  useFocusTrap(open, panel)
 
   useEffect(() => {
     if (!open) return
 
-    panel.current?.focus()
     const onPointerDown = (event: PointerEvent) => {
-      if (!wrapper.current?.contains(event.target as Node)) {
-        setOpen(false)
-        bell.current?.focus()
-      }
+      if (!wrapper.current?.contains(event.target as Node)) setOpen(false)
     }
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return
-      setOpen(false)
-      bell.current?.focus()
+      if (event.key === "Escape") setOpen(false)
     }
     document.addEventListener("pointerdown", onPointerDown)
     document.addEventListener("keydown", onKeyDown)
@@ -81,14 +77,17 @@ export default function NotificationBell() {
         aria-expanded={open}
         aria-haspopup="dialog"
         aria-controls="notifications-panel"
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          bell.current?.focus()
+          setOpen((current) => !current)
+        }}
         className="relative flex h-9 w-9 items-center justify-center rounded-md border border-line text-muted transition-colors hover:bg-page hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         <Icon name="bell" size={18} />
         {unreadCount > 0 && (
           <span
             aria-hidden="true"
-            className="absolute -end-2 -top-2 min-w-5 rounded-full bg-primary px-1 text-center text-[10px] font-semibold leading-5 text-white"
+            className="absolute -end-2 -top-2 min-w-5 rounded-full bg-primary px-1 text-center text-xs font-semibold leading-5 text-on-primary"
           >
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
@@ -103,7 +102,7 @@ export default function NotificationBell() {
           aria-label={t("notifications.title")}
           dir={direction}
           tabIndex={-1}
-          className="fixed inset-x-4 top-16 z-40 max-h-[min(30rem,calc(100vh-5rem))] overflow-hidden rounded-lg border border-line bg-surface shadow-xl focus:outline-none sm:absolute sm:start-auto sm:end-0 sm:top-11 sm:w-96"
+          className="fixed inset-x-4 top-16 z-40 max-h-[min(30rem,calc(100vh-5rem))] overflow-hidden rounded-lg border border-line bg-surface shadow-xl focus:outline-none motion-safe:animate-panel-in sm:absolute sm:start-auto sm:end-0 sm:top-11 sm:w-96"
         >
           <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-3">
             <strong className="text-sm font-semibold text-ink">
@@ -123,10 +122,7 @@ export default function NotificationBell() {
               <button
                 type="button"
                 aria-label={t("common.close")}
-                onClick={() => {
-                  setOpen(false)
-                  bell.current?.focus()
-                }}
+                onClick={() => setOpen(false)}
                 className="flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-page hover:text-ink focus-visible:outline-2 focus-visible:outline-primary"
               >
                 <Icon name="close" size={16} />
@@ -200,7 +196,7 @@ export default function NotificationBell() {
                         </span>
                         <span
                           title={formatDateTime(item.createdAt, locale)}
-                          className="shrink-0 text-[11px] text-muted"
+                          className="shrink-0 text-xs text-muted"
                         >
                           {time}
                         </span>
@@ -219,7 +215,6 @@ export default function NotificationBell() {
                             }${title}. ${description}`}
                             onClick={() => {
                               void markAsRead(item.id)
-                              bell.current?.focus()
                               setOpen(false)
                               navigate(route)
                             }}

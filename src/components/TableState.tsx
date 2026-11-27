@@ -55,7 +55,7 @@ export default function TableState({
         role="alert"
         className="flex flex-col items-center justify-center gap-3 px-6 py-10 text-center"
       >
-        <Icon name="help" size={28} className="text-red-500" />
+        <Icon name="help" size={28} className="text-danger" />
         <p className="text-sm text-ink">
           {errorMessage || t("shell.helpText")}
         </p>

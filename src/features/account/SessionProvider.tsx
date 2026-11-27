@@ -9,6 +9,7 @@ import {
 import type { ReactNode } from "react"
 
 import { clearCache } from "../../lib/cache/queryCache"
+import { clearBuilderDrafts } from "../offers/draftStorage"
 import { accountApi, type AccountUser } from "./api"
 
 const SESSION_STORAGE_KEY = "technocom.session"
@@ -117,10 +118,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem(TOKEN_STORAGE_KEY)
     }
     clearCache()
+    clearBuilderDrafts(user?.id)
     setAuthenticated(false)
     setUser(undefined)
     setLoading(false)
-  }, [])
+  }, [user?.id])
 
   useEffect(() => {
     if (authenticated && !getStoredToken()) {

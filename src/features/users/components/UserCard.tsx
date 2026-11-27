@@ -44,27 +44,27 @@ export default function UserCard({
           <h3 className="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">
             <span className="truncate">{user.fullName}</span>
             {isSelf && (
-              <span className="rounded bg-page px-1.5 py-0.5 text-[11px] font-medium text-muted">
+              <span className="rounded bg-page px-1.5 py-0.5 text-xs font-medium text-muted">
                 {t("users.you")}
               </span>
             )}
           </h3>
-          <p dir="ltr" className="truncate text-start text-xs text-muted">
-            @{user.username}
+          <p className="truncate text-start text-xs text-muted">
+            <bdi dir="ltr">@{user.username}</bdi>
           </p>
         </div>
         <RoleBadge role={user.role} />
       </header>
 
-      <dl className="flex flex-row justify-between text-sm">
-        {subtitle && <dd className="truncate text-ink">{subtitle}</dd>}
-        <dd dir="ltr" className="truncate text-start text-muted">
-          {user.email || ""}
+      <dl className="grid gap-2 text-sm sm:flex sm:flex-row sm:justify-between sm:gap-4">
+        {subtitle && <dd className="min-w-0 truncate text-ink">{subtitle}</dd>}
+        <dd className="min-w-0 truncate text-start text-muted">
+          <bdi dir="ltr">{user.email || ""}</bdi>
         </dd>
-        <span className="text-[12px] text-muted">
+        <dd className="min-w-0 text-xs text-muted sm:text-sm">
           {t("users.createdOn")}{" "}
           <bdi dir="ltr">{formatTimestampDay(user.createdAt, locale)}</bdi>
-        </span>
+        </dd>
       </dl>
 
       <footer className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-line-soft pt-3">
