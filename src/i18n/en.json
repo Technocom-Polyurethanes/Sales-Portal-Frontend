@@ -340,7 +340,7 @@
       "materials": "Materials",
       "versions": "Version history",
       "noVersions": "This offer has no other versions yet.",
-      "versionCount": "{{count}} versions",
+      "versionCount": "{count} versions",
       "newVersion": "New version",
       "createdBy": "Created by",
       "createdAt": "Created on",
