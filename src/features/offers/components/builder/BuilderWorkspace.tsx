@@ -344,7 +344,7 @@ export default function BuilderWorkspace({
               <p className="font-medium">
                 {t("offers.builder.validation.summaryTitle")}
               </p>
-              <ul className="mt-1 list-disc space-y-0.5 ps-5 text-xs">
+              <ul className="mt-1 list-disc space-y-0.5 ps-5 text-sm">
                 {summaryIssues.map((issue, index) => (
                   <li key={`${issue.message}-${index}`}>
                     {t(issue.message, issue.params)}

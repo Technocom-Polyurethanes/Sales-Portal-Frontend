@@ -279,7 +279,7 @@ export default function OfferDetailsPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
         <div className="min-w-0 space-y-4">
           <Card title={t("offers.details.summary")}>
-            <dl className="mb-4 grid gap-3 rounded-md border border-line-soft bg-page/50 p-4 text-sm sm:grid-cols-4">
+            <dl className="mb-4 grid gap-3 rounded-md border border-line-soft bg-page/50 p-4 text-sm sm:grid-cols-2 xl:grid-cols-4">
               <div>
                 <dt className="text-xs text-muted">
                   {t("offers.list.issueDate")}
@@ -392,7 +392,7 @@ export default function OfferDetailsPage() {
               }
             />
           </div>
-          <div className="max-h-[calc(100vh-8rem)] overflow-auto rounded-md border border-line p-3">
+          <div className="max-h-[70dvh] overflow-auto rounded-md border border-line p-3 lg:max-h-[calc(100vh-8rem)]">
             {documentData && (
               <OfferDocumentPreview
                 data={documentData}
