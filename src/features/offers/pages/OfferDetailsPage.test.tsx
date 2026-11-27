@@ -236,8 +236,15 @@ describe("offer view document language", () => {
     const offer = db.offers[0]
     await open(offer.id)
 
-    expect(container.querySelector("h1 bdi")?.textContent).toBe(offer.reference)
-    expect(container.querySelector("h1 bdi")?.getAttribute("dir")).toBe("ltr")
+    const reference = container.querySelector("h1 bdi")
+    expect(reference?.textContent).toBe(offer.reference)
+    expect(reference?.getAttribute("dir")).toBe("ltr")
+    expect(reference?.classList.contains("tabular-nums")).toBe(true)
+
+    const client = Array.from(container.querySelectorAll('[dir="auto"]')).find(
+      (item) => item.textContent === offer.customerName,
+    )
+    expect(client).toBeTruthy()
 
     const action = (label: string, title: string) => {
       const button = Array.from(container.querySelectorAll("button")).find(

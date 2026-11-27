@@ -213,40 +213,57 @@ export default function OfferDetailsPage() {
 
   return (
     <>
-      <section className="no-print mb-6 rounded-xl border border-line-soft bg-surface p-4 sm:p-5">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+      <section className="no-print mb-6 rounded-xl border border-line-soft bg-surface p-4 sm:p-5 lg:p-6">
+        <div className="flex flex-col gap-4 text-start lg:flex-row lg:items-center lg:justify-between lg:gap-6">
           <div className="min-w-0">
-            <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-              <bdi dir="ltr">{offer.reference}</bdi>
+            <h1 className="text-xl font-semibold tracking-tight text-ink sm:text-2xl lg:text-3xl">
+              <bdi dir="ltr" className="block break-all tabular-nums">
+                {offer.reference}
+              </bdi>
             </h1>
-            <p className="mt-1 break-words text-sm text-muted">
-              {customer?.name ?? offer.customerName}
-            </p>
-          </div>
-
-          <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:items-end">
-            <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-              <span className="text-xs text-muted">{t("common.status")}</span>
-              <Badge variant={offer.status}>
-                {t(`offers.status.${offer.status}`)}
-              </Badge>
-              {offer.version > 1 && (
-                <span className="rounded bg-page px-2 py-1 text-xs text-muted">
-                  v{offer.version}
-                </span>
-              )}
-              {versionCount > 1 && (
-                <span className="rounded bg-page px-2 py-1 text-xs text-muted">
-                  {t("offers.details.versionCount", { count: versionCount })}
-                </span>
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-muted">
+              <span dir="auto" className="w-full break-words sm:w-auto">
+                {customer?.name ?? offer.customerName}
+              </span>
+              <span aria-hidden="true" className="hidden text-line sm:inline">
+                ·
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span>{t("common.status")}</span>
+                <Badge variant={offer.status}>
+                  {t(`offers.status.${offer.status}`)}
+                </Badge>
+              </span>
+              {(offer.version > 1 || versionCount > 1) && (
+                <>
+                  <span aria-hidden="true" className="hidden text-line sm:inline">
+                    ·
+                  </span>
+                  <span className="inline-flex flex-wrap items-center gap-1.5">
+                    {offer.version > 1 && (
+                      <span className="inline-flex items-center rounded-full border border-line-soft bg-page/60 px-2 py-0.5 text-xs text-muted tabular-nums">
+                        v{offer.version}
+                      </span>
+                    )}
+                    {versionCount > 1 && (
+                      <span className="inline-flex items-center whitespace-nowrap rounded-full border border-line-soft bg-page/60 px-2 py-0.5 text-xs text-muted tabular-nums">
+                        {t("offers.details.versionCount", {
+                          count: versionCount,
+                        })}
+                      </span>
+                    )}
+                  </span>
+                </>
               )}
             </div>
+          </div>
 
-            <div className="grid grid-cols-3 gap-2 sm:flex sm:w-auto sm:justify-end">
+          <div className="w-full shrink-0 border-t border-line-soft pt-4 lg:w-auto lg:border-t-0 lg:pt-0">
+            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-3 lg:justify-end lg:gap-4">
               {canWrite && (
                 <Button
                   variant="primary"
-                  className="col-span-3 w-full sm:col-span-1 sm:w-auto"
+                  className="w-full min-h-[44px] md:w-auto"
                   aria-label={t("offers.details.statusTitle")}
                   title={t("offers.details.statusTitle")}
                   icon={<Icon name="check" size={16} />}
@@ -255,43 +272,49 @@ export default function OfferDetailsPage() {
                   {t("offers.details.changeStatus")}
                 </Button>
               )}
-              <Button
-                variant="secondary"
-                className="w-full gap-1.5 px-2 sm:w-auto sm:gap-2 sm:px-4"
-                aria-label={t("offers.details.printTitle")}
-                title={t("offers.details.printTitle")}
-                icon={<Icon name="print" size={16} />}
-                onClick={() =>
-                  documentData &&
-                  print({ data: documentData, language: documentLanguage })
-                }
-              >
-                {t("common.print")}
-              </Button>
-              {canWrite && (
+              <div className="grid grid-cols-3 gap-2 md:flex md:items-center md:gap-2">
                 <Button
                   variant="secondary"
-                  className="w-full gap-1.5 px-2 sm:w-auto sm:gap-2 sm:px-4"
-                  aria-label={t("offers.details.editTitle")}
-                  title={t("offers.details.editTitle")}
-                  icon={<Icon name="edit" size={16} />}
-                  onClick={() => navigate(`/offers/new?from=${offer.id}`)}
+                  className="w-full min-h-[40px] gap-1.5 px-2 md:w-auto md:gap-2 md:px-3"
+                  aria-label={t("offers.details.printTitle")}
+                  title={t("offers.details.printTitle")}
+                  icon={<Icon name="print" size={16} />}
+                  onClick={() =>
+                    documentData &&
+                    print({ data: documentData, language: documentLanguage })
+                  }
                 >
-                  {t("common.edit")}
+                  {t("common.print")}
                 </Button>
-              )}
-              {canDelete && (
-                <Button
-                  variant="danger"
-                  className="w-full gap-1.5 px-2 sm:w-auto sm:gap-2 sm:px-4"
-                  aria-label={t("offers.details.deleteTitle")}
-                  title={t("offers.details.deleteTitle")}
-                  icon={<Icon name="trash" size={16} />}
-                  onClick={() => deletion.setTarget(offer)}
-                >
-                  {t("common.delete")}
-                </Button>
-              )}
+                {canWrite && (
+                  <Button
+                    variant="secondary"
+                    className="w-full min-h-[40px] gap-1.5 px-2 md:w-auto md:gap-2 md:px-3"
+                    aria-label={t("offers.details.editTitle")}
+                    title={t("offers.details.editTitle")}
+                    icon={<Icon name="edit" size={16} />}
+                    onClick={() => navigate(`/offers/new?from=${offer.id}`)}
+                  >
+                    {t("common.edit")}
+                  </Button>
+                )}
+                <span
+                  aria-hidden="true"
+                  className="hidden h-5 w-px bg-line-soft md:block"
+                />
+                {canDelete && (
+                  <Button
+                    variant="subtle-danger"
+                    className="w-full min-h-[40px] gap-1.5 px-2 md:ms-1 md:w-auto md:gap-2 md:px-3"
+                    aria-label={t("offers.details.deleteTitle")}
+                    title={t("offers.details.deleteTitle")}
+                    icon={<Icon name="trash" size={16} />}
+                    onClick={() => deletion.setTarget(offer)}
+                  >
+                    {t("common.delete")}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
