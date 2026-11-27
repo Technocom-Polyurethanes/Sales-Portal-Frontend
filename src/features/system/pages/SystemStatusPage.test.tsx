@@ -80,6 +80,28 @@ describe("System status screen", () => {
     expect(container.textContent).toContain("Up")
     expect(container.textContent).toContain("Connected")
     expect(container.textContent).toContain("Production")
+
+    const headerFor = (title: string) =>
+      Array.from(container.querySelectorAll("section")).find(
+        (card) => card.querySelector("h2")?.textContent === title,
+      )?.querySelector("header")?.textContent
+
+    expect(headerFor("Overall status")).toContain("Healthy")
+    expect(headerFor("Database")).toContain("Up")
+  })
+
+  it("keeps the cards on screen when refreshing", async () => {
+    await render()
+    await waitFor("Healthy")
+
+    const refresh = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent === "Refresh",
+    )
+
+    await act(async () => refresh?.click())
+
+    expect(container.querySelector(".animate-pulse")).toBeNull()
+    expect(container.textContent).toContain("Healthy")
   })
 
   it("shows a retryable error when the status call fails", async () => {

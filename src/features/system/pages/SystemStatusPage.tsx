@@ -1,7 +1,6 @@
 import PageHeader from "../../../app/layout/PageHeader"
 import Button from "../../../components/ui/Button"
 import Card from "../../../components/ui/Card"
-import CardGridSkeleton from "../../../components/ui/CardSkeleton"
 import Badge, { type BadgeVariant } from "../../../components/ui/Badge"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import { formatDateTime } from "../../../lib/formatters/date"
@@ -52,7 +51,7 @@ export default function SystemStatusPage() {
     )
   }
 
-  if (status.loading || !status.data) {
+  if (!status.data) {
     return (
       <>
         <PageHeader
@@ -60,7 +59,11 @@ export default function SystemStatusPage() {
           subtitle={t("system.subtitle")}
           action={action}
         />
-        <CardGridSkeleton count={3} />
+        <Card>
+          <p role="status" className="text-sm text-muted">
+            {t("common.loading")}
+          </p>
+        </Card>
       </>
     )
   }
@@ -75,13 +78,16 @@ export default function SystemStatusPage() {
         subtitle={t("system.subtitle")}
         action={action}
       />
-      <div className="grid gap-4 xl:grid-cols-3">
-        <Card title={t("system.overall")}>
-          <div className="flex justify-center">
+      <div className="divide-y divide-line-soft rounded-xl border border-line-soft bg-surface">
+        <section className="p-4 sm:p-5">
+          <header className="flex flex-wrap items-start justify-between gap-3">
+            <h2 className="text-base font-semibold text-ink">
+              {t("system.overall")}
+            </h2>
             <Badge variant={badgeVariant(data.status)}>
               {stateLabel("overall", data.status, t)}
             </Badge>
-          </div>
+          </header>
           <dl className="mt-4 space-y-3 text-sm">
             <div className="flex justify-between gap-3">
               <dt className="text-muted">{t("system.checkedAt")}</dt>
@@ -106,24 +112,32 @@ export default function SystemStatusPage() {
               </dd>
             </div>
           </dl>
-        </Card>
+        </section>
 
-        <Card title={t("system.database")}>
-          <div className="flex justify-center">
+        <section className="p-4 sm:p-5">
+          <header className="flex flex-wrap items-start justify-between gap-3">
+            <h2 className="text-base font-semibold text-ink">
+              {t("system.database")}
+            </h2>
             <Badge variant={badgeVariant(data.database.status)}>
               {stateLabel("database", data.database.status, t)}
             </Badge>
-          </div>
+          </header>
           <div className="mt-4 flex justify-between gap-3 text-sm">
             <span className="text-muted">{t("system.latency")}</span>
             <span className="text-ink" dir="ltr">
               {data.database.latencyMs} ms
             </span>
           </div>
-        </Card>
+        </section>
 
-        <Card title={t("system.live")}>
-          <div className="space-y-3">
+        <section className="p-4 sm:p-5">
+          <header className="flex flex-wrap items-start justify-between gap-3">
+            <h2 className="text-base font-semibold text-ink">
+              {t("system.live")}
+            </h2>
+          </header>
+          <div className="mt-4 space-y-3">
             <div className="flex items-center justify-between gap-3 text-sm">
               <span className="text-muted">{t("system.liveState")}</span>
               <Badge variant={badgeVariant(data.live.state)}>
@@ -132,24 +146,24 @@ export default function SystemStatusPage() {
             </div>
             <div className="flex justify-between gap-3 text-sm">
               <span className="text-muted">{t("system.changes")}</span>
-              <span className="text-ink">
+              <Badge variant={badgeVariant(data.live.changes)}>
                 {stateLabel("live", data.live.changes, t)}
-              </span>
+              </Badge>
             </div>
             <div className="flex justify-between gap-3 text-sm">
               <span className="text-muted">{t("system.notifications")}</span>
-              <span className="text-ink">
+              <Badge variant={badgeVariant(data.live.notifications)}>
                 {stateLabel("live", data.live.notifications, t)}
-              </span>
+              </Badge>
             </div>
             <div className="flex justify-between gap-3 text-sm">
               <span className="text-muted">{t("system.pollingFallback")}</span>
-              <span className="text-ink">
+              <Badge variant={badgeVariant(data.live.pollingFallback ? "success" : "destructive")}>
                 {data.live.pollingFallback ? t("common.yes") : t("common.no")}
-              </span>
+              </Badge>
             </div>
           </div>
-        </Card>
+        </section>
       </div>
     </>
   )
