@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { formatDateTime, formatIsoDay, formatTimestampDay } from "./date"
+import {
+  formatDateTime,
+  formatIsoDay,
+  formatTimestampDay,
+  localizeTypedDates,
+} from "./date"
 
 describe("formatIsoDay", () => {
   it("keeps the English day/month/year order and switches Arabic to year/month/day", () => {
@@ -28,5 +33,26 @@ describe("formatDateTime", () => {
     expect(formatDateTime(undefined)).toBe("")
     expect(formatDateTime(null)).toBe("")
     expect(formatDateTime("not a date")).toBe("not a date")
+  })
+})
+
+describe("localizeTypedDates", () => {
+  it("flips both orders for Arabic", () => {
+    expect(localizeTypedDates("until 28/11/2026", "ar-EG")).toBe("until 2026/11/28")
+    expect(localizeTypedDates("until 2026/11/28", "ar-EG")).toBe("until 2026/11/28")
+  })
+
+  it("flips a year-first date for English", () => {
+    expect(localizeTypedDates("until 2026/11/28")).toBe("until 28/11/2026")
+  })
+
+  it("passes other text through unchanged", () => {
+    expect(localizeTypedDates("Form TF-06-01, code 14:05, day 3", "ar-EG")).toBe(
+      "Form TF-06-01, code 14:05, day 3",
+    )
+  })
+
+  it("leaves an invalid date unchanged", () => {
+    expect(localizeTypedDates("31/13/2026", "ar-EG")).toBe("31/13/2026")
   })
 })

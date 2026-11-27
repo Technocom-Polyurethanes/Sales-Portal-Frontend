@@ -3,6 +3,7 @@ import { useState } from "react"
 import Button from "../../../../components/ui/Button"
 import { useTranslation } from "../../../../i18n/I18nProvider"
 import { formatDateTime } from "../../../../lib/formatters/date"
+import { localeForLanguage } from "../../../../lib/formatters/locale"
 
 export type RestoredNoticeProps = {
   /** Epoch milliseconds of the moment the restored copy was last written. */
@@ -17,7 +18,7 @@ export default function RestoredNotice({
   onStartOver,
   onDismiss,
 }: RestoredNoticeProps) {
-  const { t } = useTranslation()
+  const { t, language } = useTranslation()
   // Starting over throws the work away, so it asks once more instead of acting on a misclick.
   const [confirming, setConfirming] = useState(false)
 
@@ -30,7 +31,10 @@ export default function RestoredNotice({
         <p className="font-medium">{t("offers.builder.restored.title")}</p>
         <p className="text-xs text-muted">
           {t("offers.builder.restored.message", {
-            time: formatDateTime(new Date(savedAt).toISOString()),
+            time: formatDateTime(
+              new Date(savedAt).toISOString(),
+              localeForLanguage(language),
+            ),
           })}
         </p>
       </div>
