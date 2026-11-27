@@ -236,51 +236,56 @@ export default function OfferDetailsPage() {
           </span>
         }
         action={
-          canWrite ? (
+          <div className="flex flex-wrap items-center justify-end gap-1.5">
             <Button
-              variant="primary"
-              icon={<Icon name="check" size={16} />}
-              onClick={() => setStatusOpen(true)}
-            >
-              {t("offers.details.changeStatus")}
-            </Button>
-          ) : undefined
+              variant="ghost"
+              className="px-2.5"
+              aria-label={t("common.print")}
+              title={t("common.print")}
+              icon={<Icon name="print" size={16} />}
+              onClick={() =>
+                documentData &&
+                print({ data: documentData, language: documentLanguage })
+              }
+            />
+            {canWrite && (
+              <Button
+                variant="ghost"
+                className="px-2.5"
+                aria-label={t("offers.details.newVersion")}
+                title={t("offers.details.newVersion")}
+                icon={<Icon name="edit" size={16} />}
+                onClick={() => navigate(`/offers/new?from=${offer.id}`)}
+              />
+            )}
+            {canDelete && (
+              <Button
+                variant="danger"
+                className="px-2.5"
+                aria-label={t("common.delete")}
+                title={t("common.delete")}
+                icon={<Icon name="trash" size={16} />}
+                onClick={() => deletion.setTarget(offer)}
+              />
+            )}
+            {canWrite && (
+              <>
+                <span
+                  aria-hidden="true"
+                  className="mx-1 hidden h-6 w-px bg-line sm:block"
+                />
+                <Button
+                  variant="primary"
+                  icon={<Icon name="check" size={16} />}
+                  onClick={() => setStatusOpen(true)}
+                >
+                  {t("offers.details.changeStatus")}
+                </Button>
+              </>
+            )}
+          </div>
         }
       />
-
-      <div className="no-print mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-line-soft bg-surface px-3 py-2">
-        <Button
-          variant="ghost"
-          icon={<Icon name="print" size={16} />}
-          onClick={() =>
-            documentData &&
-            print({ data: documentData, language: documentLanguage })
-          }
-        >
-          {t("common.print")}
-        </Button>
-
-        {canWrite && (
-          <Button
-            variant="ghost"
-            icon={<Icon name="edit" size={16} />}
-            onClick={() => navigate(`/offers/new?from=${offer.id}`)}
-          >
-            {t("offers.details.newVersion")}
-          </Button>
-        )}
-
-        {canDelete && (
-          <Button
-            variant="danger"
-            icon={<Icon name="trash" size={16} />}
-            className="ms-auto"
-            onClick={() => deletion.setTarget(offer)}
-          >
-            {t("common.delete")}
-          </Button>
-        )}
-      </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_26rem]">
         <div className="min-w-0 space-y-4">
