@@ -11,6 +11,7 @@ export type PagedTableProps<T,> = {
   columns: Column<T>[]
   rowKey: (row: T) => string
   onRowClick?: (row: T) => void
+  rowActionLabel?: (row: T) => string
   onPageChange: (page: number) => void
   onRetry?: () => void
   query?: string
@@ -32,6 +33,7 @@ export default function PagedTable<T>({
   columns,
   rowKey,
   onRowClick,
+  rowActionLabel,
   onPageChange,
   onRetry,
   query,
@@ -76,6 +78,7 @@ export default function PagedTable<T>({
           rows={rows}
           rowKey={rowKey}
           onRowClick={onRowClick}
+          rowActionLabel={rowActionLabel}
         />
       </TableState>
 

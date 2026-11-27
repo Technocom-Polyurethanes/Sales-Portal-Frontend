@@ -190,6 +190,7 @@ export default function CustomerHistoryPage() {
         columns={columns}
         rowKey={(offer) => offer.id}
         onRowClick={(offer) => navigate(`/offers/${offer.id}`)}
+        rowActionLabel={(offer) => t("common.open", { name: offer.reference })}
         onPageChange={setPage}
         onRetry={reloadOffers}
         emptyTitle={t("customers.noHistory")}

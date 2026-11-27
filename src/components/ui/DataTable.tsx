@@ -15,6 +15,8 @@ export type DataTableProps<T,> = {
   rows: T[]
   rowKey: (row: T) => string
   onRowClick?: (row: T) => void
+  /** Accessible name for the hidden action button in the first cell. */
+  rowActionLabel?: (row: T) => string
   empty?: ReactNode
   className?: string
 }
@@ -28,6 +30,7 @@ export default function DataTable<T>({
   rows,
   rowKey,
   onRowClick,
+  rowActionLabel = (row) => `${columns[0].header}: ${rowKey(row)}`,
   empty,
   className = "",
 }: DataTableProps<T>) {
@@ -61,26 +64,12 @@ export default function DataTable<T>({
           {rows.map((row) => (
             <tr
               key={rowKey(row)}
-              role={onRowClick ? "button" : undefined}
-              tabIndex={onRowClick ? 0 : undefined}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
-              onKeyDown={
-                onRowClick
-                  ? (event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault()
-                        onRowClick(row)
-                      }
-                    }
-                  : undefined
-              }
               className={`border-b border-line-soft last:border-0 max-md:block max-md:border-b max-md:border-line-soft max-md:py-2 ${
-                onRowClick
-                  ? "cursor-pointer hover:bg-page focus-visible:bg-primary-soft"
-                  : ""
+                onRowClick ? "cursor-pointer hover:bg-page" : ""
               }`}
             >
-              {columns.map((column) => (
+              {columns.map((column, index) => (
                 <td
                   key={column.key}
                   data-label={column.header}
@@ -91,6 +80,19 @@ export default function DataTable<T>({
                   <span className="text-xs font-medium text-muted md:hidden">
                     {column.header}
                   </span>
+                  {onRowClick && index === 0 && (
+                    <button
+                      type="button"
+                      aria-label={rowActionLabel(row)}
+                      className="sr-only focus:not-sr-only focus:me-2 focus:rounded focus:bg-primary-soft focus:px-2 focus:py-1 focus:text-ink"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        onRowClick(row)
+                      }}
+                    >
+                      {rowActionLabel(row)}
+                    </button>
+                  )}
                   <span className={column.align === "end" ? "text-end" : "text-start"}>
                     {column.render(row)}
                   </span>

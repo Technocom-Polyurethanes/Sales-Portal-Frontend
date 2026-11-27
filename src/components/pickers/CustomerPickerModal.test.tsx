@@ -68,11 +68,11 @@ describe("CustomerPickerModal", () => {
     vi.restoreAllMocks()
   })
 
-  const render = async () => {
+  const render = async (onSelect = () => {}) => {
     await act(async () => {
       root.render(
         <I18nProvider>
-          <CustomerPickerModal open customers={[]} onSelect={() => {}} onClose={() => {}} />
+          <CustomerPickerModal open customers={[]} onSelect={onSelect} onClose={() => {}} />
         </I18nProvider>,
       )
     })
@@ -136,6 +136,27 @@ describe("CustomerPickerModal", () => {
     await click("Next")
     expect(hasSkeleton()).toBe(true)
     expect(container.textContent).toContain("Page 3 of 3")
+  })
+
+  it("only moves the highlight when the search field has focus", async () => {
+    vi.spyOn(api, "get").mockImplementation((_path, query) => Promise.resolve(pageOf(query as Query)) as never)
+    const onSelect = vi.fn()
+    await render(onSelect)
+    await flush()
+
+    const close = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.getAttribute("aria-label") === "Close",
+    )!
+    await act(async () => {
+      close.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }))
+    })
+    expect(onSelect).not.toHaveBeenCalled()
+
+    const input = container.querySelector<HTMLInputElement>("input")!
+    await act(async () => {
+      input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }))
+    })
+    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ id: "c1" }))
   })
 
   it("does not wait on a timer: a search request leaves in the same tick", async () => {

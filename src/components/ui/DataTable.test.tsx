@@ -29,16 +29,18 @@ describe("DataTable", () => {
           rows={rows}
           rowKey={(row) => row.id}
           onRowClick={onRowClick}
+          rowActionLabel={(row) => `Open ${row.name}`}
         />,
       )
     })
 
     const row = container.querySelector("tbody tr") as HTMLElement
-    expect(row.getAttribute("tabindex")).toBe("0")
+    expect(row.getAttribute("role")).toBeNull()
 
-    await act(async () => {
-      row.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }))
-    })
+    const action = container.querySelector("tbody button") as HTMLButtonElement
+    expect(action.getAttribute("aria-label")).toBe("Open Loc/1-2026")
+    action.click()
+    expect(onRowClick).toHaveBeenCalledTimes(1)
     expect(onRowClick).toHaveBeenCalledWith(rows[0])
     root.unmount()
   })

@@ -15,6 +15,7 @@
     "edit": "Edit",
     "add": "Add",
     "close": "Close",
+    "open": "Open {name}",
     "back": "Back",
     "next": "Next",
     "previous": "Previous",
