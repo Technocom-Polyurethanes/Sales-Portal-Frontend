@@ -36,10 +36,7 @@ export default function OfferCard({ offer, onOpen, onDelete }: OfferCardProps) {
   const modifiedAt = offer.lastModifiedAt ?? offer.updatedAt
 
   return (
-    <article
-      onClick={() => onOpen(offer)}
-      className="flex w-full cursor-pointer flex-col gap-3 rounded-lg border border-line bg-surface p-4 transition-colors hover:border-primary/40 hover:bg-page/40"
-    >
+    <article className="flex w-full flex-col gap-3 rounded-lg border border-line bg-surface p-4 transition-colors hover:border-primary/40">
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="flex items-center gap-2 text-sm font-semibold">
