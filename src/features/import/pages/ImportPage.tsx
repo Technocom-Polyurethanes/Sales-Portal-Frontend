@@ -69,7 +69,7 @@ export default function ImportPage() {
                   </span>
                   {t(key)}
                   {number < STEPS.length && (
-                    <span className="text-line">—</span>
+                    <span className="text-muted">—</span>
                   )}
                 </li>
               )
