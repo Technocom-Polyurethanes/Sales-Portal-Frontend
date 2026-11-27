@@ -233,7 +233,11 @@ describe("offer view document language", () => {
   })
 
   it("names and titles every offer action", async () => {
-    await open(db.offers[0].id)
+    const offer = db.offers[0]
+    await open(offer.id)
+
+    expect(container.querySelector("h1 bdi")?.textContent).toBe(offer.reference)
+    expect(container.querySelector("h1 bdi")?.getAttribute("dir")).toBe("ltr")
 
     const action = (label: string, title: string) => {
       const button = Array.from(container.querySelectorAll("button")).find(
