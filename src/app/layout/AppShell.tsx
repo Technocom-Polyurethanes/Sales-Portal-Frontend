@@ -17,11 +17,20 @@ const HELP_TIPS: TranslationKey[] = [
   "offers.builder.saveIssue",
 ]
 
+const SIDEBAR_STORAGE_KEY = "sales_portal_sidebar_collapsed"
+
 export default function AppShell() {
   const { t } = useTranslation()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(
+    () => localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true",
+  )
+
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, String(sidebarCollapsed))
+  }, [sidebarCollapsed])
 
   useEffect(() => {
     if (!menuOpen) return
@@ -41,8 +50,16 @@ export default function AppShell() {
 
   return (
     <div className="min-h-dvh bg-page">
-      <div className="fixed inset-y-0 start-0 z-40 hidden lg:block no-print">
-        <Sidebar onOpenHelp={() => setHelpOpen(true)} />
+      <div
+        className={`fixed inset-y-0 start-0 z-40 hidden transition-[width] duration-200 lg:block no-print ${
+          sidebarCollapsed ? "w-18" : "w-60"
+        }`}
+      >
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggleCollapsed={() => setSidebarCollapsed((current) => !current)}
+          onOpenHelp={() => setHelpOpen(true)}
+        />
       </div>
 
       {menuOpen && (
@@ -69,7 +86,11 @@ export default function AppShell() {
         </div>
       )}
 
-      <div className="app-shell flex min-h-dvh flex-col lg:ms-60">
+      <div
+        className={`app-shell flex min-h-dvh flex-col transition-[margin] duration-200 ${
+          sidebarCollapsed ? "lg:ms-18" : "lg:ms-60"
+        }`}
+      >
         <Topbar
           onOpenMenu={() => setMenuOpen(true)}
           onOpenHelp={() => setHelpOpen(true)}

@@ -81,6 +81,8 @@
     "languageSwitch": "Switch application language",
     "skipToContent": "Skip to content",
     "toggleNavigation": "Toggle navigation",
+    "collapseNavigation": "Collapse sidebar",
+    "expandNavigation": "Expand sidebar",
     "helpTitle": "Help center",
     "helpBody": "Use the search box to find an offer, or create a new one from scratch."
   },

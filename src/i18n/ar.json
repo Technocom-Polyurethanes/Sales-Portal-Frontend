@@ -81,6 +81,8 @@
     "languageSwitch": "تغيير لغة التطبيق",
     "skipToContent": "تخطَّ إلى المحتوى",
     "toggleNavigation": "إظهار القائمة",
+    "collapseNavigation": "طيّ الشريط الجانبي",
+    "expandNavigation": "توسيع الشريط الجانبي",
     "helpTitle": "مركز المساعدة",
     "helpBody": "استخدم مربع البحث للعثور على عرض سعر، أو أنشئ عرضاً جديداً من الصفر."
   },
