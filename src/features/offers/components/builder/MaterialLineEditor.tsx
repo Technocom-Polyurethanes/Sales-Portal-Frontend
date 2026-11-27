@@ -54,7 +54,7 @@ export default function MaterialLineEditor({
       </header>
 
       <div className="grid gap-3 py-3 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 text-[13px] font-medium text-ink">
+        <label className="flex flex-col gap-1 text-sm font-medium text-ink">
           {t("offers.builder.packaging.rate")}
           <DecimalInput
             value={line.ratePerKg ?? 0}
@@ -86,7 +86,7 @@ export default function MaterialLineEditor({
         </Button>
       </div>
 
-      <footer className="mt-3 flex flex-wrap items-center justify-end gap-6 border-t border-line-soft pt-3 text-xs text-muted">
+      <footer className="mt-3 flex flex-wrap items-center justify-end gap-3 border-t border-line-soft pt-3 text-xs text-muted sm:gap-6 sm:text-sm">
         <span>
           {t("offers.builder.packaging.quantity")}{" "}
           <strong className="ms-1 text-base font-semibold text-primary tabular-nums">

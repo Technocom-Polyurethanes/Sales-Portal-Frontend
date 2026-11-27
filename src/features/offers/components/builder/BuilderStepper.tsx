@@ -82,8 +82,8 @@ export default function BuilderStepper({
                 <span
                   // On a phone only the current step keeps its visible label; the
                   // others stay readable by screen readers.
-                  className={`text-xs leading-tight ${
-                    active ? "" : "sr-only sm:not-sr-only"
+                  className={`text-xs leading-tight sm:text-sm ${
+                    active ? "" : "sr-only md:not-sr-only"
                   } ${
                     active
                       ? "font-semibold text-ink"
