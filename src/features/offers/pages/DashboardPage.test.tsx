@@ -150,9 +150,36 @@ describe("dashboard", () => {
     expect(rows[0].textContent).toContain("Offer")
     expect(rows[0].getAttribute("aria-label")).toContain("Offer")
     expect(rows[0].getAttribute("aria-label")).toContain("Accepted")
+    expect(rows[0].getAttribute("aria-label")).toContain("1,000.00 USD")
+    expect(rows[0].getAttribute("aria-label")).toContain(
+      `05/${month.slice(5)}/2026`,
+    )
+
+    const dateLabel = Array.from(rows[0].querySelectorAll("span")).find(
+      (item) => item.textContent === "Date",
+    )
+    expect(dateLabel?.parentElement?.parentElement?.className).toContain(
+      "col-span-2",
+    )
 
     await click(rows[0])
     expect(state.navigate).toHaveBeenCalledWith("/offers/7")
+  })
+
+  it("mirrors the card layout while loading", async () => {
+    state.loading = true
+    await renderPage()
+
+    const row = container.querySelector('[aria-busy="true"] li')
+    const classes = Array.from(row?.querySelectorAll("span") ?? []).map(
+      (item) => item.className,
+    )
+    expect(
+      classes.some(
+        (value) => value.includes("lg:hidden") && value.includes("rounded-full"),
+      ),
+    ).toBe(true)
+    expect(classes.some((value) => value.includes("col-span-2"))).toBe(true)
   })
 
   it("shows an empty state and an error state with a way out", async () => {
