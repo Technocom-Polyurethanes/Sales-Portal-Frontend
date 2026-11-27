@@ -304,7 +304,7 @@ export default function OfferDetailsPage() {
                 {canDelete && (
                   <Button
                     size="sm"
-                    variant="subtle-danger"
+                    variant="danger"
                     className={actionButtonClass}
                     aria-label={t("offers.details.deleteTitle")}
                     title={t("offers.details.deleteTitle")}
