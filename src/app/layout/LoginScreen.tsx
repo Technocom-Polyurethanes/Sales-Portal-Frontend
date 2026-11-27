@@ -32,10 +32,10 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-page px-4 py-10">
-      <div className="w-full max-w-sm rounded-xl border border-line bg-surface p-7 shadow-sm motion-safe:animate-rise-in">
+    <main className="flex min-h-dvh items-center justify-center bg-page px-4 py-8 sm:py-12">
+      <div className="w-full max-w-md rounded-xl border border-line-soft bg-surface p-6 shadow-sm motion-safe:animate-rise-in sm:p-8">
         <Wordmark size="lg" />
-        <h1 className="mt-6 text-xl font-semibold text-ink">
+        <h1 className="mt-6 text-2xl font-semibold text-ink">
           {t("auth.welcomeBack")}
         </h1>
         <p className="mt-1 text-sm text-muted">{t("auth.subtitle")}</p>
@@ -58,12 +58,12 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 autoComplete="current-password"
-                className="pe-16"
+                className="pe-20"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((current) => !current)}
-                className="absolute inset-y-0 inset-e-2 px-2 text-xs font-medium text-primary"
+                className="absolute inset-y-0 inset-e-2 flex min-h-11 items-center px-2 text-sm font-semibold text-primary"
               >
                 {showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
               </button>
@@ -71,7 +71,10 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
           </Field>
 
           {error && (
-            <p className="rounded border border-danger/30 bg-danger/10 px-3 py-2 text-xs text-danger motion-safe:animate-fade-in">
+            <p
+              role="alert"
+              className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger motion-safe:animate-fade-in"
+            >
               {error}
             </p>
           )}
@@ -83,14 +86,14 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
           <button
             type="button"
             onClick={() => setResetOpen(true)}
-            className="self-center text-xs font-medium text-primary transition-colors hover:text-primary-hover"
+            className="min-h-10 self-center px-2 text-sm font-semibold text-primary transition-colors hover:text-primary-hover"
           >
             {t("auth.forgotPassword")}
           </button>
           <button
             type="button"
             onClick={toggleLanguage}
-            className="self-center text-xs font-medium text-muted transition-colors hover:text-ink"
+            className="min-h-10 self-center px-2 text-sm font-medium text-muted transition-colors hover:text-ink"
           >
             {language === "ar" ? "English" : "العربية"}
           </button>
