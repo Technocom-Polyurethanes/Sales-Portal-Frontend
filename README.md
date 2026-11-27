@@ -291,7 +291,7 @@ src/
     offers/                Builder, list, details, calculations, draft mapping, statuses
     customers/, products/, banks/
     import/                CSV import wizard and history
-    settings/, account/, users/
+    settings/, account/, users/, audit/
   lib/
     api/                   Typed client, transport registry, HTTP transport, errors
     calculations/          Pure offer maths and unit tests
@@ -351,8 +351,8 @@ Runs for the same ref are queued, never cancelled. [`vercel.json`](vercel.json) 
 ## Current state and gotchas
 
 Phases 1 and 2 (shell, calculations, mock API, offer builder, printed document) are complete, as are
-the Customers, Products, Banks, Import and Users screens. `/settings` and `/account` still show
-`PhasePlaceholder`; side-by-side document comparison and final polish are future phases in
+the Customers, Products, Banks, Import, Users and Admin-only Logs screens. `/settings` and `/account`
+still show `PhasePlaceholder`; side-by-side document comparison and final polish are future phases in
 [Phase.md](Phase.md).
 
 Things that surprise new developers:
