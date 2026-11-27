@@ -2,23 +2,23 @@
 @import "tailwindcss";
 
 @theme {
-  --color-page: #fbf8f1;
-  --color-surface: #fffefb;
-  --color-surface-soft: #f4efe6;
-  --color-line: #8a8374;
-  --color-line-soft: #e9e2d6;
-  --color-ink: #1d2b3a;
-  --color-muted: #5c6673;
-  --color-primary: #123b66;
-  --color-primary-hover: #0b2949;
-  --color-primary-soft: #e3ebf4;
-  --color-accent: #8a5a12;
-  --color-accent-soft: #f7ecd7;
-  --color-success: #236b4a;
-  --color-warning: #8a5a12;
-  --color-danger: #a02c2c;
-  --color-deduction: #8f4439;
-  --color-focus: #8a5a12;
+  --color-page: #f6f4f0;
+  --color-surface: #ffffff;
+  --color-surface-soft: #ebe7e0;
+  --color-line: #ddd8d0;
+  --color-line-soft: #ebe7e0;
+  --color-ink: #1f2933;
+  --color-muted: #5b6670;
+  --color-primary: #1f4e79;
+  --color-primary-hover: #173b5c;
+  --color-primary-soft: #eaf0f6;
+  --color-accent: #a2670a;
+  --color-accent-soft: #f3ece0;
+  --color-success: #1c7a4d;
+  --color-warning: #a2670a;
+  --color-danger: #b3261e;
+  --color-deduction: #8f3f38;
+  --color-focus: #a2670a;
   --color-on-primary: #ffffff;
   --color-on-danger: #ffffff;
   --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
@@ -30,6 +30,7 @@
   --animate-panel-in: panel-in 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-panel-out: panel-out 0.2s ease-in both;
   --animate-drawer-in: drawer-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-drawer-out: drawer-out 0.22s ease-in both;
 }
 
 @keyframes fade-in {
@@ -74,6 +75,15 @@
 
 @keyframes drawer-in {
   from {
+    transform: translateX(var(--drawer-offset, -100%));
+  }
+}
+
+@keyframes drawer-out {
+  from {
+    transform: translateX(0);
+  }
+  to {
     transform: translateX(var(--drawer-offset, -100%));
   }
 }
