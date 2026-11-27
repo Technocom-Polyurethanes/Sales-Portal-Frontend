@@ -95,7 +95,7 @@ function Row({ label, value, emphasis }: RowProps) {
       <dt className="text-muted">{label}</dt>
       <dd
         className={`tabular-nums ${
-          emphasis === "deduction" ? "text-[#984c3f]" : "text-ink"
+          emphasis === "deduction" ? "text-deduction" : "text-ink"
         }`}
       >
         {value}

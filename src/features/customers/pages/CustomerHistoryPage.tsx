@@ -136,7 +136,7 @@ export default function CustomerHistoryPage() {
 
       <div className="mb-6 grid gap-4 lg:grid-cols-3">
         <div className="rounded-lg border border-line bg-surface p-4">
-          <p className="text-xs font-semibold tracking-wide text-muted uppercase">
+          <p className="text-xs font-semibold text-muted">
             {t("customers.offers")}
           </p>
           <p className="mt-1 text-2xl font-semibold text-ink">
@@ -144,7 +144,7 @@ export default function CustomerHistoryPage() {
           </p>
         </div>
         <div className="rounded-lg border border-line bg-surface p-4">
-          <p className="text-xs font-semibold tracking-wide text-muted uppercase">
+          <p className="text-xs font-semibold text-muted">
             {t("customers.totalValue")}
           </p>
           <p className="mt-1 text-2xl font-semibold text-ink">
@@ -152,7 +152,7 @@ export default function CustomerHistoryPage() {
           </p>
         </div>
         <div className="rounded-lg border border-line bg-surface p-4">
-          <p className="text-xs font-semibold tracking-wide text-muted uppercase">
+          <p className="text-xs font-semibold text-muted">
             {t("customers.lastOffer")}
           </p>
           <p className="mt-1 text-2xl font-semibold text-ink">

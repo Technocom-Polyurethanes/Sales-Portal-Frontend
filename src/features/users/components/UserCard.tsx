@@ -44,7 +44,7 @@ export default function UserCard({
           <h3 className="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink">
             <span className="truncate">{user.fullName}</span>
             {isSelf && (
-              <span className="rounded bg-page px-1.5 py-0.5 text-[11px] font-medium text-muted">
+              <span className="rounded bg-page px-1.5 py-0.5 text-xs font-medium text-muted">
                 {t("users.you")}
               </span>
             )}
@@ -61,7 +61,7 @@ export default function UserCard({
         <dd dir="ltr" className="truncate text-start text-muted">
           {user.email || ""}
         </dd>
-        <span className="text-[12px] text-muted">
+        <span className="text-xs text-muted">
           {t("users.createdOn")}{" "}
           <bdi dir="ltr">{formatTimestampDay(user.createdAt, locale)}</bdi>
         </span>
