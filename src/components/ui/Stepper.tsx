@@ -29,7 +29,7 @@ export default function Stepper({
         onClick={() => onChange(clamp(value - step))}
         disabled={disabled || value <= min}
         aria-label={`Decrease ${ariaLabel}`}
-        className="w-9 border-e border-line text-lg leading-none text-muted transition-colors hover:bg-page disabled:cursor-not-allowed disabled:opacity-40"
+        className="w-11 border-e border-line text-lg leading-none text-muted transition-colors hover:bg-page disabled:cursor-not-allowed disabled:opacity-40"
       >
         −
       </button>
@@ -49,7 +49,7 @@ export default function Stepper({
         onClick={() => onChange(clamp(value + step))}
         disabled={disabled || value >= max}
         aria-label={`Increase ${ariaLabel}`}
-        className="w-9 border-s border-line text-lg leading-none text-muted transition-colors hover:bg-page disabled:cursor-not-allowed disabled:opacity-40"
+        className="w-11 border-s border-line text-lg leading-none text-muted transition-colors hover:bg-page disabled:cursor-not-allowed disabled:opacity-40"
       >
         +
       </button>

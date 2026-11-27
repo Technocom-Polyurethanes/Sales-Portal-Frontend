@@ -33,7 +33,9 @@ export default function DataTable<T>({
 }: DataTableProps<T>) {
   if (rows.length === 0 && empty) {
     return (
-      <div className="px-5 py-10 text-center text-sm text-muted">{empty}</div>
+      <div className="rounded-xl border border-line-soft bg-surface px-5 py-10 text-center text-sm text-muted">
+        {empty}
+      </div>
     )
   }
 
@@ -46,7 +48,7 @@ export default function DataTable<T>({
               <th
                 key={column.key}
                 scope="col"
-                className={`px-4 py-3 text-xs font-semibold tracking-wide text-muted uppercase ${
+                className={`px-4 py-3 text-xs font-semibold text-muted ${
                   column.align === "end" ? "text-end" : "text-start"
                 }`}
               >
@@ -59,9 +61,23 @@ export default function DataTable<T>({
           {rows.map((row) => (
             <tr
               key={rowKey(row)}
+              role={onRowClick ? "button" : undefined}
+              tabIndex={onRowClick ? 0 : undefined}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
-              className={`border-b border-line-soft last:border-0 max-md:block max-md:border-b max-md:border-line max-md:py-2 ${
-                onRowClick ? "cursor-pointer hover:bg-page" : ""
+              onKeyDown={
+                onRowClick
+                  ? (event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault()
+                        onRowClick(row)
+                      }
+                    }
+                  : undefined
+              }
+              className={`border-b border-line-soft last:border-0 max-md:block max-md:border-b max-md:border-line-soft max-md:py-2 ${
+                onRowClick
+                  ? "cursor-pointer hover:bg-page focus-visible:bg-primary-soft"
+                  : ""
               }`}
             >
               {columns.map((column) => (
@@ -72,7 +88,9 @@ export default function DataTable<T>({
                     column.align === "end" ? "md:text-end" : "md:text-start"
                   } ${column.className ?? ""}`}
                 >
-                  <span className="md:hidden text-xs text-muted">{column.header}</span>
+                  <span className="text-xs font-medium text-muted md:hidden">
+                    {column.header}
+                  </span>
                   <span className={column.align === "end" ? "text-end" : "text-start"}>
                     {column.render(row)}
                   </span>
