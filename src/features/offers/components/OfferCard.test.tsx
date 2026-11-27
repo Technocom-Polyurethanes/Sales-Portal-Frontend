@@ -85,4 +85,16 @@ describe("OfferCard", () => {
     expect(onOpen).not.toHaveBeenCalled()
     expect(container!.textContent).not.toContain("Open")
   })
+
+  it("opens the offer from anywhere on the card", () => {
+    const onOpen = vi.fn()
+    render(base, { onOpen })
+
+    const customer = Array.from(container!.querySelectorAll("p")).find(
+      (node) => node.textContent === "Customer",
+    )
+    act(() => customer!.click())
+
+    expect(onOpen).toHaveBeenCalledWith(base)
+  })
 })
