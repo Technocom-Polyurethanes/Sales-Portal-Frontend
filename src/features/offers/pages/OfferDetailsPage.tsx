@@ -30,6 +30,7 @@ import { localeForLanguage } from "../../../lib/formatters/locale"
 
 import { formatCurrency } from "../../../lib/formatters/number"
 
+import { isApiError } from "../../../lib/api/errors"
 import { useDelete } from "../../../lib/hooks/useDelete"
 
 import OfferDocumentPreview from "../../../pdf/OfferDocumentPreview"
@@ -196,7 +197,24 @@ export default function OfferDetailsPage() {
     )
   }
 
-  if (error || !data) {
+  if (error && !(isApiError(error) && error.status === 404)) {
+    return (
+      <>
+        <PageHeader title={t("offers.details.title")} />
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
+        >
+          <span>{t("common.somethingWrong")}</span>
+          <Button size="sm" variant="secondary" onClick={reload}>
+            {t("common.retry")}
+          </Button>
+        </div>
+      </>
+    )
+  }
+
+  if (!data) {
     return (
       <>
         <PageHeader title={t("offers.details.title")} />

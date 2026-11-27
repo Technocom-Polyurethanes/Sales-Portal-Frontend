@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { cached, clearCache, invalidate, peek } from "./queryCache"
+import { MAX_ENTRIES, cached, clearCache, invalidate, peek } from "./queryCache"
 
 afterEach(() => {
   clearCache()
@@ -73,5 +73,16 @@ describe("queryCache", () => {
 
     expect(peek("k")).toBeUndefined()
     expect(await cached("k", ["catalog"], load, 1000)).toBe("new")
+  })
+
+  it("evicts the oldest entry when the cache is full", async () => {
+    for (let index = 0; index < MAX_ENTRIES; index += 1) {
+      await cached(`k${index}`, ["catalog"], async () => index)
+    }
+
+    await cached(`k${MAX_ENTRIES}`, ["catalog"], async () => MAX_ENTRIES)
+
+    expect(peek("k0")).toBeUndefined()
+    expect(peek(`k${MAX_ENTRIES}`)).toBe(MAX_ENTRIES)
   })
 })

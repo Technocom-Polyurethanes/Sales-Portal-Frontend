@@ -6,6 +6,7 @@ import {
   MAX_AGE_MS,
   builderDraftKey,
   clearBuilderDraft,
+  clearBuilderDrafts,
   isRestorableDraft,
   loadBuilderDraft,
   sanitizeRestoredDraft,
@@ -21,6 +22,10 @@ function memoryStorage(seed: Record<string, string> = {}) {
     getItem: (key: string) => data.get(key) ?? null,
     setItem: (key: string, value: string) => void data.set(key, value),
     removeItem: (key: string) => void data.delete(key),
+    get length() {
+      return data.size
+    },
+    key: (index: number) => Array.from(data.keys())[index] ?? null,
   }
 }
 
@@ -148,6 +153,19 @@ describe("save and load", () => {
     clearBuilderDraft("k", storage)
 
     expect(storage.data.has("k")).toBe(false)
+  })
+
+  it("clears every draft of one user but leaves another user's drafts", () => {
+    const storage = memoryStorage()
+    saveBuilderDraft(builderDraftKey("u1"), sampleDraft(), 0, { storage })
+    saveBuilderDraft(builderDraftKey("u1", "offer-9"), sampleDraft(), 0, { storage })
+    saveBuilderDraft(builderDraftKey("u2"), sampleDraft(), 0, { storage })
+
+    clearBuilderDrafts("u1", storage)
+
+    expect(storage.getItem(builderDraftKey("u1"))).toBeNull()
+    expect(storage.getItem(builderDraftKey("u1", "offer-9"))).toBeNull()
+    expect(storage.getItem(builderDraftKey("u2"))).not.toBeNull()
   })
 
   it("survives storage that refuses writes or reads", () => {

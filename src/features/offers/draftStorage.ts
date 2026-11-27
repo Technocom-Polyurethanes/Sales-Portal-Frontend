@@ -25,7 +25,8 @@ export type StoredBuilderDraft = {
   draft: OfferDraft
 }
 
-type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">
+type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem"> &
+  Partial<Pick<Storage, "length" | "key">>
 
 function defaultStorage(): StorageLike | undefined {
   // Reading `localStorage` itself throws when storage is blocked (some private modes).
@@ -140,6 +141,25 @@ export function saveBuilderDraft(
 export function clearBuilderDraft(key: string, storage?: StorageLike): void {
   try {
     ;(storage ?? defaultStorage())?.removeItem(key)
+  } catch {
+    // Nothing to clean up when storage is unavailable.
+  }
+}
+
+/** Removes every saved builder draft for one user, including revisions of existing offers. */
+export function clearBuilderDrafts(
+  userId: string | undefined,
+  storage?: StorageLike,
+): void {
+  const target = storage ?? defaultStorage()
+  if (!target || typeof target.length !== "number" || typeof target.key !== "function") return
+
+  const prefix = `technocom.offerBuilder.v${SCHEMA_VERSION}.${userId || "anonymous"}.`
+  try {
+    for (let index = target.length - 1; index >= 0; index -= 1) {
+      const key = target.key(index)
+      if (key?.startsWith(prefix)) target.removeItem(key)
+    }
   } catch {
     // Nothing to clean up when storage is unavailable.
   }

@@ -5,8 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import "@/mock"
 import App from "../../../app/App"
+import { ApiError } from "../../../lib/api/types"
 import { clearCache } from "../../../lib/cache/queryCache"
 import { db } from "../../../mock/db"
+import { offersApi } from "../api"
 
 // Sileo reads the system theme; jsdom has no matchMedia.
 if (!window.matchMedia) {
@@ -118,6 +120,22 @@ describe("offer view document language", () => {
     localStorage.clear()
     window.history.pushState({}, "", "/")
     vi.restoreAllMocks()
+  })
+
+  it("shows a retryable error when the offer cannot be loaded", async () => {
+    vi.spyOn(offersApi, "get").mockRejectedValueOnce(new ApiError("offline", 500))
+
+    await open(db.offers[0].id)
+
+    expect(container.querySelector('[role="alert"]')?.textContent).toContain(
+      "Something went wrong.",
+    )
+    expect(container.textContent).not.toContain("This offer could not be found.")
+    expect(
+      Array.from(container.querySelectorAll("button")).some(
+        (button) => button.textContent === "Retry",
+      ),
+    ).toBe(true)
   })
 
   it("opens in the language the offer was saved in", async () => {
