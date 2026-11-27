@@ -71,7 +71,8 @@
     "settings": "Settings",
     "account": "My Account",
     "workspace": "WORKSPACE",
-    "users": "Users"
+    "users": "Users",
+    "system": "System"
   },
   "shell": {
     "searchPlaceholder": "Search offers or customers…",
@@ -632,6 +633,39 @@
       "Admin": "Full access to everything, including Users.",
       "Sales": "Creates offers. Views and creates customers, materials and bank accounts.",
       "Accountant": "Uses data import and the catalogue. Offers are read only."
+    }
+  },
+  "system": {
+    "title": "System status",
+    "subtitle": "Diagnostics for the current deployment.",
+    "refresh": "Refresh",
+    "overall": "Overall status",
+    "checkedAt": "Checked at",
+    "version": "Version",
+    "environment": "Environment",
+    "uptime": "Uptime",
+    "database": "Database",
+    "latency": "Latency",
+    "live": "Live updates",
+    "liveState": "Listener state",
+    "changes": "Changes listener",
+    "notifications": "Notifications listener",
+    "pollingFallback": "Polling fallback",
+    "states": {
+      "overall": {
+        "Healthy": "Healthy",
+        "Degraded": "Degraded",
+        "Unhealthy": "Unhealthy"
+      },
+      "database": {
+        "Up": "Up",
+        "Down": "Down"
+      },
+      "live": {
+        "connected": "Connected",
+        "disconnected": "Disconnected",
+        "disabled": "Disabled"
+      }
     }
   },
   "notifications": {
