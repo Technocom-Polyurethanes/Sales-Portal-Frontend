@@ -2,21 +2,23 @@
 @import "tailwindcss";
 
 @theme {
-  --color-page: #f5f7f5;
-  --color-surface: #ffffff;
-  --color-surface-soft: #eef2ef;
-  --color-line: #7f8d86;
-  --color-line-soft: #d8e0da;
-  --color-ink: #14241f;
-  --color-muted: #53615c;
-  --color-primary: #0f5b58;
-  --color-primary-hover: #0a4543;
-  --color-primary-soft: #e5f1ef;
-  --color-success: #166b49;
-  --color-warning: #8a5300;
-  --color-danger: #a32622;
-  --color-deduction: #8f3f38;
-  --color-focus: #9a4b00;
+  --color-page: #f6f1e6;
+  --color-surface: #fffdf7;
+  --color-surface-soft: #efe8d9;
+  --color-line: #8a8374;
+  --color-line-soft: #e4ddd0;
+  --color-ink: #1d2b3a;
+  --color-muted: #5c6673;
+  --color-primary: #123b66;
+  --color-primary-hover: #0b2949;
+  --color-primary-soft: #e3ebf4;
+  --color-accent: #8a5a12;
+  --color-accent-soft: #f4e6c8;
+  --color-success: #236b4a;
+  --color-warning: #8a5a12;
+  --color-danger: #a02c2c;
+  --color-deduction: #8f4439;
+  --color-focus: #8a5a12;
   --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
   --font-arabic: "IBM Plex Sans Arabic", "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
   --radius-card: 12px;
