@@ -36,6 +36,7 @@ import { commit, history, preview, template } from "./import"
 
 import { userRoutes } from "./users"
 
+import { auditRoutes } from "./audit"
 import { systemRoutes } from "./system"
 
 import type { ImportSource } from "../features/import/types"
@@ -807,6 +808,7 @@ const routes: Route[] = [
 
   ...userRoutes,
 
+  ...auditRoutes,
   ...systemRoutes,
 ]
 

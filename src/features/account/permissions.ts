@@ -14,7 +14,7 @@ export const ROLES: readonly Role[] = ["Admin", "Sales", "Accountant"]
 
 export type Permission = /** Create, edit, duplicate, revise and change the status of offers. */
 
-"offers.write" /** Delete an offer. */ | "offers.delete" /** Create a customer, material or bank account. */ | "catalog.create" /** Edit an existing customer, material or bank account. */ | "catalog.edit" /** Delete a customer, material or bank account. */ | "catalog.delete" /** Data import. */ | "import.use" /** The Users screen and its delete action. */ | "users.manage" /** The system status screen. */ | "system.view"
+"offers.write" /** Delete an offer. */ | "offers.delete" /** Create a customer, material or bank account. */ | "catalog.create" /** Edit an existing customer, material or bank account. */ | "catalog.edit" /** Delete a customer, material or bank account. */ | "catalog.delete" /** Data import. */ | "import.use" /** The Users screen and its delete action. */ | "users.manage" /** The audit log and system status screens. */ | "audit.view" /** The system status screen. */ | "system.view"
 
 const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   Admin: [
@@ -32,6 +32,7 @@ const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
 
     "users.manage",
 
+    "audit.view",
     "system.view",
   ],
 

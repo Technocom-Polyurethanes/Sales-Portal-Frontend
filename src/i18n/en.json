@@ -72,6 +72,7 @@
     "account": "My Account",
     "workspace": "WORKSPACE",
     "users": "Users",
+    "logs": "Logs",
     "system": "System"
   },
   "shell": {
@@ -665,6 +666,87 @@
         "connected": "Connected",
         "disconnected": "Disconnected",
         "disabled": "Disabled"
+      }
+    }
+  },
+  "audit": {
+    "title": "Activity log",
+    "subtitle": "Review sign-ins and changes across the workspace.",
+    "search": "Search description, entity or username",
+    "empty": "No activity recorded yet.",
+    "from": "From date",
+    "to": "To date",
+    "allActors": "All users",
+    "allCategories": "All categories",
+    "allActions": "All actions",
+    "allOutcomes": "All outcomes",
+    "clear": "Clear filters",
+    "fields": {
+      "when": "When",
+      "actor": "User",
+      "action": "Action",
+      "details": "Details",
+      "outcome": "Outcome"
+    },
+    "categories": {
+      "auth": "Sign-in",
+      "offers": "Offers",
+      "customers": "Customers",
+      "materials": "Materials",
+      "banks": "Banks",
+      "catalog": "Catalogue",
+      "settings": "Settings",
+      "users": "Users",
+      "imports": "Imports"
+    },
+    "outcomes": {
+      "success": "Success",
+      "failure": "Failure"
+    },
+    "actions": {
+      "auth": {
+        "login": "Signed in",
+        "login_failed": "Sign-in failed",
+        "password_changed": "Changed password"
+      },
+      "offer": {
+        "created": "Created offer",
+        "updated": "Updated offer",
+        "revised": "Revised offer",
+        "status_changed": "Changed offer status",
+        "deleted": "Deleted offer",
+        "document_opened": "Opened offer document"
+      },
+      "customer": {
+        "created": "Created customer",
+        "updated": "Updated customer",
+        "deleted": "Deleted customer"
+      },
+      "material": {
+        "created": "Created material",
+        "updated": "Updated material",
+        "deleted": "Deleted material"
+      },
+      "bank": {
+        "created": "Created bank account",
+        "updated": "Updated bank account",
+        "deleted": "Deleted bank account"
+      },
+      "catalog": {
+        "payment_term_created": "Created payment term",
+        "payment_term_updated": "Updated payment term"
+      },
+      "settings": {
+        "updated": "Updated settings"
+      },
+      "user": {
+        "created": "Created user",
+        "updated": "Updated user",
+        "password_reset": "Reset user password",
+        "deleted": "Deleted user"
+      },
+      "import": {
+        "committed": "Committed import"
       }
     }
   },
