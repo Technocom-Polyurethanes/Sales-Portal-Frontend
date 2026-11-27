@@ -252,6 +252,8 @@ describe("offer view document language", () => {
       )
       expect(button?.getAttribute("aria-label")).toBe(title)
       expect(button?.getAttribute("title")).toBe(title)
+      expect(button?.classList.contains("min-h-[44px]")).toBe(true)
+      expect(button?.classList.contains("md:w-auto")).toBe(true)
     }
 
     action("Print", "Print this offer")
