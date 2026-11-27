@@ -16,5 +16,6 @@ describe("live topics", () => {
     expect(cacheTagsFor(["banks", "catalog"]).sort()).toEqual(["banks", "catalog"])
     expect(cacheTagsFor(["customers", "offers"])).toEqual(["customers"])
     expect(cacheTagsFor(["users", "imports"])).toEqual([])
+    expect(cacheTagsFor(["audit"])).toEqual([])
   })
 })

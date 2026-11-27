@@ -72,6 +72,7 @@
     "account": "حسابي",
     "workspace": "مساحة العمل",
     "users": "المستخدمون",
+    "logs": "السجلات",
     "system": "النظام"
   },
   "shell": {
@@ -665,6 +666,87 @@
         "connected": "متصل",
         "disconnected": "غير متصل",
         "disabled": "معطل"
+      }
+    }
+  },
+  "audit": {
+    "title": "سجل النشاط",
+    "subtitle": "راجع تسجيلات الدخول والتغييرات في مساحة العمل.",
+    "search": "ابحث في الوصف أو الكيان أو اسم المستخدم",
+    "empty": "لا يوجد نشاط مسجّل بعد.",
+    "from": "من تاريخ",
+    "to": "إلى تاريخ",
+    "allActors": "كل المستخدمين",
+    "allCategories": "كل الفئات",
+    "allActions": "كل الإجراءات",
+    "allOutcomes": "كل النتائج",
+    "clear": "مسح الفلاتر",
+    "fields": {
+      "when": "الوقت",
+      "actor": "المستخدم",
+      "action": "الإجراء",
+      "details": "التفاصيل",
+      "outcome": "النتيجة"
+    },
+    "categories": {
+      "auth": "تسجيل الدخول",
+      "offers": "العروض",
+      "customers": "العملاء",
+      "materials": "الخامات",
+      "banks": "الحسابات البنكية",
+      "catalog": "الكتالوج",
+      "settings": "الإعدادات",
+      "users": "المستخدمون",
+      "imports": "الاستيراد"
+    },
+    "outcomes": {
+      "success": "نجاح",
+      "failure": "فشل"
+    },
+    "actions": {
+      "auth": {
+        "login": "تسجيل الدخول",
+        "login_failed": "فشل تسجيل الدخول",
+        "password_changed": "تغيير كلمة المرور"
+      },
+      "offer": {
+        "created": "إنشاء عرض",
+        "updated": "تعديل عرض",
+        "revised": "مراجعة عرض",
+        "status_changed": "تغيير حالة العرض",
+        "deleted": "حذف عرض",
+        "document_opened": "فتح مستند العرض"
+      },
+      "customer": {
+        "created": "إنشاء عميل",
+        "updated": "تعديل عميل",
+        "deleted": "حذف عميل"
+      },
+      "material": {
+        "created": "إنشاء خامة",
+        "updated": "تعديل خامة",
+        "deleted": "حذف خامة"
+      },
+      "bank": {
+        "created": "إنشاء حساب بنكي",
+        "updated": "تعديل حساب بنكي",
+        "deleted": "حذف حساب بنكي"
+      },
+      "catalog": {
+        "payment_term_created": "إنشاء مدة دفع",
+        "payment_term_updated": "تعديل مدة دفع"
+      },
+      "settings": {
+        "updated": "تعديل الإعدادات"
+      },
+      "user": {
+        "created": "إنشاء مستخدم",
+        "updated": "تعديل مستخدم",
+        "password_reset": "إعادة تعيين كلمة مرور مستخدم",
+        "deleted": "حذف مستخدم"
+      },
+      "import": {
+        "committed": "تأكيد الاستيراد"
       }
     }
   },

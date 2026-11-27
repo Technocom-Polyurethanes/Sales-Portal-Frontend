@@ -9,6 +9,8 @@ export const LIVE_TOPICS = [
   "catalog",
   "offers",
   "imports",
+
+  "audit",
 ] as const
 
 export type LiveTopic = (typeof LIVE_TOPICS)[number]
@@ -29,6 +31,8 @@ const TAGS_BY_TOPIC: Record<LiveTopic, readonly CacheTag[]> = {
   catalog: ["catalog"],
   offers: ["customers"],
   imports: [],
+
+  audit: [],
 }
 
 export function cacheTagsFor(topics: Iterable<LiveTopic>): CacheTag[] {

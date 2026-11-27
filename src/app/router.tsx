@@ -1,6 +1,7 @@
 import { lazy } from "react"
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom"
 
+import AuditLogPage from "../features/audit/pages/AuditLogPage"
 import SystemStatusPage from "../features/system/pages/SystemStatusPage"
 
 import AppShell from "./layout/AppShell"
@@ -79,6 +80,14 @@ export function AppRouter() {
           element={
             <RequirePermission permission="users.manage">
               <UsersPage />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="audit-logs"
+          element={
+            <RequirePermission permission="audit.view">
+              <AuditLogPage />
             </RequirePermission>
           }
         />
