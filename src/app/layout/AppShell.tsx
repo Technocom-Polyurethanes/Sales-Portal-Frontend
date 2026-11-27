@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Outlet, useLocation } from "react-router-dom"
 
 import Button from "../../components/ui/Button"
@@ -23,8 +23,24 @@ export default function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
 
+  useEffect(() => {
+    if (!menuOpen) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false)
+    }
+    const previousOverflow = document.body.style.overflow
+
+    document.addEventListener("keydown", onKeyDown)
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.removeEventListener("keydown", onKeyDown)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [menuOpen])
+
   return (
-    <div className="min-h-screen bg-page">
+    <div className="min-h-dvh bg-page">
       <div className="fixed inset-y-0 start-0 z-40 hidden lg:block no-print">
         <Sidebar onOpenHelp={() => setHelpOpen(true)} />
       </div>
@@ -32,11 +48,16 @@ export default function AppShell() {
       {menuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div
-            className="absolute inset-0 bg-ink/40 motion-safe:animate-fade-in"
+            className="absolute inset-0 bg-ink/50 motion-safe:animate-fade-in"
             role="presentation"
             onClick={() => setMenuOpen(false)}
           />
-          <div className="mobile-drawer absolute inset-y-0 start-0 w-64 motion-safe:animate-drawer-in">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("shell.toggleNavigation")}
+            className="mobile-drawer absolute inset-y-0 start-0 w-[min(17rem,85vw)] motion-safe:animate-drawer-in"
+          >
             <Sidebar
               onNavigate={() => setMenuOpen(false)}
               onOpenHelp={() => {
@@ -48,13 +69,13 @@ export default function AppShell() {
         </div>
       )}
 
-      <div className="app-shell flex min-h-screen flex-col lg:ms-60">
+      <div className="app-shell flex min-h-dvh flex-col lg:ms-60">
         <Topbar
           onOpenMenu={() => setMenuOpen(true)}
           onOpenHelp={() => setHelpOpen(true)}
         />
-        <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8 lg:pb-10">
-          <div key={location.pathname} className="motion-safe:animate-fade-in">
+        <main className="w-full flex-1 px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+          <div key={location.pathname} className="mx-auto w-full max-w-[1500px] motion-safe:animate-fade-in">
             <Outlet />
           </div>
         </main>
