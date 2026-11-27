@@ -236,54 +236,57 @@ export default function OfferDetailsPage() {
           </span>
         }
         action={
-          <div className="flex flex-wrap items-center justify-end gap-1.5">
+          <>
             <Button
-              variant="ghost"
-              className="px-2.5"
-              aria-label={t("common.print")}
-              title={t("common.print")}
+              variant="secondary"
+              className="grow shrink-0 sm:grow-0"
+              aria-label={t("offers.details.printTitle")}
+              title={t("offers.details.printTitle")}
               icon={<Icon name="print" size={16} />}
               onClick={() =>
                 documentData &&
                 print({ data: documentData, language: documentLanguage })
               }
-            />
+            >
+              {t("common.print")}
+            </Button>
             {canWrite && (
               <Button
-                variant="ghost"
-                className="px-2.5"
-                aria-label={t("offers.details.newVersion")}
-                title={t("offers.details.newVersion")}
+                variant="secondary"
+                className="grow shrink-0 sm:grow-0"
+                aria-label={t("offers.details.editTitle")}
+                title={t("offers.details.editTitle")}
                 icon={<Icon name="edit" size={16} />}
                 onClick={() => navigate(`/offers/new?from=${offer.id}`)}
-              />
+              >
+                {t("common.edit")}
+              </Button>
             )}
             {canDelete && (
               <Button
                 variant="danger"
-                className="px-2.5"
-                aria-label={t("common.delete")}
-                title={t("common.delete")}
+                className="grow shrink-0 sm:grow-0"
+                aria-label={t("offers.details.deleteTitle")}
+                title={t("offers.details.deleteTitle")}
                 icon={<Icon name="trash" size={16} />}
                 onClick={() => deletion.setTarget(offer)}
-              />
+              >
+                {t("common.delete")}
+              </Button>
             )}
             {canWrite && (
-              <>
-                <span
-                  aria-hidden="true"
-                  className="mx-1 hidden h-6 w-px bg-line sm:block"
-                />
-                <Button
-                  variant="primary"
-                  icon={<Icon name="check" size={16} />}
-                  onClick={() => setStatusOpen(true)}
-                >
-                  {t("offers.details.changeStatus")}
-                </Button>
-              </>
+              <Button
+                variant="primary"
+                className="grow shrink-0 sm:grow-0"
+                aria-label={t("offers.details.statusTitle")}
+                title={t("offers.details.statusTitle")}
+                icon={<Icon name="check" size={16} />}
+                onClick={() => setStatusOpen(true)}
+              >
+                {t("offers.details.changeStatus")}
+              </Button>
             )}
-          </div>
+          </>
         }
       />
 
