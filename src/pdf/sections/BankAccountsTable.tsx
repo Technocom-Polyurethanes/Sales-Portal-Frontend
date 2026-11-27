@@ -44,12 +44,8 @@ export default function BankAccountsTable({
         <tbody>
           {banks.map((account) => (
             <tr key={`${account.bank}-${account.accountNumber}`}>
-              <td>
-                <span className="doc-ltr">{account.bank}</span>
-              </td>
-              <td>
-                <span className="doc-ltr">{account.branch}</span>
-              </td>
+              <td>{account.bank}</td>
+              <td>{account.branch}</td>
               <td>
                 <span className="doc-ltr">{account.accountNumber}</span>
               </td>

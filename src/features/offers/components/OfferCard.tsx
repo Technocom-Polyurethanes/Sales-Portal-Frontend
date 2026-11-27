@@ -85,14 +85,18 @@ export default function OfferCard({ offer, onOpen, onDelete }: OfferCardProps) {
         </div>
         <div>
           <dt className="text-xs text-muted">{t("offers.list.createdAt")}</dt>
-          <dd dir="ltr" className="text-start text-ink tabular-nums">
-            {formatDateTime(offer.rootCreatedAt ?? offer.createdAt, locale)}
+          <dd className="text-start text-ink tabular-nums">
+            <bdi dir="ltr">
+              {formatDateTime(offer.rootCreatedAt ?? offer.createdAt, locale)}
+            </bdi>
           </dd>
         </div>
         <div>
           <dt className="text-xs text-muted">{t("offers.list.updatedAt")}</dt>
-          <dd dir="ltr" className="text-start text-ink tabular-nums">
-            {modifiedAt ? formatDateTime(modifiedAt, locale) : "—"}
+          <dd className="text-start text-ink tabular-nums">
+            <bdi dir="ltr">
+              {modifiedAt ? formatDateTime(modifiedAt, locale) : "—"}
+            </bdi>
           </dd>
         </div>
       </dl>
