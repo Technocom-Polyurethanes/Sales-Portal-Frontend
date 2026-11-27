@@ -81,7 +81,7 @@ export default function Topbar({ onOpenMenu, onOpenHelp }: TopbarProps) {
           type="button"
           onClick={() => navigate("/account")}
           aria-label={t("nav.account")}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-white"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold text-primary transition-colors hover:bg-primary hover:text-on-primary"
         >
           {user?.initials ?? "AA"}
         </button>

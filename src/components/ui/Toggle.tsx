@@ -33,7 +33,7 @@ export default function Toggle({
       >
         <span
           aria-hidden="true"
-          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-all ${
+          className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow-sm transition-all ${
             checked ? "start-[24px]" : "start-0.5"
           }`}
         />

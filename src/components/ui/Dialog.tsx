@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react"
 import type { ReactNode } from "react"
 
+import { useTranslation } from "../../i18n/I18nProvider"
 import Button from "./Button"
 import Icon from "./Icon"
 
@@ -27,6 +28,8 @@ export default function Dialog({
   footer,
   size = "md",
 }: DialogProps) {
+  const { t } = useTranslation()
+
   // Keep the dialog mounted until the closing animation has finished.
   const [visible, setVisible] = useState(open)
   const titleId = useId()
@@ -88,7 +91,7 @@ export default function Dialog({
             variant="ghost"
             size="sm"
             onClick={onClose}
-            aria-label="Close dialog"
+            aria-label={t("common.close")}
           >
             <Icon name="close" size={18} />
           </Button>

@@ -56,15 +56,15 @@ export default function UserCard({
         <RoleBadge role={user.role} />
       </header>
 
-      <dl className="flex flex-row justify-between text-sm">
-        {subtitle && <dd className="truncate text-ink">{subtitle}</dd>}
-        <dd dir="ltr" className="truncate text-start text-muted">
+      <dl className="grid gap-2 text-sm sm:flex sm:flex-row sm:justify-between sm:gap-4">
+        {subtitle && <dd className="min-w-0 truncate text-ink">{subtitle}</dd>}
+        <dd dir="ltr" className="min-w-0 truncate text-start text-muted">
           {user.email || ""}
         </dd>
-        <span className="text-xs text-muted">
+        <dd className="min-w-0 text-xs text-muted sm:text-sm">
           {t("users.createdOn")}{" "}
           <bdi dir="ltr">{formatTimestampDay(user.createdAt, locale)}</bdi>
-        </span>
+        </dd>
       </dl>
 
       <footer className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-line-soft pt-3">

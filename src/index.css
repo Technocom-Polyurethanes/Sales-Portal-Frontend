@@ -19,6 +19,8 @@
   --color-danger: #a02c2c;
   --color-deduction: #8f4439;
   --color-focus: #8a5a12;
+  --color-on-primary: #ffffff;
+  --color-on-danger: #ffffff;
   --font-sans: "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
   --font-arabic: "IBM Plex Sans Arabic", "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
   --radius-card: 12px;

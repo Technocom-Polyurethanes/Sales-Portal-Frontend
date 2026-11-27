@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import PhasePlaceholder from "../../../app/layout/PhasePlaceholder"
-import PageHeader from "../../../app/layout/PageHeader"
 import Icon from "../../../components/ui/Icon"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import type { TranslationKey } from "../../../i18n/types"
@@ -28,7 +27,6 @@ export default function AccountPage() {
 
   return (
     <>
-      <PageHeader title={t("account.title")} subtitle={t("account.subtitle")} />
       {can("users.manage") && (
         <p role="status" className="mb-4 text-xs text-muted">
           {t("account.liveUpdates", { status: t(STATUS_KEYS[status]) })}

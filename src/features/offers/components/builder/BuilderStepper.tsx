@@ -69,7 +69,7 @@ export default function BuilderStepper({
                 <span
                   className={`relative z-10 flex h-7 w-7 items-center justify-center rounded-full border-2 text-xs font-semibold ${
                     active
-                      ? "border-primary bg-primary text-white"
+                      ? "border-primary bg-primary text-on-primary"
                       : done
                         ? "border-primary bg-primary-soft text-primary"
                         : locked
