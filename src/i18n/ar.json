@@ -340,7 +340,7 @@
       "materials": "الخامات",
       "versions": "سجل الإصدارات",
       "noVersions": "لا توجد إصدارات أخرى لهذا العرض بعد.",
-      "versionCount": "{{count}} إصدارات",
+      "versionCount": "{count} إصدارات",
       "newVersion": "إصدار جديد",
       "createdBy": "أنشأه",
       "createdAt": "تاريخ الإنشاء",
