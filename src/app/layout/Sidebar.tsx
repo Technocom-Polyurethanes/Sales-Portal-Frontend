@@ -74,7 +74,7 @@ export default function Sidebar({
               aria-label={collapsed ? label : undefined}
               title={collapsed ? label : undefined}
               className={({ isActive }) =>
-                `flex min-h-11 items-center rounded-lg border-s-2 text-sm font-medium transition-colors ${
+                `flex min-h-11 items-center rounded-lg text-sm font-medium transition-colors ${
                   collapsed ? "justify-center px-0" : "gap-3 px-3"
                 } ${
                   isActive
@@ -100,20 +100,6 @@ export default function Sidebar({
       </nav>
 
       <div className={`mt-auto flex flex-col gap-3 ${collapsed ? "p-2" : "p-4"}`}>
-        {onOpenHelp && (
-          <button
-            type="button"
-            onClick={onOpenHelp}
-            aria-label={collapsed ? t("shell.helpTitle") : undefined}
-            title={collapsed ? t("shell.helpTitle") : undefined}
-            className={`flex min-h-11 items-center rounded-lg text-sm font-medium text-muted transition-colors hover:bg-page hover:text-ink ${
-              collapsed ? "justify-center px-0" : "gap-3 px-3"
-            }`}
-          >
-            <Icon name="help" size={19} />
-            {!collapsed && t("shell.helpTitle")}
-          </button>
-        )}
         <NavLink
           to="/account"
           onClick={onNavigate}
