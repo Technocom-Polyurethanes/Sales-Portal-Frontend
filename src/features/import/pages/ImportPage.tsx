@@ -48,7 +48,7 @@ export default function ImportPage() {
 
       <div className="flex flex-col gap-6">
         <Card>
-          <ol className="mb-6 flex flex-wrap items-center gap-3 text-xs font-medium">
+          <ol className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm font-medium">
             {STEPS.map((key, index) => {
               const number = index + 1
               const current = flow.step === number

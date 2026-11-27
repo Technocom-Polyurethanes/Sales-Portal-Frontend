@@ -188,7 +188,7 @@ export default function ProductsPage() {
         align: "end",
 
         render: (product) => (
-          <div className="flex justify-end gap-1">
+          <div className="flex flex-wrap justify-end gap-1">
             {canEdit && (
               <Button
                 variant="ghost"
@@ -262,7 +262,7 @@ export default function ProductsPage() {
             setPage(1)
           }}
           aria-label={t("products.category")}
-          className="w-full sm:w-56"
+          className="min-w-0 w-full flex-1 sm:w-56 sm:flex-none"
         >
           <option value="">{t("common.all")}</option>
           {categories.map((name) => (
