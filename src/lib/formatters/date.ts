@@ -32,6 +32,40 @@ export function formatIsoDay(value: string, locale: Locale = "en-US"): string {
     : `${pad(parsed.day)}/${pad(parsed.month)}/${parsed.year}`
 }
 
+/** Flips typed `DD/MM/YYYY` / `YYYY/MM/DD` dates in free text to the locale's order. */
+export function localizeTypedDates(
+  value: string,
+  locale: Locale = "en-US",
+): string {
+  return value.replace(
+    /(?<![\d/])(\d{1,4})\/(\d{1,4})\/(\d{1,4})(?![\d/])/g,
+    (match, first: string, middle: string, last: string) => {
+      let year: string
+      let month: string
+      let day: string
+      if (first.length === 4 && middle.length <= 2 && last.length <= 2) {
+        year = first
+        month = middle
+        day = last
+      } else if (last.length === 4 && first.length <= 2 && middle.length <= 2) {
+        year = last
+        month = middle
+        day = first
+      } else return match
+
+      if (Number(month) < 1 || Number(month) > 12 || Number(day) < 1 || Number(day) > 31) {
+        return match
+      }
+
+      const paddedMonth = String(month).padStart(2, "0")
+      const paddedDay = String(day).padStart(2, "0")
+      return locale === "ar-EG"
+        ? `${year}/${paddedMonth}/${paddedDay}`
+        : `${paddedDay}/${paddedMonth}/${year}`
+    },
+  )
+}
+
 /** Localised long date, e.g. `21 October 2026`. */
 export function formatLongDate(
   value: string,
