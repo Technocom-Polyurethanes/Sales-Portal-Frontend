@@ -210,24 +210,25 @@ export default function OfferDetailsPage() {
   const { offer, versions, customer } = data
 
   const versionCount = versions?.length ?? (offer.version > 0 ? 1 : 0)
+  const actionButtonClass = "min-h-[44px] w-full md:w-auto"
 
   return (
     <>
       <section className="no-print mb-6 rounded-xl border border-line-soft bg-surface p-4 sm:p-5 lg:p-6">
-        <div className="flex flex-col gap-4 text-start lg:flex-row lg:items-center lg:justify-between lg:gap-6">
-          <div className="min-w-0">
-            <h1 className="text-xl font-semibold tracking-tight text-ink sm:text-2xl lg:text-3xl">
-              <bdi dir="ltr" className="block break-all tabular-nums">
-                {offer.reference}
-              </bdi>
-            </h1>
-            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-muted">
-              <span dir="auto" className="w-full break-words sm:w-auto">
+        <div className="flex flex-col gap-5 text-start lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+          <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
+            <div className="min-w-0">
+              <h1 className="text-xl font-semibold tracking-tight text-ink sm:text-2xl lg:text-3xl">
+                <bdi dir="ltr" className="block break-all tabular-nums">
+                  {offer.reference}
+                </bdi>
+              </h1>
+              <p dir="auto" className="mt-1.5 break-words text-sm text-muted">
                 {customer?.name ?? offer.customerName}
-              </span>
-              <span aria-hidden="true" className="hidden text-line sm:inline">
-                ·
-              </span>
+              </p>
+            </div>
+
+            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted sm:border-s sm:border-line-soft sm:ps-5">
               <span className="inline-flex items-center gap-1.5">
                 <span>{t("common.status")}</span>
                 <Badge variant={offer.status}>
@@ -235,25 +236,20 @@ export default function OfferDetailsPage() {
                 </Badge>
               </span>
               {(offer.version > 1 || versionCount > 1) && (
-                <>
-                  <span aria-hidden="true" className="hidden text-line sm:inline">
-                    ·
-                  </span>
-                  <span className="inline-flex flex-wrap items-center gap-1.5">
-                    {offer.version > 1 && (
-                      <span className="inline-flex items-center rounded-full border border-line-soft bg-page/60 px-2 py-0.5 text-xs text-muted tabular-nums">
-                        v{offer.version}
-                      </span>
-                    )}
-                    {versionCount > 1 && (
-                      <span className="inline-flex items-center whitespace-nowrap rounded-full border border-line-soft bg-page/60 px-2 py-0.5 text-xs text-muted tabular-nums">
-                        {t("offers.details.versionCount", {
-                          count: versionCount,
-                        })}
-                      </span>
-                    )}
-                  </span>
-                </>
+                <span className="inline-flex flex-wrap items-center gap-1.5">
+                  {offer.version > 1 && (
+                    <span className="inline-flex items-center rounded-full border border-line-soft bg-page/60 px-2 py-0.5 text-xs text-muted tabular-nums">
+                      v{offer.version}
+                    </span>
+                  )}
+                  {versionCount > 1 && (
+                    <span className="inline-flex items-center whitespace-nowrap rounded-full border border-line-soft bg-page/60 px-2 py-0.5 text-xs text-muted tabular-nums">
+                      {t("offers.details.versionCount", {
+                        count: versionCount,
+                      })}
+                    </span>
+                  )}
+                </span>
               )}
             </div>
           </div>
@@ -262,8 +258,9 @@ export default function OfferDetailsPage() {
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-3 lg:justify-end lg:gap-4">
               {canWrite && (
                 <Button
+                  size="sm"
                   variant="primary"
-                  className="w-full min-h-[44px] md:w-auto"
+                  className={actionButtonClass}
                   aria-label={t("offers.details.statusTitle")}
                   title={t("offers.details.statusTitle")}
                   icon={<Icon name="check" size={16} />}
@@ -274,8 +271,9 @@ export default function OfferDetailsPage() {
               )}
               <div className="grid grid-cols-3 gap-2 md:flex md:items-center md:gap-2">
                 <Button
+                  size="sm"
                   variant="secondary"
-                  className="w-full min-h-[40px] gap-1.5 px-2 md:w-auto md:gap-2 md:px-3"
+                  className={actionButtonClass}
                   aria-label={t("offers.details.printTitle")}
                   title={t("offers.details.printTitle")}
                   icon={<Icon name="print" size={16} />}
@@ -288,8 +286,9 @@ export default function OfferDetailsPage() {
                 </Button>
                 {canWrite && (
                   <Button
+                    size="sm"
                     variant="secondary"
-                    className="w-full min-h-[40px] gap-1.5 px-2 md:w-auto md:gap-2 md:px-3"
+                    className={actionButtonClass}
                     aria-label={t("offers.details.editTitle")}
                     title={t("offers.details.editTitle")}
                     icon={<Icon name="edit" size={16} />}
@@ -300,12 +299,13 @@ export default function OfferDetailsPage() {
                 )}
                 <span
                   aria-hidden="true"
-                  className="hidden h-5 w-px bg-line-soft md:block"
+                  className="hidden h-5 w-px bg-line-soft md:block md:me-1"
                 />
                 {canDelete && (
                   <Button
+                    size="sm"
                     variant="subtle-danger"
-                    className="w-full min-h-[40px] gap-1.5 px-2 md:ms-1 md:w-auto md:gap-2 md:px-3"
+                    className={actionButtonClass}
                     aria-label={t("offers.details.deleteTitle")}
                     title={t("offers.details.deleteTitle")}
                     icon={<Icon name="trash" size={16} />}
