@@ -17,8 +17,8 @@ export default function EmptyState({
 }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
-      <span className="text-muted">
-        {icon ?? <Icon name="offers" size={30} />}
+      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-soft text-primary">
+        {icon ?? <Icon name="offers" size={28} />}
       </span>
       <div>
         <p className="text-sm font-semibold text-ink">{title}</p>

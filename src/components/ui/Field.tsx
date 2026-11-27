@@ -48,7 +48,7 @@ export default function Field({
   return (
     <div className="flex flex-col gap-1.5">
       <label
-        className="flex items-center gap-1 text-[13px] font-medium text-ink"
+        className="flex items-center gap-1 text-sm font-semibold text-ink"
         htmlFor={htmlFor}
       >
         {label}
