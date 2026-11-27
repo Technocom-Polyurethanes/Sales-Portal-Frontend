@@ -1,6 +1,8 @@
 import { lazy } from "react"
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom"
 
+import SystemStatusPage from "../features/system/pages/SystemStatusPage"
+
 import AppShell from "./layout/AppShell"
 import LoginScreen from "./layout/LoginScreen"
 import NotFoundPage from "./pages/NotFoundPage"
@@ -77,6 +79,14 @@ export function AppRouter() {
           element={
             <RequirePermission permission="users.manage">
               <UsersPage />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="system-status"
+          element={
+            <RequirePermission permission="system.view">
+              <SystemStatusPage />
             </RequirePermission>
           }
         />

@@ -121,10 +121,12 @@ describe("what each role sees", () => {
     db.session.userId = ADMIN
   })
 
-  it("shows the admin the Users and Data Import links", async () => {
+  it("shows the admin the Users, System and Data Import links", async () => {
     await open("/", ADMIN)
 
     expect(navLinks()).toContain("/users")
+
+    expect(navLinks()).toContain("/system-status")
 
     expect(navLinks()).toContain("/import")
   })
@@ -133,6 +135,8 @@ describe("what each role sees", () => {
     await open("/", SALES)
 
     expect(navLinks()).not.toContain("/users")
+
+    expect(navLinks()).not.toContain("/system-status")
 
     expect(navLinks()).not.toContain("/import")
 
@@ -145,6 +149,8 @@ describe("what each role sees", () => {
     expect(navLinks()).toContain("/import")
 
     expect(navLinks()).not.toContain("/users")
+
+    expect(navLinks()).not.toContain("/system-status")
   })
 
   it("shows catalogue and offer delete buttons to sales but not on users", async () => {
