@@ -88,7 +88,7 @@ export default function NotificationBell() {
         {unreadCount > 0 && (
           <span
             aria-hidden="true"
-            className="absolute -end-2 -top-2 min-w-5 rounded-full bg-primary px-1 text-center text-[10px] font-semibold leading-5 text-white"
+            className="absolute -end-2 -top-2 min-w-5 rounded-full bg-primary px-1 text-center text-xs font-semibold leading-5 text-white"
           >
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
@@ -200,7 +200,7 @@ export default function NotificationBell() {
                         </span>
                         <span
                           title={formatDateTime(item.createdAt, locale)}
-                          className="shrink-0 text-[11px] text-muted"
+                          className="shrink-0 text-xs text-muted"
                         >
                           {time}
                         </span>

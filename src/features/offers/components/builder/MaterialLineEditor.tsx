@@ -38,7 +38,7 @@ export default function MaterialLineEditor({
       <header className="flex flex-wrap items-start justify-between gap-3 border-b border-line-soft pb-3">
         <div>
           <p className="text-sm font-semibold text-ink">{line.materialName}</p>
-          <span className="mt-1 inline-block rounded bg-page px-2 py-0.5 text-[11px] text-muted">
+          <span className="mt-1 inline-block rounded bg-page px-2 py-0.5 text-xs text-muted">
             {line.materialCode} · {line.category}
           </span>
         </div>

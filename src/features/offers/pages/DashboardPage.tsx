@@ -146,7 +146,7 @@ export default function DashboardPage() {
 
         <div
           aria-hidden="true"
-          className={`hidden border-b border-line bg-surface px-4 py-2 text-xs font-semibold tracking-wide text-muted uppercase sm:grid ${DOCUMENT_COLUMNS}`}
+          className={`hidden border-b border-line-soft bg-surface px-4 py-2 text-xs font-semibold text-muted sm:grid ${DOCUMENT_COLUMNS}`}
         >
           <span>{t("dashboard.document")}</span><span>{t("dashboard.type")}</span><span>{t("common.status")}</span><span className="text-end">{t("common.total")}</span><span className="text-end">{t("common.date")}</span>
         </div>

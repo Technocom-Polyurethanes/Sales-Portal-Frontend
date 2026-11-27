@@ -144,7 +144,7 @@ export default function DeliveryScheduleEditor({
                             {line.materialName}
                           </p>
                           <p
-                            className={`text-[11px] ${
+                            className={`text-xs ${
                               complete ? "text-success" : "text-muted"
                             }`}
                           >

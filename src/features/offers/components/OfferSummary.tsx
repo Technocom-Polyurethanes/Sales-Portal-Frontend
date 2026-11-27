@@ -58,7 +58,7 @@ export default function OfferSummary({ offer }: { offer: Offer }) {
         <div className="overflow-x-auto rounded-md border border-line">
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b border-line bg-page/60 text-xs tracking-wide text-muted uppercase">
+              <tr className="border-b border-line-soft bg-surface-soft text-xs font-semibold text-muted">
                 <th scope="col" className="px-3 py-2 text-start">
                   {t("offers.details.materials")}
                 </th>
@@ -123,7 +123,7 @@ export default function OfferSummary({ offer }: { offer: Offer }) {
                         {materialName}
                       </span>
                       {category && (
-                        <span className="text-[11px] text-muted">{category}</span>
+                        <span className="text-xs text-muted">{category}</span>
                       )}
                     </td>
                     <td className="px-3 py-2 text-muted">

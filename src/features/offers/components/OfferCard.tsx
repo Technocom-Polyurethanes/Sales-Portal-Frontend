@@ -56,7 +56,7 @@ export default function OfferCard({ offer, onOpen, onDelete }: OfferCardProps) {
               {offer.reference}
             </button>
             {offer.version > 1 && (
-              <span className="rounded bg-page px-1.5 py-0.5 text-[11px] font-normal text-muted">
+              <span className="rounded bg-page px-1.5 py-0.5 text-xs font-normal text-muted">
                 v{offer.version}
               </span>
             )}
