@@ -39,10 +39,13 @@ export default function AppShell() {
   useEffect(() => {
     if (!drawerClosing) return
 
+    const delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? 0
+      : 220
     const timer = window.setTimeout(() => {
       setMenuOpen(false)
       setDrawerClosing(false)
-    }, 220)
+    }, delay)
     return () => window.clearTimeout(timer)
   }, [drawerClosing])
 
