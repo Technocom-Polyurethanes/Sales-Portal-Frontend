@@ -67,6 +67,33 @@ describe("application shell", () => {
     expect(text).toContain("Loc/3089-2026/YL/AA")
   })
 
+  it("collapses the desktop sidebar and remembers the choice", async () => {
+    localStorage.setItem("sales_portal_sidebar_collapsed", "true")
+    const root = createRoot(container)
+    await act(async () => {
+      root.render(<App />)
+    })
+    await settle()
+
+    const shell = container.querySelector(".app-shell") as HTMLElement
+    expect(shell.className).toContain("lg:ms-18")
+
+    const expand = container.querySelector(
+      '[aria-label="Expand sidebar"]',
+    ) as HTMLButtonElement
+    expect(expand).toBeTruthy()
+
+    await act(async () => {
+      expand.click()
+    })
+    expect(shell.className).toContain("lg:ms-60")
+    expect(localStorage.getItem("sales_portal_sidebar_collapsed")).toBe("false")
+
+    await act(async () => {
+      root.unmount()
+    })
+  })
+
   it("shows six recent offers, newest first", async () => {
     clearCache()
     const items = Array.from({ length: 7 }, (_, index) => ({
