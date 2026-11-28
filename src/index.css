@@ -34,21 +34,13 @@
   --animate-drawer-out: drawer-out 0.22s ease-in both;
 }
 
-/* Toasts use Sileo's dark fill with white text; the body expands on hover. */
+/* Toasts use Sileo's dark fill; state icons keep their tone and all text stays white. */
 html:root {
   --sileo-height: 46px;
 }
 
-[data-sileo-toast] [data-sileo-badge],
 [data-sileo-toast] [data-sileo-title] {
   color: #ffffff;
-}
-
-[data-sileo-toast] [data-sileo-badge] {
-  background-color: rgb(255 255 255 / 14%);
-}
-
-[data-sileo-toast] [data-sileo-title] {
   font-size: 0.92rem;
   font-weight: 700;
 }
