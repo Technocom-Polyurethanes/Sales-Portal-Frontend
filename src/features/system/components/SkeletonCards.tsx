@@ -3,14 +3,18 @@ import Skeleton from "../../../components/ui/Skeleton"
 const CELLS = [
   {
     delay: 0,
-    span: "sm:col-span-2 lg:col-span-5 lg:row-span-2",
+    span: "sm:col-span-2 lg:col-span-6 lg:row-span-2",
     feature: true,
   },
-  { delay: 40, span: "sm:col-span-2 lg:col-span-7" },
+  {
+    delay: 40,
+    span: "sm:col-span-2 lg:col-span-6 lg:row-span-2",
+    feature: true,
+  },
   { delay: 80, span: "lg:col-span-7" },
-  { delay: 120, span: "lg:col-span-4" },
-  { delay: 160, span: "lg:col-span-4" },
-  { delay: 200, span: "lg:col-span-4" },
+  { delay: 120, span: "lg:col-span-5" },
+  { delay: 160, span: "lg:col-span-7" },
+  { delay: 200, span: "lg:col-span-5" },
   { delay: 240, span: "lg:col-span-5" },
   { delay: 280, span: "lg:col-span-7" },
 ]
