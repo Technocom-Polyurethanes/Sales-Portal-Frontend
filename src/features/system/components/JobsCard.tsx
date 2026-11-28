@@ -64,7 +64,13 @@ export default function JobsCard({
                     {msText(job.durationMs, locale, t)}
                   </td>
                   <td className="px-1 py-2">
-                    <Badge variant={stateTone(job.result)}>
+                    <Badge
+                      variant={
+                        job.result === "running"
+                          ? "issued"
+                          : stateTone(job.result)
+                      }
+                    >
                       {resultLabel(job.result)}
                     </Badge>
                   </td>
