@@ -125,6 +125,23 @@ describe("System status screen", () => {
     expect(headerFor("Database")).toContain("Up")
   })
 
+  it("shows the offers count from the offers list, not the status probe", async () => {
+    await render()
+
+    const expected = String(db.offers.length)
+    let dataCard: HTMLElement | undefined
+    for (let tries = 0; tries < 40; tries += 1) {
+      dataCard = Array.from(container.querySelectorAll("section")).find(
+        (card) => card.querySelector("h2")?.textContent === "Data",
+      )
+      if (dataCard?.textContent?.includes(expected)) break
+      await pause(100)
+    }
+
+    expect(dataCard?.textContent).toContain(expected)
+    expect(dataCard?.textContent).not.toContain("428")
+  })
+
   it("keeps the cards on screen when refreshing", async () => {
     await render()
 

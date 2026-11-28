@@ -34,6 +34,22 @@
   --animate-drawer-out: drawer-out 0.22s ease-in both;
 }
 
+/* Toasts are tone-tinted and bigger; Sileo reveals the body on hover. */
+html:root {
+  --sileo-height: 46px;
+}
+
+[data-sileo-toast] [data-sileo-title] {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+[data-sileo-toast] [data-sileo-description] {
+  color: var(--color-ink);
+  text-align: start;
+  white-space: pre-line;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

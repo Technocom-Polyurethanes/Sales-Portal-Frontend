@@ -10,6 +10,7 @@ import { localeForLanguage } from "../../../lib/formatters/locale"
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
 import { useNow } from "../../../lib/hooks/useNow"
 import { live, LIVE_TOPICS } from "../../../lib/live"
+import { useOffers } from "../../offers/hooks/useOffers"
 
 import { systemApi } from "../api"
 import ApplicationCard from "../components/ApplicationCard"
@@ -35,6 +36,8 @@ export default function SystemStatusPage() {
   const { notify } = useToast()
   const now = useNow()
   const status = useAsyncData(() => systemApi.status())
+  // The offers tile shows the same count as the offers list: latest version per chain.
+  const offers = useOffers({ pageSize: 1, latestOnly: true })
   const [samples, setSamples] = useState<number[]>([])
   const [staleSince, setStaleSince] = useState<string | null>(null)
   const busy = useRef(false)
@@ -45,6 +48,7 @@ export default function SystemStatusPage() {
     try {
       const next = await systemApi.status()
       status.mutate(() => next)
+      offers.refresh()
       setSamples((current) => [...current, next.database.latencyMs].slice(-20))
       setStaleSince(null)
     } catch {
@@ -52,7 +56,7 @@ export default function SystemStatusPage() {
     } finally {
       busy.current = false
     }
-  }, [status.mutate])
+  }, [status.mutate, offers.refresh])
 
   // Live events refresh the snapshot as soon as data changes; the live client polls when the
   // stream is down, so there is no separate timer here.
@@ -168,7 +172,11 @@ export default function SystemStatusPage() {
           <RealtimeCard realtime={data.realtime} locale={locale} />
         </div>
         <div className={`${TILE} lg:col-span-7`}>
-          <DataCard data={data.data} locale={locale} />
+          <DataCard
+            data={data.data}
+            locale={locale}
+            offersCount={offers.data?.totalCount}
+          />
         </div>
       </div>
     </>

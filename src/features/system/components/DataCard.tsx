@@ -10,9 +10,11 @@ import StatusCard from "./StatusCard"
 export default function DataCard({
   data,
   locale,
+  offersCount,
 }: {
   data?: SystemData
   locale: Locale
+  offersCount?: number
 }) {
   const { t } = useTranslation()
   const items = [
@@ -20,7 +22,7 @@ export default function DataCard({
       key: "offers",
       label: t("system.labels.offers"),
       to: "/offers",
-      value: data?.offers,
+      value: offersCount,
     },
     {
       key: "customers",
@@ -45,7 +47,7 @@ export default function DataCard({
   return (
     <StatusCard
       title={t("system.cards.data")}
-      headline={data?.offers == null ? "—" : formatNumber(data.offers, locale)}
+      headline={offersCount == null ? "—" : formatNumber(offersCount, locale)}
     >
       <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {items.map((item) => (

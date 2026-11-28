@@ -912,6 +912,11 @@
     "open": "فتح",
     "unread": "{count} غير مقروء",
     "unreadItem": "غير مقروء",
+    "toast": {
+      "actor": "المستخدم: {name}",
+      "record": "السجل: {record}",
+      "time": "الوقت: {time}"
+    },
     "loading": "جارٍ تحميل الإشعارات",
     "loadFailed": "تعذّر تحميل الإشعارات.",
     "writeFailed": "تعذّر حفظ هذا التغيير.",

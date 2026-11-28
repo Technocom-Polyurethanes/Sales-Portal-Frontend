@@ -912,6 +912,11 @@
     "open": "Open",
     "unread": "{count} unread",
     "unreadItem": "Unread",
+    "toast": {
+      "actor": "User: {name}",
+      "record": "Record: {record}",
+      "time": "Time: {time}"
+    },
     "loading": "Loading notifications",
     "loadFailed": "Couldn't load notifications.",
     "writeFailed": "Couldn't save that change.",
