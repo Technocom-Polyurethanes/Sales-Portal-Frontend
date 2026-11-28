@@ -38,7 +38,6 @@ export default function ApplicationCard({
             </Badge>
           }
         />
-        <DetailRow label={t("system.version")} value={status.version} mono />
         <DetailRow
           label={t("system.labels.commit")}
           value={
