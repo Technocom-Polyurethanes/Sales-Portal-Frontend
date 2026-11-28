@@ -1,8 +1,6 @@
 import Badge from "../../../components/ui/Badge"
-import Button from "../../../components/ui/Button"
 import Card from "../../../components/ui/Card"
 import Icon, { type IconName } from "../../../components/ui/Icon"
-import Toggle from "../../../components/ui/Toggle"
 import { useTranslation } from "../../../i18n/I18nProvider"
 import type { Locale } from "../../../lib/formatters/locale"
 import { formatClock } from "../../../lib/formatters/relative"
@@ -32,24 +30,12 @@ export default function StatusBanner({
   status,
   insight,
   locale,
-  autoRefresh,
-  onAutoRefresh,
-  hidden,
   staleSince,
-  progressKey,
-  refreshing,
-  onRefresh,
 }: {
   status: SystemStatus
   insight: Insight
   locale: Locale
-  autoRefresh: boolean
-  onAutoRefresh: (checked: boolean) => void
-  hidden: boolean
   staleSince: string | null
-  progressKey: number
-  refreshing: boolean
-  onRefresh: () => void
 }) {
   const { t } = useTranslation()
   const tone = stateTone(status.status)
@@ -91,39 +77,6 @@ export default function StatusBanner({
             {t(insight.nextKey)}
           </p>
         </div>
-      </div>
-
-      <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <Toggle
-          checked={autoRefresh}
-          onChange={onAutoRefresh}
-          label={`${t("system.autoRefresh")}: ${t(autoRefresh ? "system.on" : "system.off")}`}
-          hint={hidden ? t("system.paused") : undefined}
-        />
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={onRefresh}
-            disabled={refreshing}
-          >
-            {t("system.refresh")}
-          </Button>
-        </div>
-      </div>
-
-      <div
-        className="mt-4 h-0.5 w-full overflow-hidden rounded bg-line-soft"
-        aria-hidden="true"
-      >
-        {autoRefresh && !hidden ? (
-          <span
-            key={progressKey}
-            className="status-progress block h-full w-full bg-primary"
-          />
-        ) : (
-          <span className="block h-full w-full bg-line" />
-        )}
       </div>
     </Card>
   )

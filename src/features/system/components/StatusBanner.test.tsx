@@ -28,7 +28,7 @@ const base: SystemStatus = {
   },
 }
 
-function render(status: SystemStatus, hidden = false) {
+function render(status: SystemStatus) {
   const container = document.createElement("div")
   document.body.appendChild(container)
   const root = createRoot(container)
@@ -39,13 +39,7 @@ function render(status: SystemStatus, hidden = false) {
           status={status}
           insight={statusInsight(status)}
           locale="en-US"
-          autoRefresh
-          onAutoRefresh={() => {}}
-          hidden={hidden}
           staleSince={null}
-          progressKey={0}
-          refreshing={false}
-          onRefresh={() => {}}
         />
       </I18nProvider>,
     )
@@ -101,18 +95,13 @@ describe("status banner messages", () => {
     },
   )
 
-  it("pauses the progress line and says why when the tab is hidden", () => {
-    const visible = render(base)
-    expect(visible.container.querySelector(".status-progress")).not.toBeNull()
-    act(() => visible.root.unmount())
-    visible.container.remove()
+  it("keeps refresh controls out of the banner", () => {
+    const { container, root } = render(base)
 
-    const hidden = render(base, true)
-    expect(hidden.container.querySelector(".status-progress")).toBeNull()
-    expect(hidden.container.textContent).toContain(
-      "Paused while the tab is hidden",
-    )
-    act(() => hidden.root.unmount())
-    hidden.container.remove()
+    expect(container.querySelector("button")).toBeNull()
+    expect(container.textContent).not.toContain("Auto-refresh")
+
+    act(() => root.unmount())
+    container.remove()
   })
 })

@@ -12,6 +12,8 @@ import App from "../../../app/App"
 
 import { clearCache } from "../../../lib/cache/queryCache"
 
+import { live } from "../../../lib/live"
+
 import { db } from "../../../mock/db"
 
 import { systemApi } from "../api"
@@ -128,15 +130,36 @@ describe("System status screen", () => {
 
     await waitFor("Healthy")
 
-    const refresh = Array.from(container.querySelectorAll("button")).find(
-      (button) => button.textContent === "Refresh",
-    )
+    const refreshButtons = Array.from(
+      container.querySelectorAll("button"),
+    ).filter((button) => button.textContent === "Refresh")
 
-    await act(async () => refresh?.click())
+    expect(refreshButtons).toHaveLength(1)
+
+    await act(async () => refreshButtons[0]?.click())
 
     expect(container.querySelector(".animate-pulse")).toBeNull()
 
     expect(container.textContent).toContain("Healthy")
+  })
+
+  it("refreshes as soon as a live change arrives", async () => {
+    let onChange: (() => void) | undefined
+    vi.spyOn(live, "subscribe").mockImplementation((_topics, listener) => {
+      onChange = () => listener([])
+      return () => {}
+    })
+    const statusCalls = vi.spyOn(systemApi, "status")
+
+    await render()
+
+    await waitFor("Healthy")
+
+    expect(statusCalls).toHaveBeenCalledTimes(1)
+
+    await act(async () => onChange?.())
+
+    expect(statusCalls).toHaveBeenCalledTimes(2)
   })
 
   it("shows a retryable error when the status call fails", async () => {

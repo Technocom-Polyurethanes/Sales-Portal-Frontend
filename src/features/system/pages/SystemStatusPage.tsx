@@ -9,6 +9,7 @@ import { useTranslation } from "../../../i18n/I18nProvider"
 import { localeForLanguage } from "../../../lib/formatters/locale"
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
 import { useNow } from "../../../lib/hooks/useNow"
+import { live, LIVE_TOPICS } from "../../../lib/live"
 
 import { systemApi } from "../api"
 import ApplicationCard from "../components/ApplicationCard"
@@ -26,7 +27,7 @@ import StatusBanner from "../components/StatusBanner"
 const BENTO_GRID = "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12"
 const CELL = "min-w-0 [&>section]:h-full"
 const TILE = `${CELL} [&>section]:shadow-bento`
-const FEATURE = `${CELL} sm:col-span-2 lg:col-span-6 lg:row-span-2 [&>section]:!border-primary/25 [&>section]:!bg-primary-soft/25 [&>section]:shadow-bento-feature`
+const FEATURE = `${TILE} sm:col-span-2 lg:col-span-6 lg:row-span-2`
 
 /** Admin only: a live, plain-language view of the deployment's health. */
 export default function SystemStatusPage() {
@@ -34,45 +35,35 @@ export default function SystemStatusPage() {
   const { notify } = useToast()
   const now = useNow()
   const status = useAsyncData(() => systemApi.status())
-  const [autoRefresh, setAutoRefresh] = useState(true)
-  const [hidden, setHidden] = useState(() => document.hidden)
   const [samples, setSamples] = useState<number[]>([])
   const [staleSince, setStaleSince] = useState<string | null>(null)
-  const [refreshing, setRefreshing] = useState(false)
-  const [progressKey, setProgressKey] = useState(0)
   const busy = useRef(false)
 
   const refresh = useCallback(async () => {
     if (busy.current) return
     busy.current = true
-    setRefreshing(true)
     try {
       const next = await systemApi.status()
       status.mutate(() => next)
       setSamples((current) => [...current, next.database.latencyMs].slice(-20))
       setStaleSince(null)
-      setProgressKey((value) => value + 1)
     } catch {
       setStaleSince((current) => current ?? new Date().toISOString())
     } finally {
       busy.current = false
-      setRefreshing(false)
     }
   }, [status.mutate])
 
+  // Live events refresh the snapshot as soon as data changes; the live client polls when the
+  // stream is down, so there is no separate timer here.
   useEffect(() => {
-    const onVisibility = () => setHidden(document.hidden)
-    document.addEventListener("visibilitychange", onVisibility)
-    return () => document.removeEventListener("visibilitychange", onVisibility)
-  }, [])
-
-  useEffect(() => {
-    if (!autoRefresh) return
-    const timer = window.setInterval(() => {
-      if (!document.hidden) void refresh()
-    }, 15_000)
-    return () => window.clearInterval(timer)
-  }, [autoRefresh, refresh])
+    const stopChanges = live.subscribe(LIVE_TOPICS, () => void refresh())
+    const stopReady = live.onReady(() => void refresh())
+    return () => {
+      stopChanges()
+      stopReady()
+    }
+  }, [refresh])
 
   const copyDiagnostics = async () => {
     if (!status.data) return
@@ -93,7 +84,7 @@ export default function SystemStatusPage() {
           <Button
             variant="secondary"
             onClick={() => void refresh()}
-            disabled={refreshing || !status.data}
+            disabled={!status.data}
           >
             {t("system.refresh")}
           </Button>
@@ -148,13 +139,7 @@ export default function SystemStatusPage() {
         status={data}
         insight={statusInsight(data)}
         locale={locale}
-        autoRefresh={autoRefresh}
-        onAutoRefresh={setAutoRefresh}
-        hidden={hidden}
         staleSince={staleSince}
-        progressKey={progressKey}
-        refreshing={refreshing}
-        onRefresh={() => void refresh()}
       />
       <div className={BENTO_GRID}>
         <div className={FEATURE}>
