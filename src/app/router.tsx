@@ -1,47 +1,92 @@
 import { lazy } from "react"
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom"
+
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom"
 
 import AuditLogPage from "../features/audit/pages/AuditLogPage"
+
 import SystemStatusPage from "../features/system/pages/SystemStatusPage"
 
 import AppShell from "./layout/AppShell"
+
 import LoginScreen from "./layout/LoginScreen"
+
 import NotFoundPage from "./pages/NotFoundPage"
+
 import RequirePermission from "./RequirePermission"
+
 import { useSession } from "../features/account/hooks/useSession"
 
 const AccountPage = lazy(() => import("../features/account/pages/AccountPage"))
+
 const BanksPage = lazy(() => import("../features/banks/pages/BanksPage"))
-const CustomersPage = lazy(() => import("../features/customers/pages/CustomersPage"))
+
+const CustomersPage = lazy(
+  () => import("../features/customers/pages/CustomersPage"),
+)
+
 const CustomerHistoryPage = lazy(
   () => import("../features/customers/pages/CustomerHistoryPage"),
 )
+
 const ImportPage = lazy(() => import("../features/import/pages/ImportPage"))
+
 const OfferBuilderPage = lazy(
   () => import("../features/offers/pages/OfferBuilderPage"),
 )
+
 const OfferDetailsPage = lazy(
   () => import("../features/offers/pages/OfferDetailsPage"),
 )
+
 const OffersListPage = lazy(
   () => import("../features/offers/pages/OffersListPage"),
 )
-const DashboardPage = lazy(() => import("../features/offers/pages/DashboardPage"))
-const ProductsPage = lazy(() => import("../features/products/pages/ProductsPage"))
-const SettingsPage = lazy(() => import("../features/settings/pages/SettingsPage"))
+
+const DashboardPage = lazy(
+  () => import("../features/offers/pages/DashboardPage"),
+)
+
+const ProductsPage = lazy(
+  () => import("../features/products/pages/ProductsPage"),
+)
+
+const SettingsPage = lazy(
+  () => import("../features/settings/pages/SettingsPage"),
+)
+
 const UsersPage = lazy(() => import("../features/users/pages/UsersPage"))
+
+/** The short addresses keep their filters when they redirect to the canonical pages. */
+
+function AddressAlias({ to }: { to: string }) {
+  const { search } = useLocation()
+
+  return <Navigate to={`${to}${search}`} replace />
+}
 
 export function AppRouter() {
   const { authenticated, signIn } = useSession()
+
   const navigate = useNavigate()
 
   if (!authenticated) {
     // The sign in screen answers every address, so a session that expires on /offers/12 (or the
+
     // /login redirect after a 401) asks for credentials instead of showing "page not found".
+
     const handleLogin = async (username: string, password: string) => {
       const signedIn = await signIn(username, password)
+
       // Always land on the home page, not on the address the user was signed out from.
+
       if (signedIn) navigate("/", { replace: true })
+
       return signedIn
     }
 
@@ -53,6 +98,22 @@ export function AppRouter() {
       <Route element={<AppShell />}>
         <Route index element={<DashboardPage />} />
         <Route path="login" element={<Navigate to="/" replace />} />
+        <Route
+          path="logs"
+          element={
+            <RequirePermission permission="audit.view">
+              <AddressAlias to="/audit-logs" />
+            </RequirePermission>
+          }
+        />
+        <Route
+          path="system"
+          element={
+            <RequirePermission permission="system.view">
+              <AddressAlias to="/system-status" />
+            </RequirePermission>
+          }
+        />
         <Route path="offers" element={<OffersListPage />} />
         <Route
           path="offers/new"

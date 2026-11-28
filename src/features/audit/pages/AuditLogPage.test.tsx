@@ -1,107 +1,70 @@
 // @vitest-environment jsdom
-import { act } from "react"
-import { createRoot, type Root } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 
-import "@/mock"
-import App from "../../../app/App"
-import { clearCache } from "../../../lib/cache/queryCache"
-import { db } from "../../../mock/db"
-
-;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT =
-  true
-
-if (!window.matchMedia) {
-  window.matchMedia = (query: string) =>
-    ({
-      matches: false,
-      media: query,
-      onchange: null,
-      addEventListener: () => {},
-      removeEventListener: () => {},
-      addListener: () => {},
-      removeListener: () => {},
-      dispatchEvent: () => false,
-    }) as MediaQueryList
-}
-
-if (!("ResizeObserver" in globalThis)) {
-  globalThis.ResizeObserver = (class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  } as unknown as typeof ResizeObserver)
-}
-
-const pause = (ms: number) =>
-  act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, ms))
-  })
-
-function setSelect(label: string, value: string) {
-  const select = document.querySelector(
-    `select[aria-label="${label}"]`,
-  ) as HTMLSelectElement
-  Object.getOwnPropertyDescriptor(
-    HTMLSelectElement.prototype,
-    "value",
-  )!.set!.call(select, value)
-  select.dispatchEvent(new Event("change", { bubbles: true }))
-}
+import { createAuditHarness } from "./auditTestSetup"
 
 describe("Activity log screen", () => {
-  let container: HTMLDivElement
-  let root: Root
+  const h = createAuditHarness()
 
-  const waitFor = async (text: string) => {
-    for (let tries = 0; tries < 30; tries += 1) {
-      if (document.body.textContent?.includes(text)) return
-      await pause(100)
-    }
-  }
-
-  const tableText = () => document.querySelector("tbody")?.textContent ?? ""
-
-  const waitForRows = async () => {
-    for (let tries = 0; tries < 30; tries += 1) {
-      if (tableText().includes("Changed offer status")) return
-      await pause(100)
-    }
-  }
-
-  beforeEach(async () => {
-    clearCache()
-    db.session.userId = "acct-admin"
-    localStorage.setItem("technocom.session", "active")
-    localStorage.setItem("sales_portal_jwt", "test-token")
-    window.history.pushState({}, "", "/audit-logs")
-    container = document.createElement("div")
-    document.body.appendChild(container)
-    root = createRoot(container)
-    await act(async () => root.render(<App />))
-    await waitFor("Activity log")
-  })
-
-  afterEach(async () => {
-    await act(async () => root.unmount())
-    container.remove()
-    localStorage.clear()
-    window.history.pushState({}, "", "/")
-  })
+  beforeEach(() => h.reset())
+  afterEach(async () => h.dispose())
 
   it("lists the newest audit entries with localized action labels", async () => {
-    await waitForRows()
-    expect(tableText()).toContain("Amgad Anwar")
-    expect(tableText()).toContain("Success")
-    expect(tableText()).toContain("Sign-in failed")
+    await h.mount()
+    await h.waitUntil(() => h.tableText().includes("Changed offer status"))
+    expect(h.tableText()).toContain("Amgad Anwar")
+    expect(h.tableText()).toContain("Success")
+    expect(h.tableText()).toContain("Sign-in failed")
   })
 
-  it("filters by action", async () => {
-    await waitForRows()
-    await act(async () => setSelect("Action", "customer.created"))
-    await pause(300)
+  it("filters by action through the labelled select", async () => {
+    await h.mount()
+    await h.waitUntil(() => h.tableText().includes("Changed offer status"))
+    await h.change(() => h.setSelect("Action", "customer.created"))
+    await h.waitUntil(() => h.query().get("action") === "customer.created")
+    await h.waitUntil(() => !h.tableText().includes("Changed offer status"))
 
-    expect(tableText()).toContain("Created customer")
-    expect(tableText()).not.toContain("Changed offer status")
+    expect(h.tableText()).toContain("Created customer")
+  })
+
+  it("restores filters from the URL", async () => {
+    await h.mount("/audit-logs?action=customer.created&outcome=success")
+    await h.waitUntil(() => h.tableText().includes("Created customer"))
+    expect(h.tableText()).not.toContain("Changed offer status")
+    expect(
+      (document.querySelector(
+        'select[aria-label="Action"]',
+      ) as HTMLSelectElement).value,
+    ).toBe("customer.created")
+  })
+
+  it("removes chips and clears all filters", async () => {
+    await h.mount()
+    await h.waitUntil(() => h.tableText().includes("Changed offer status"))
+    await h.change(() => h.setSelect("Action", "customer.created"))
+    await h.waitUntil(() => h.query().get("action") === "customer.created")
+    expect(document.body.textContent).toContain("Action: Created customer")
+
+    await h.click(
+      h.findButton(
+        (button) =>
+          button.textContent?.includes("Action: Created customer") === true,
+      ),
+    )
+    await h.waitUntil(() => h.query().get("action") === null)
+    await h.waitUntil(() => h.tableText().includes("Changed offer status"))
+
+    await h.click(h.findButton(h.byText("Failures only")))
+    await h.waitUntil(() => h.query().get("outcome") === "failure")
+    await h.click(h.findButton(h.byText("Clear filters")))
+    await h.waitUntil(() => h.query().get("outcome") === null)
+  })
+
+  it("renders the Arabic report mirrored with a left-to-right chart", async () => {
+    localStorage.setItem("technocom.app-language", "ar")
+    await h.mount("/audit-logs", "٧ أيام")
+    await h.waitUntil(() => h.tableText().includes("تغيير حالة العرض"))
+    expect(document.documentElement.dir).toBe("rtl")
+    expect(document.querySelector('[dir="ltr"]')).not.toBeNull()
   })
 })

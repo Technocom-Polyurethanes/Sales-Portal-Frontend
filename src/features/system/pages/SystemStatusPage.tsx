@@ -1,44 +1,114 @@
+import { useCallback, useEffect, useRef, useState } from "react"
+
 import PageHeader from "../../../app/layout/PageHeader"
 import Button from "../../../components/ui/Button"
 import Card from "../../../components/ui/Card"
-import Badge, { type BadgeVariant } from "../../../components/ui/Badge"
+import Icon from "../../../components/ui/Icon"
+import { useToast } from "../../../components/ui/ToastProvider"
 import { useTranslation } from "../../../i18n/I18nProvider"
-import { formatDateTime } from "../../../lib/formatters/date"
 import { localeForLanguage } from "../../../lib/formatters/locale"
 import { useAsyncData } from "../../../lib/hooks/useAsyncData"
+import { useNow } from "../../../lib/hooks/useNow"
 
 import { systemApi } from "../api"
-import { stateLabel } from "../labels"
+import ApplicationCard from "../components/ApplicationCard"
+import AuditCard from "../components/AuditCard"
+import DatabaseCard from "../components/DatabaseCard"
+import { diagnosticsText, statusInsight } from "../components/insight"
+import DataCard from "../components/DataCard"
+import JobsCard from "../components/JobsCard"
+import LiveCard from "../components/LiveCard"
+import RealtimeCard from "../components/RealtimeCard"
+import SecurityCard from "../components/SecurityCard"
+import SkeletonCards from "../components/SkeletonCards"
+import StatusBanner from "../components/StatusBanner"
 
-const badgeVariant = (value: string): BadgeVariant => {
-  if (value === "Healthy" || value === "Up" || value === "connected") {
-    return "accepted"
-  }
-  if (value === "Unhealthy" || value === "Down" || value === "disconnected") {
-    return "rejected"
-  }
-  return "draft"
-}
-
-/** Admin only: the diagnostics behind /health, plus the build and live listeners. */
+/** Admin only: a live, plain-language view of the deployment's health. */
 export default function SystemStatusPage() {
   const { t, language } = useTranslation()
+  const { notify } = useToast()
+  const now = useNow()
   const status = useAsyncData(() => systemApi.status())
+  const [autoRefresh, setAutoRefresh] = useState(true)
+  const [hidden, setHidden] = useState(() => document.hidden)
+  const [samples, setSamples] = useState<number[]>([])
+  const [staleSince, setStaleSince] = useState<string | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
+  const [progressKey, setProgressKey] = useState(0)
+  const busy = useRef(false)
 
-  const action = (
-    <Button variant="secondary" onClick={status.reload} disabled={status.loading}>
-      {t("system.refresh")}
-    </Button>
+  const refresh = useCallback(async () => {
+    if (busy.current) return
+    busy.current = true
+    setRefreshing(true)
+    try {
+      const next = await systemApi.status()
+      status.mutate(() => next)
+      setSamples((current) => [...current, next.database.latencyMs].slice(-20))
+      setStaleSince(null)
+      setProgressKey((value) => value + 1)
+    } catch {
+      setStaleSince((current) => current ?? new Date().toISOString())
+    } finally {
+      busy.current = false
+      setRefreshing(false)
+    }
+  }, [status.mutate])
+
+  useEffect(() => {
+    const onVisibility = () => setHidden(document.hidden)
+    document.addEventListener("visibilitychange", onVisibility)
+    return () => document.removeEventListener("visibilitychange", onVisibility)
+  }, [])
+
+  useEffect(() => {
+    if (!autoRefresh) return
+    const timer = window.setInterval(() => {
+      if (!document.hidden) void refresh()
+    }, 15_000)
+    return () => window.clearInterval(timer)
+  }, [autoRefresh, refresh])
+
+  const copyDiagnostics = async () => {
+    if (!status.data) return
+    try {
+      await navigator.clipboard.writeText(diagnosticsText(status.data))
+      notify(t("system.diagnosticsCopied"), "success")
+    } catch (cause) {
+      notify(cause instanceof Error ? cause.message : String(cause), "error")
+    }
+  }
+
+  const header = (
+    <PageHeader
+      title={t("system.title")}
+      subtitle={t("system.subtitle")}
+      action={
+        <>
+          <Button
+            variant="secondary"
+            onClick={() => void refresh()}
+            disabled={refreshing || !status.data}
+          >
+            {t("system.refresh")}
+          </Button>
+          <Button
+            variant="secondary"
+            icon={<Icon name="copy" size={16} />}
+            onClick={() => void copyDiagnostics()}
+            disabled={!status.data}
+          >
+            {t("system.copyDiagnostics")}
+          </Button>
+        </>
+      }
+    />
   )
 
   if (status.error) {
     return (
       <>
-        <PageHeader
-          title={t("system.title")}
-          subtitle={t("system.subtitle")}
-          action={action}
-        />
+        {header}
         <Card>
           <div role="alert" className="flex flex-col items-start gap-3">
             <p className="text-sm text-ink">{status.error.message}</p>
@@ -54,16 +124,11 @@ export default function SystemStatusPage() {
   if (!status.data) {
     return (
       <>
-        <PageHeader
-          title={t("system.title")}
-          subtitle={t("system.subtitle")}
-          action={action}
-        />
-        <Card>
-          <p role="status" className="text-sm text-muted">
-            {t("common.loading")}
-          </p>
-        </Card>
+        {header}
+        <p role="status" className="sr-only">
+          {t("common.loading")}
+        </p>
+        <SkeletonCards />
       </>
     )
   }
@@ -73,97 +138,32 @@ export default function SystemStatusPage() {
 
   return (
     <>
-      <PageHeader
-        title={t("system.title")}
-        subtitle={t("system.subtitle")}
-        action={action}
+      {header}
+      <StatusBanner
+        status={data}
+        insight={statusInsight(data)}
+        locale={locale}
+        autoRefresh={autoRefresh}
+        onAutoRefresh={setAutoRefresh}
+        hidden={hidden}
+        staleSince={staleSince}
+        progressKey={progressKey}
+        refreshing={refreshing}
+        onRefresh={() => void refresh()}
       />
-      <div className="divide-y divide-line-soft rounded-xl border border-line-soft bg-surface">
-        <section className="p-4 sm:p-5">
-          <header className="flex flex-wrap items-start justify-between gap-3">
-            <h2 className="text-base font-semibold text-ink">
-              {t("system.overall")}
-            </h2>
-            <Badge variant={badgeVariant(data.status)}>
-              {stateLabel("overall", data.status, t)}
-            </Badge>
-          </header>
-          <dl className="mt-4 space-y-3 text-sm">
-            <div className="flex justify-between gap-3">
-              <dt className="text-muted">{t("system.checkedAt")}</dt>
-              <dd className="text-ink" dir="ltr">
-                {formatDateTime(data.checkedAt, locale)}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-3">
-              <dt className="text-muted">{t("system.version")}</dt>
-              <dd className="text-ink" dir="ltr">
-                {data.version}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-3">
-              <dt className="text-muted">{t("system.environment")}</dt>
-              <dd className="text-ink">{data.environment}</dd>
-            </div>
-            <div className="flex justify-between gap-3">
-              <dt className="text-muted">{t("system.uptime")}</dt>
-              <dd className="text-ink" dir="ltr">
-                {data.uptimeSeconds} s
-              </dd>
-            </div>
-          </dl>
-        </section>
-
-        <section className="p-4 sm:p-5">
-          <header className="flex flex-wrap items-start justify-between gap-3">
-            <h2 className="text-base font-semibold text-ink">
-              {t("system.database")}
-            </h2>
-            <Badge variant={badgeVariant(data.database.status)}>
-              {stateLabel("database", data.database.status, t)}
-            </Badge>
-          </header>
-          <div className="mt-4 flex justify-between gap-3 text-sm">
-            <span className="text-muted">{t("system.latency")}</span>
-            <span className="text-ink" dir="ltr">
-              {data.database.latencyMs} ms
-            </span>
-          </div>
-        </section>
-
-        <section className="p-4 sm:p-5">
-          <header className="flex flex-wrap items-start justify-between gap-3">
-            <h2 className="text-base font-semibold text-ink">
-              {t("system.live")}
-            </h2>
-          </header>
-          <div className="mt-4 space-y-3">
-            <div className="flex items-center justify-between gap-3 text-sm">
-              <span className="text-muted">{t("system.liveState")}</span>
-              <Badge variant={badgeVariant(data.live.state)}>
-                {stateLabel("live", data.live.state, t)}
-              </Badge>
-            </div>
-            <div className="flex justify-between gap-3 text-sm">
-              <span className="text-muted">{t("system.changes")}</span>
-              <Badge variant={badgeVariant(data.live.changes)}>
-                {stateLabel("live", data.live.changes, t)}
-              </Badge>
-            </div>
-            <div className="flex justify-between gap-3 text-sm">
-              <span className="text-muted">{t("system.notifications")}</span>
-              <Badge variant={badgeVariant(data.live.notifications)}>
-                {stateLabel("live", data.live.notifications, t)}
-              </Badge>
-            </div>
-            <div className="flex justify-between gap-3 text-sm">
-              <span className="text-muted">{t("system.pollingFallback")}</span>
-              <Badge variant={badgeVariant(data.live.pollingFallback ? "success" : "destructive")}>
-                {data.live.pollingFallback ? t("common.yes") : t("common.no")}
-              </Badge>
-            </div>
-          </div>
-        </section>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <DatabaseCard
+          database={data.database}
+          samples={samples}
+          locale={locale}
+        />
+        <LiveCard live={data.live} now={now} locale={locale} />
+        <RealtimeCard realtime={data.realtime} locale={locale} />
+        <AuditCard audit={data.audit} now={now} locale={locale} />
+        <JobsCard jobs={data.jobs} now={now} locale={locale} />
+        <SecurityCard security={data.security} now={now} locale={locale} />
+        <ApplicationCard status={data} locale={locale} />
+        <DataCard data={data.data} locale={locale} />
       </div>
     </>
   )
