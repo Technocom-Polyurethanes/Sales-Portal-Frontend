@@ -25,7 +25,7 @@ export default function ApplicationCard({
       title={t("system.cards.application")}
       headline={uptimeText(status.uptimeSeconds, t)}
     >
-      <dl className="space-y-2.5">
+      <dl className="flex h-full flex-col justify-between gap-2.5">
         <DetailRow
           label={t("system.environment")}
           value={

@@ -82,7 +82,7 @@ export default function AuditLogCards({
                     aria-expanded={open}
                     aria-controls={panelId}
                     aria-label={`${t("audit.row.details")}: ${row.description}`}
-                    className="activity-press flex size-11 shrink-0 items-center justify-center text-muted"
+                    className="activity-press flex size-11 shrink-0 items-center justify-center text-muted hover:bg-page"
                   >
                     <Icon
                       name="chevron"

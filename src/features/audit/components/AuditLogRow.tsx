@@ -101,7 +101,7 @@ export default function AuditLogRow({
             aria-expanded={open}
             aria-controls={panelId}
             aria-label={`${t("audit.row.details")}: ${row.description}`}
-            className="activity-press flex size-11 items-center justify-center text-muted hover:text-primary"
+            className="activity-press flex size-11 items-center justify-center text-muted hover:bg-page hover:text-primary"
           >
             <Icon
               name="chevron"

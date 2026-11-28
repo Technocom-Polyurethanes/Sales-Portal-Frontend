@@ -15,7 +15,7 @@ export type AuditLogDetailsProps = {
   onRecord: (entityType: string, entityId: string) => void
 }
 
-const CAPTION = "mb-1 text-[11px] font-semibold uppercase text-muted"
+const CAPTION = "mb-1 text-xs font-semibold text-muted"
 
 export default function AuditLogDetails({
   row,

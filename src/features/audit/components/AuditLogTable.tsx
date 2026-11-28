@@ -37,14 +37,12 @@ export default function AuditLogTable({
       <table className="w-full border-collapse text-sm">
         <thead className="bg-surface-soft">
           <tr className="border-b border-line">
-            <th scope="col" className={`${HEAD} w-24 text-start`}>
-              {t("audit.fields.when")}
-            </th>
-            <th scope="col" className={`${HEAD} w-52 text-start`}>
-              {t("audit.fields.actor")}
-            </th>
-            <th scope="col" className={`${HEAD} w-44 text-start`}>
-              {t("audit.fields.action")}
+            <th scope="col" colSpan={3} className="p-0 text-start">
+              <div className={`${HEAD} grid grid-cols-3 gap-3`}>
+                <span>{t("audit.fields.when")}</span>
+                <span>{t("audit.fields.actor")}</span>
+                <span>{t("audit.fields.action")}</span>
+              </div>
             </th>
             <th scope="col" className={`${HEAD} text-start`}>
               {t("audit.row.description")}

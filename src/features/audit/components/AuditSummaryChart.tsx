@@ -35,12 +35,8 @@ export default function AuditSummaryChart({
   // A chart is a timeline: hours and days stay left-to-right even in Arabic.
   return (
     <div className="rounded-xl border border-line-soft bg-surface px-3 py-2">
-      <p className="mb-1.5 text-[11px] font-semibold text-muted">{label}</p>
-      <div
-        dir="ltr"
-        className="flex h-9 items-end gap-[2px]"
-        aria-hidden="true"
-      >
+      <p className="mb-1.5 text-xs font-semibold text-muted">{label}</p>
+      <div dir="ltr" className="flex h-9 items-end gap-0.5" aria-hidden="true">
         {values.map((value, index) => (
           <span
             key={index}

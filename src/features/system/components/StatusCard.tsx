@@ -19,6 +19,8 @@ export default function StatusCard({
   return (
     <Card
       title={title}
+      className="flex flex-col"
+      bodyClassName="flex flex-1 flex-col"
       actions={
         status ? (
           <Badge variant={tone}>{status}</Badge>
@@ -33,7 +35,7 @@ export default function StatusCard({
       <p className="min-w-0 wrap-break-word text-2xl font-semibold tabular-nums text-ink">
         {headline}
       </p>
-      {children && <div className="mt-4">{children}</div>}
+      {children && <div className="mt-4 flex-1">{children}</div>}
     </Card>
   )
 }

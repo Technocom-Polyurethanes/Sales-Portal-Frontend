@@ -12,7 +12,7 @@ export type AuditSummaryStripProps = {
 }
 
 const TILE = "rounded-xl border border-line-soft bg-surface px-3 py-2.5"
-const CAPTION = "text-[11px] font-medium text-muted"
+const CAPTION = "text-xs font-medium text-muted"
 const VALUE = "mt-0.5 text-lg font-semibold text-ink"
 
 export default function AuditSummaryStrip({
@@ -43,7 +43,7 @@ export default function AuditSummaryStrip({
         </div>
         <button
           type="button"
-          className={`${TILE} activity-press text-start`}
+          className={`${TILE} activity-press text-start hover:bg-page`}
           onClick={() => onFilter("outcome", "failure")}
           aria-label={`${t("audit.summary.failed")}: ${formatNumber(failures, locale)}`}
         >
@@ -54,13 +54,13 @@ export default function AuditSummaryStrip({
         </button>
         <button
           type="button"
-          className={`${TILE} activity-press text-start`}
+          className={`${TILE} activity-press text-start hover:bg-page`}
           onClick={() => onFilter("category", "auth")}
           aria-label={`${t("audit.summary.signIns")}: ${formatNumber(signIns, locale)}`}
         >
           <p className={CAPTION}>{t("audit.summary.signIns")}</p>
           <p className={VALUE}>{formatNumber(signIns, locale)}</p>
-          <p className="truncate text-[11px] text-muted">
+          <p className="truncate text-xs text-muted">
             {t("audit.summary.failedCount", {
               count: formatNumber(failedSignIns, locale),
             })}
@@ -78,7 +78,7 @@ export default function AuditSummaryStrip({
               : t("audit.summary.none")}
           </p>
           {lastFailed && lastFailedUser && (
-            <p className="truncate text-[11px] text-muted" dir="ltr">
+            <p className="truncate text-xs text-muted" dir="ltr">
               @{lastFailedUser}
             </p>
           )}
