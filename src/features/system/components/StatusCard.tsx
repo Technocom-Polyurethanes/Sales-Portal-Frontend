@@ -30,7 +30,7 @@ export default function StatusCard({
         )
       }
     >
-      <p className="min-w-0 break-words text-2xl font-semibold tabular-nums text-ink">
+      <p className="min-w-0 wrap-break-word text-2xl font-semibold tabular-nums text-ink">
         {headline}
       </p>
       {children && <div className="mt-4">{children}</div>}

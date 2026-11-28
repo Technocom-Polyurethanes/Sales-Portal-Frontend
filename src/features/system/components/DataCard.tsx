@@ -47,7 +47,7 @@ export default function DataCard({
       title={t("system.cards.data")}
       headline={data?.offers == null ? "—" : formatNumber(data.offers, locale)}
     >
-      <dl className="grid grid-cols-2 gap-3">
+      <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {items.map((item) => (
           <div
             key={item.key}

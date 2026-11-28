@@ -23,6 +23,11 @@ import SecurityCard from "../components/SecurityCard"
 import SkeletonCards from "../components/SkeletonCards"
 import StatusBanner from "../components/StatusBanner"
 
+const BENTO_GRID = "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12"
+const CELL = "min-w-0 [&>section]:h-full"
+const TILE = `${CELL} [&>section]:shadow-bento`
+const FEATURE = `${CELL} sm:col-span-2 lg:col-span-5 lg:row-span-2 [&>section]:!border-primary/25 [&>section]:!bg-primary-soft/25 [&>section]:shadow-bento-feature`
+
 /** Admin only: a live, plain-language view of the deployment's health. */
 export default function SystemStatusPage() {
   const { t, language } = useTranslation()
@@ -151,19 +156,35 @@ export default function SystemStatusPage() {
         refreshing={refreshing}
         onRefresh={() => void refresh()}
       />
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <DatabaseCard
-          database={data.database}
-          samples={samples}
-          locale={locale}
-        />
-        <LiveCard live={data.live} now={now} locale={locale} />
-        <RealtimeCard realtime={data.realtime} locale={locale} />
-        <AuditCard audit={data.audit} now={now} locale={locale} />
-        <JobsCard jobs={data.jobs} now={now} locale={locale} />
-        <SecurityCard security={data.security} now={now} locale={locale} />
-        <ApplicationCard status={data} locale={locale} />
-        <DataCard data={data.data} locale={locale} />
+      <div className={BENTO_GRID}>
+        <div className={FEATURE}>
+          <DatabaseCard
+            database={data.database}
+            samples={samples}
+            locale={locale}
+          />
+        </div>
+        <div className={`${TILE} sm:col-span-2 lg:col-span-7`}>
+          <JobsCard jobs={data.jobs} now={now} locale={locale} />
+        </div>
+        <div className={`${TILE} lg:col-span-7`}>
+          <LiveCard live={data.live} now={now} locale={locale} />
+        </div>
+        <div className={`${TILE} lg:col-span-4`}>
+          <AuditCard audit={data.audit} now={now} locale={locale} />
+        </div>
+        <div className={`${TILE} lg:col-span-4`}>
+          <SecurityCard security={data.security} now={now} locale={locale} />
+        </div>
+        <div className={`${TILE} lg:col-span-4`}>
+          <RealtimeCard realtime={data.realtime} locale={locale} />
+        </div>
+        <div className={`${TILE} lg:col-span-5`}>
+          <ApplicationCard status={data} locale={locale} />
+        </div>
+        <div className={`${TILE} lg:col-span-7`}>
+          <DataCard data={data.data} locale={locale} />
+        </div>
       </div>
     </>
   )

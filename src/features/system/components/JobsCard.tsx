@@ -34,7 +34,7 @@ export default function JobsCard({
         <p className="text-sm text-muted">—</p>
       ) : (
         <div className="-mx-1 overflow-x-auto">
-          <table className="w-full min-w-[34rem] text-start text-xs">
+          <table className="w-full min-w-136 text-start text-xs">
             <thead className="text-muted">
               <tr>
                 <th scope="col" className="px-1 pb-2 font-semibold">
