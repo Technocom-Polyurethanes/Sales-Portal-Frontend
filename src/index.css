@@ -25,7 +25,6 @@
   --font-arabic: "IBM Plex Sans Arabic", "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
   --radius-card: 12px;
   --shadow-bento: 0 1px 2px color-mix(in srgb, var(--color-ink) 5%, transparent);
-  --shadow-bento-feature: 0 18px 40px -28px color-mix(in srgb, var(--color-primary) 55%, transparent);
   --animate-fade-in: fade-in 0.25s ease-out both;
   --animate-fade-out: fade-out 0.2s ease-in both;
   --animate-rise-in: rise-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -239,20 +238,6 @@ textarea[aria-invalid="true"],
   animation: activity-row-flash 300ms ease-out;
 }
 
-@keyframes status-progress {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-@utility status-progress {
-  transform-origin: left center;
-  animation: status-progress 15s linear infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -272,10 +257,5 @@ textarea[aria-invalid="true"],
 
   .activity-row-new {
     animation: activity-row-flash 180ms ease-out !important;
-  }
-
-  .status-progress {
-    animation: none !important;
-    transform: scaleX(1) !important;
   }
 }
