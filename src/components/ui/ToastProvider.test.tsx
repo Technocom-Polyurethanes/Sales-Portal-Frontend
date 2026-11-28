@@ -9,17 +9,22 @@ const sileo = vi.hoisted(() => ({
   warning: vi.fn(),
   error: vi.fn(),
 }))
+const toasterProps = vi.hoisted(() => ({
+  value: {} as Record<string, unknown>,
+}))
 
-vi.mock("sileo", () => ({ sileo, Toaster: () => null }))
-
-vi.mock("../../i18n/I18nProvider", () => ({
-  useTranslation: () => ({ language: "en" }),
+vi.mock("sileo", () => ({
+  sileo,
+  Toaster: (props: Record<string, unknown>) => {
+    toasterProps.value = props
+    return null
+  },
 }))
 
 import { ToastProvider, useToast } from "./ToastProvider"
 
 describe("ToastProvider", () => {
-  it("tints toasts and puts expandable details in the body", () => {
+  it("uses dark toasts and puts expandable details in the body", () => {
     let notify: ReturnType<typeof useToast>["notify"] = () => {}
     const Probe = () => {
       notify = useToast().notify
@@ -49,10 +54,13 @@ describe("ToastProvider", () => {
       expect.objectContaining({
         title: "Saved",
         description: "Offer saved\nUser: Amgad\nTime: 2 min ago",
-        fill: "#e3f3e9",
         duration: 9000,
       }),
     )
+    expect(toasterProps.value).toMatchObject({
+      position: "bottom-right",
+      theme: "light",
+    })
 
     act(() => root.unmount())
   })

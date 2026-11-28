@@ -2,13 +2,9 @@ import { createContext, useCallback, useContext, useMemo } from "react"
 
 import type { ReactNode } from "react"
 
-import { sileo, Toaster, type SileoPosition } from "sileo"
+import { sileo, Toaster } from "sileo"
 
 import "sileo/styles.css"
-
-import { useTranslation } from "../../i18n/I18nProvider"
-
-import type { AppLanguage } from "../../i18n/direction"
 
 export type ToastTone = "success" | "info" | "warning" | "error"
 
@@ -31,31 +27,9 @@ type ToastContextValue = {
   ) => void
 }
 
-/** Tinted backgrounds make the toast readable at a glance on the busy workspace. */
-
-const FILLS: Record<ToastTone, string> = {
-  success: "#e3f3e9",
-
-  info: "#dceafa",
-
-  warning: "#fbf0d9",
-
-  error: "#fae5e3",
-}
-
 const ToastContext = createContext<ToastContextValue | null>(null)
 
-/** Arabic reads right to left, so its toasts sit on the opposite corner. */
-
-export function toastPosition(language: AppLanguage): SileoPosition {
-  return language === "ar" ? "bottom-left" : "bottom-right"
-}
-
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const { language } = useTranslation()
-
-  const position = toastPosition(language)
-
   const notify = useCallback(
     (
       message: string,
@@ -74,11 +48,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         description:
           [description, details].filter(Boolean).join("\n") || undefined,
 
-        position,
-
         duration: 9000,
-
-        fill: FILLS[tone],
 
         button: action
           ? { title: action.label, onClick: action.onClick }
@@ -86,14 +56,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       })
     },
 
-    [position],
+    [],
   )
 
   const value = useMemo(() => ({ notify }), [notify])
 
   return (
     <ToastContext.Provider value={value}>
-      <Toaster position={position} />
+      {/* Sileo's "light" theme paints a dark toast on a light workspace. */}
+      <Toaster position="bottom-right" theme="light" />
       {children}
     </ToastContext.Provider>
   )

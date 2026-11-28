@@ -34,9 +34,18 @@
   --animate-drawer-out: drawer-out 0.22s ease-in both;
 }
 
-/* Toasts are tone-tinted and bigger; Sileo reveals the body on hover. */
+/* Toasts use Sileo's dark fill with white text; the body expands on hover. */
 html:root {
   --sileo-height: 46px;
+}
+
+[data-sileo-toast] [data-sileo-badge],
+[data-sileo-toast] [data-sileo-title] {
+  color: #ffffff;
+}
+
+[data-sileo-toast] [data-sileo-badge] {
+  background-color: rgb(255 255 255 / 14%);
 }
 
 [data-sileo-toast] [data-sileo-title] {
@@ -44,10 +53,20 @@ html:root {
   font-weight: 700;
 }
 
-[data-sileo-toast] [data-sileo-description] {
-  color: var(--color-ink);
+[data-sileo-viewport][data-theme="light"] [data-sileo-toast] [data-sileo-description] {
+  color: rgb(255 255 255 / 92%);
   text-align: start;
   white-space: pre-line;
+}
+
+[data-sileo-toast] [data-sileo-button],
+[data-sileo-toast] [data-sileo-button]:hover {
+  color: #ffffff;
+  background-color: rgb(255 255 255 / 16%);
+}
+
+[data-sileo-toast] [data-sileo-button]:hover {
+  background-color: rgb(255 255 255 / 26%);
 }
 
 @keyframes fade-in {
