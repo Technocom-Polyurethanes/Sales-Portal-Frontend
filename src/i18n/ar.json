@@ -73,7 +73,7 @@
     "workspace": "مساحة العمل",
     "users": "المستخدمون",
     "logs": "السجلات",
-    "system": "النظام"
+    "system": "حالة النظام"
   },
   "shell": {
     "searchPlaceholder": "ابحث عن عرض أو عميل…",
@@ -652,6 +652,85 @@
     "changes": "مستمع التغييرات",
     "notifications": "مستمع الإشعارات",
     "pollingFallback": "الاستعانة بالاستقصاء",
+    "stale": "بيانات قديمة منذ {time}",
+    "copyDiagnostics": "نسخ التشخيصات",
+    "diagnosticsCopied": "تم نسخ التشخيصات.",
+    "reasons": {
+      "healthy": "كل الأنظمة تعمل. آخر فحص {time}.",
+      "listener": "التحديثات المباشرة تستخدم البديل الأبطأ. قد تظهر التغييرات بعد ثوانٍ.",
+      "database": "قاعدة البيانات غير متاحة. لا يمكن للمستخدمين تسجيل الدخول.",
+      "migrations": "هناك {count} ترحيلات معلّقة على قاعدة البيانات.",
+      "dropped": "تم إسقاط إشعارات بسبب زيادة حمل الخادم."
+    },
+    "next": {
+      "healthy": "لا يلزم اتخاذ إجراء.",
+      "listener": "تحقق من اتصال قاعدة البيانات (pooler/proxy).",
+      "database": "استعد الوصول إلى قاعدة البيانات ثم أعد المحاولة.",
+      "migrations": "طبّق الترحيلات المعلّقة ثم حدّث الصفحة.",
+      "dropped": "تحقق من طابور الإشعارات ثم حدّث الصفحة."
+    },
+    "labels": {
+      "serverVersion": "إصدار الخادم",
+      "size": "الحجم",
+      "connections": "الاتصالات",
+      "migrations": "الترحيلات",
+      "upToDate": "محدّثة",
+      "pending": "{count} معلّقة",
+      "lastMigration": "آخر ترحيل",
+      "lastEvent": "آخر حدث {time}",
+      "reconnects": "إعادة الاتصال",
+      "sinceStart": "{count} منذ التشغيل",
+      "fallbackNotNeeded": "غير مطلوب",
+      "fallbackActive": "نشط",
+      "lastError": "آخر خطأ",
+      "connectedClients": "العملاء المتصلون",
+      "queueDepth": "عمق الطابور",
+      "dropped": "المسقوط",
+      "droppedHint": "الإشعارات المسقوطة تعني أن الخادم كان مثقلًا.",
+      "rowsTotal": "إجمالي الصفوف",
+      "lastWrite": "آخر كتابة",
+      "retention": "الاحتفاظ",
+      "days": "{count} يومًا",
+      "lastRun": "آخر تشغيل",
+      "duration": "المدة",
+      "result": "النتيجة",
+      "nextRun": "التشغيل التالي",
+      "failedSignIns": "تسجيلات دخول فاشلة",
+      "lastFailed": "آخر تسجيل دخول فاشل",
+      "activeUsers": "المستخدمون النشطون",
+      "inactiveUsers": "المستخدمون غير النشطين",
+      "viewFailed": "عرض تسجيلات الدخول الفاشلة",
+      "commit": "المراجعة",
+      "apiVersion": "إصدار API",
+      "frontendVersion": "إصدار الواجهة",
+      "startedAt": "وقت التشغيل",
+      "data": "البيانات",
+      "offers": "العروض",
+      "customers": "العملاء",
+      "materials": "الخامات",
+      "users": "المستخدمون النشطون",
+      "jobs": "المهام في الخلفية"
+    },
+    "results": {
+      "success": "نجاح",
+      "failure": "فشل"
+    },
+    "cards": {
+      "database": "قاعدة البيانات",
+      "live": "التحديثات المباشرة",
+      "realtime": "في الوقت الفعلي",
+      "audit": "سجل التدقيق",
+      "jobs": "المهام في الخلفية",
+      "security": "الأمان (٢٤ ساعة)",
+      "application": "التطبيق",
+      "data": "البيانات"
+    },
+    "units": {
+      "d": "ي",
+      "h": "س",
+      "m": "د",
+      "ms": "{count} مللي ثانية"
+    },
     "states": {
       "overall": {
         "Healthy": "سليم",
@@ -681,6 +760,81 @@
     "allActions": "كل الإجراءات",
     "allOutcomes": "كل النتائج",
     "clear": "مسح الفلاتر",
+    "presets": {
+      "today": "اليوم",
+      "yesterday": "أمس",
+      "seven": "٧ أيام",
+      "thirty": "٣٠ يومًا",
+      "custom": "مخصص"
+    },
+    "rangeLabel": "{from} – {to}",
+    "filtersLabel": "الفلاتر",
+    "quick": {
+      "failures": "الفاشلة فقط",
+      "signIns": "تسجيلات الدخول",
+      "offerChanges": "تغييرات العروض",
+      "userManagement": "إدارة المستخدمين"
+    },
+    "exportCsv": "تصدير CSV",
+    "exportDone": "تم تصدير الملف.",
+    "exportEmpty": "لا يوجد ما يمكن تصديره بهذه الفلاتر",
+    "refresh": "تحديث",
+    "chips": {
+      "user": "المستخدم",
+      "category": "الفئة",
+      "action": "الإجراء",
+      "outcome": "النتيجة",
+      "entity": "السجل"
+    },
+    "summary": {
+      "actions": "الإجراءات",
+      "failed": "الفاشلة",
+      "signIns": "تسجيلات الدخول",
+      "activeUsers": "المستخدمون النشطون",
+      "lastFailedSignIn": "آخر تسجيل دخول فاشل",
+      "failedCount": "{count} فاشلة",
+      "none": "لا شيء",
+      "chartHour": "الإجراءات بالساعة",
+      "chartDay": "الإجراءات باليوم",
+      "chartSummary": "{label}: {values}"
+    },
+    "days": {
+      "today": "اليوم",
+      "yesterday": "أمس"
+    },
+    "anonymous": "مجهول",
+    "unknownUser": "مستخدم غير معروف",
+    "failedStatus": "فشل {code}",
+    "row": {
+      "description": "الوصف",
+      "details": "التفاصيل",
+      "ip": "عنوان IP",
+      "device": "الجهاز",
+      "duration": "المدة",
+      "request": "الطلب",
+      "recordId": "معرّف السجل",
+      "open": "فتح {entity}",
+      "byUser": "عرض كل نشاط هذا المستخدم",
+      "forRecord": "عرض كل نشاط هذا السجل",
+      "copy": "نسخ {label}",
+      "copied": "تم نسخ {label}.",
+      "from": "من",
+      "to": "إلى"
+    },
+    "emptyRange": "لا يوجد نشاط في هذه الفترة",
+    "emptyFiltered": "لا يوجد نشاط يطابق هذه الفلاتر",
+    "firstTimeHint": "نسجّل تسجيلات الدخول والتغييرات داخل التطبيق. التعديلات المباشرة على قاعدة البيانات غير مسجّلة.",
+    "tryRange": "جرّب {range}",
+    "footer": {
+      "showing": "عرض {from}–{to} من {total}",
+      "pageSize": "صفوف لكل صفحة",
+      "retention": "تُحفظ السجلات ٣٦٥ يومًا ولا يمكن تعديلها."
+    },
+    "live": {
+      "newEvents": "{count} أحداث جديدة",
+      "show": "عرض"
+    },
+    "ms": "{count} مللي ثانية",
     "fields": {
       "when": "الوقت",
       "actor": "المستخدم",
@@ -758,6 +912,11 @@
     "open": "فتح",
     "unread": "{count} غير مقروء",
     "unreadItem": "غير مقروء",
+    "toast": {
+      "actor": "المستخدم: {name}",
+      "record": "السجل: {record}",
+      "time": "الوقت: {time}"
+    },
     "loading": "جارٍ تحميل الإشعارات",
     "loadFailed": "تعذّر تحميل الإشعارات.",
     "writeFailed": "تعذّر حفظ هذا التغيير.",

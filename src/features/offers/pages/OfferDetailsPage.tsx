@@ -241,7 +241,7 @@ export default function OfferDetailsPage() {
                   {offer.reference}
                 </bdi>
               </h1>
-              <p dir="auto" className="mt-1.5 break-words text-sm text-muted">
+              <p dir="auto" className="mt-1.5 wrap-break-word text-sm text-muted">
                 {customer?.name ?? offer.customerName}
               </p>
             </div>
@@ -391,7 +391,7 @@ export default function OfferDetailsPage() {
                 <dd
                   lang={documentLanguage}
                   dir={documentLanguage === "ar" ? "rtl" : "ltr"}
-                  className="[overflow-wrap:anywhere] font-medium text-ink"
+                  className="wrap-anywhere font-medium text-ink"
                 >
                   {documentData.totalInWords}
                 </dd>

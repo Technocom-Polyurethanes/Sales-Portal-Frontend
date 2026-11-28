@@ -1,59 +1,70 @@
 import { createContext, useCallback, useContext, useMemo } from "react"
-import type { ReactNode } from "react"
-import { sileo, Toaster, type SileoPosition } from "sileo"
-import "sileo/styles.css"
 
-import { useTranslation } from "../../i18n/I18nProvider"
-import type { AppLanguage } from "../../i18n/direction"
+import type { ReactNode } from "react"
+
+import { sileo, Toaster } from "sileo"
+
+import "sileo/styles.css"
 
 export type ToastTone = "success" | "info" | "warning" | "error"
 
-export type ToastAction = { label: string; onClick: () => void }
+export type ToastAction = {
+  label: string
+  onClick: () => void
+}
 
 type ToastContextValue = {
   notify: (
     message: string,
+
     tone?: ToastTone,
+
     description?: string,
+
     action?: ToastAction,
+
+    details?: string,
   ) => void
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null)
 
-/** Arabic reads right to left, so its toasts sit on the opposite corner. */
-export function toastPosition(language: AppLanguage): SileoPosition {
-  return language === "ar" ? "bottom-left" : "bottom-right"
-}
-
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const { language } = useTranslation()
-  const position = toastPosition(language)
-
   const notify = useCallback(
     (
       message: string,
+
       tone: ToastTone = "success",
+
       description?: string,
+
       action?: ToastAction,
+
+      details?: string,
     ) => {
       sileo[tone]({
         title: message,
-        description,
-        position,
+
+        description:
+          [description, details].filter(Boolean).join("\n") || undefined,
+
+        duration: 9000,
+
         button: action
           ? { title: action.label, onClick: action.onClick }
           : undefined,
       })
     },
-    [position],
+
+    [],
   )
 
   const value = useMemo(() => ({ notify }), [notify])
 
   return (
     <ToastContext.Provider value={value}>
-      <Toaster position={position} />
+      {/* Sileo's "light" theme paints a dark toast on a light workspace. */}
+      <Toaster position="bottom-right" theme="light" />
       {children}
     </ToastContext.Provider>
   )
@@ -61,6 +72,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 export function useToast(): ToastContextValue {
   const context = useContext(ToastContext)
+
   if (!context) throw new Error("useToast must be used inside <ToastProvider>")
+
   return context
 }

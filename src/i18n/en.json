@@ -73,7 +73,7 @@
     "workspace": "WORKSPACE",
     "users": "Users",
     "logs": "Logs",
-    "system": "System"
+    "system": "System status"
   },
   "shell": {
     "searchPlaceholder": "Search offers or customers…",
@@ -652,6 +652,85 @@
     "changes": "Changes listener",
     "notifications": "Notifications listener",
     "pollingFallback": "Polling fallback",
+    "stale": "Stale since {time}",
+    "copyDiagnostics": "Copy diagnostics",
+    "diagnosticsCopied": "Diagnostics copied.",
+    "reasons": {
+      "healthy": "All systems operational. Checked {time}.",
+      "listener": "Live updates are using the slower fallback. Changes still appear, within a few seconds.",
+      "database": "The database is not reachable. Users cannot sign in.",
+      "migrations": "The database has {count} pending migrations.",
+      "dropped": "Notifications were dropped because the server was overloaded."
+    },
+    "next": {
+      "healthy": "Nothing to do.",
+      "listener": "Check the database connection (pooler/proxy).",
+      "database": "Restore database access, then retry.",
+      "migrations": "Apply the pending migrations, then refresh.",
+      "dropped": "Check the notification queue, then refresh."
+    },
+    "labels": {
+      "serverVersion": "Server version",
+      "size": "Size",
+      "connections": "Connections",
+      "migrations": "Migrations",
+      "upToDate": "Up to date",
+      "pending": "{count} pending",
+      "lastMigration": "Last migration",
+      "lastEvent": "Last event {time}",
+      "reconnects": "Reconnects",
+      "sinceStart": "{count} since start",
+      "fallbackNotNeeded": "Not needed",
+      "fallbackActive": "Active",
+      "lastError": "Last error",
+      "connectedClients": "Connected clients",
+      "queueDepth": "Queue depth",
+      "dropped": "Dropped",
+      "droppedHint": "Dropped notifications mean the server was overloaded.",
+      "rowsTotal": "Rows total",
+      "lastWrite": "Last write",
+      "retention": "Retention",
+      "days": "{count} days",
+      "lastRun": "Last run",
+      "duration": "Duration",
+      "result": "Result",
+      "nextRun": "Next run",
+      "failedSignIns": "Failed sign-ins",
+      "lastFailed": "Last failed sign-in",
+      "activeUsers": "Active users",
+      "inactiveUsers": "Inactive users",
+      "viewFailed": "View failed sign-ins",
+      "commit": "Commit",
+      "apiVersion": "API version",
+      "frontendVersion": "Frontend version",
+      "startedAt": "Started at",
+      "data": "Data",
+      "offers": "Offers",
+      "customers": "Customers",
+      "materials": "Materials",
+      "users": "Active users",
+      "jobs": "Background jobs"
+    },
+    "results": {
+      "success": "Success",
+      "failure": "Failure"
+    },
+    "cards": {
+      "database": "Database",
+      "live": "Live updates",
+      "realtime": "Realtime",
+      "audit": "Audit log",
+      "jobs": "Background jobs",
+      "security": "Security (24h)",
+      "application": "Application",
+      "data": "Data"
+    },
+    "units": {
+      "d": "d",
+      "h": "h",
+      "m": "m",
+      "ms": "{count} ms"
+    },
     "states": {
       "overall": {
         "Healthy": "Healthy",
@@ -681,6 +760,81 @@
     "allActions": "All actions",
     "allOutcomes": "All outcomes",
     "clear": "Clear filters",
+    "presets": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "seven": "7 days",
+      "thirty": "30 days",
+      "custom": "Custom"
+    },
+    "rangeLabel": "{from} – {to}",
+    "filtersLabel": "Filters",
+    "quick": {
+      "failures": "Failures only",
+      "signIns": "Sign-ins",
+      "offerChanges": "Changes to offers",
+      "userManagement": "User management"
+    },
+    "exportCsv": "Export CSV",
+    "exportDone": "CSV exported.",
+    "exportEmpty": "Nothing to export for these filters",
+    "refresh": "Refresh",
+    "chips": {
+      "user": "User",
+      "category": "Category",
+      "action": "Action",
+      "outcome": "Outcome",
+      "entity": "Record"
+    },
+    "summary": {
+      "actions": "Actions",
+      "failed": "Failed",
+      "signIns": "Sign-ins",
+      "activeUsers": "Active users",
+      "lastFailedSignIn": "Last failed sign-in",
+      "failedCount": "{count} failed",
+      "none": "None",
+      "chartHour": "Actions per hour",
+      "chartDay": "Actions per day",
+      "chartSummary": "{label}: {values}"
+    },
+    "days": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    },
+    "anonymous": "Anonymous",
+    "unknownUser": "Unknown user",
+    "failedStatus": "Failed {code}",
+    "row": {
+      "description": "Description",
+      "details": "Details",
+      "ip": "IP address",
+      "device": "Device",
+      "duration": "Duration",
+      "request": "Request",
+      "recordId": "Record id",
+      "open": "Open {entity}",
+      "byUser": "Show all activity by this user",
+      "forRecord": "Show all activity for this record",
+      "copy": "Copy {label}",
+      "copied": "{label} copied.",
+      "from": "From",
+      "to": "To"
+    },
+    "emptyRange": "No activity in this range",
+    "emptyFiltered": "No activity matches these filters",
+    "firstTimeHint": "We record sign-ins and changes made in the app. Direct database edits are not recorded.",
+    "tryRange": "Try {range}",
+    "footer": {
+      "showing": "Showing {from}–{to} of {total}",
+      "pageSize": "Rows per page",
+      "retention": "Logs are kept for 365 days and cannot be edited."
+    },
+    "live": {
+      "newEvents": "{count} new events",
+      "show": "Show"
+    },
+    "ms": "{count} ms",
     "fields": {
       "when": "When",
       "actor": "User",
@@ -758,6 +912,11 @@
     "open": "Open",
     "unread": "{count} unread",
     "unreadItem": "Unread",
+    "toast": {
+      "actor": "User: {name}",
+      "record": "Record: {record}",
+      "time": "Time: {time}"
+    },
     "loading": "Loading notifications",
     "loadFailed": "Couldn't load notifications.",
     "writeFailed": "Couldn't save that change.",

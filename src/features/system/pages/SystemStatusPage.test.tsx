@@ -1,28 +1,43 @@
 // @vitest-environment jsdom
+
 import { act } from "react"
+
 import { createRoot, type Root } from "react-dom/client"
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import "@/mock"
+
 import App from "../../../app/App"
+
 import { clearCache } from "../../../lib/cache/queryCache"
+
+import { live } from "../../../lib/live"
+
 import { db } from "../../../mock/db"
 
 import { systemApi } from "../api"
-
-;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT =
-  true
+;(globalThis as {
+  IS_REACT_ACT_ENVIRONMENT?: boolean
+}).IS_REACT_ACT_ENVIRONMENT = true
 
 if (!window.matchMedia) {
   window.matchMedia = (query: string) =>
     ({
       matches: false,
+
       media: query,
+
       onchange: null,
+
       addEventListener: () => {},
+
       removeEventListener: () => {},
+
       addListener: () => {},
+
       removeListener: () => {},
+
       dispatchEvent: () => false,
     }) as MediaQueryList
 }
@@ -30,7 +45,9 @@ if (!window.matchMedia) {
 if (!("ResizeObserver" in globalThis)) {
   globalThis.ResizeObserver = (class {
     observe() {}
+
     unobserve() {}
+
     disconnect() {}
   } as unknown as typeof ResizeObserver)
 }
@@ -42,24 +59,34 @@ const pause = (ms: number) =>
 
 describe("System status screen", () => {
   let container: HTMLDivElement
+
   let root: Root
 
   const waitFor = async (text: string) => {
     for (let tries = 0; tries < 40; tries += 1) {
       if (container.textContent?.includes(text)) return
+
       await pause(100)
     }
   }
 
   beforeEach(async () => {
     clearCache()
+
     vi.restoreAllMocks()
+
     db.session.userId = "acct-admin"
+
     localStorage.setItem("technocom.session", "active")
+
     localStorage.setItem("sales_portal_jwt", "test-token")
+
     window.history.pushState({}, "", "/system-status")
+
     container = document.createElement("div")
+
     document.body.appendChild(container)
+
     root = createRoot(container)
   })
 
@@ -67,32 +94,113 @@ describe("System status screen", () => {
 
   afterEach(async () => {
     await act(async () => root.unmount())
+
     container.remove()
+
     localStorage.clear()
+
     window.history.pushState({}, "", "/")
   })
 
   it("shows the admin a localized status snapshot", async () => {
     await render()
+
     await waitFor("System status")
+
     await waitFor("Healthy")
 
     expect(container.textContent).toContain("Up")
+
     expect(container.textContent).toContain("Connected")
+
     expect(container.textContent).toContain("Production")
 
     const headerFor = (title: string) =>
-      Array.from(container.querySelectorAll("section")).find(
-        (card) => card.querySelector("h2")?.textContent === title,
-      )?.querySelector("header")?.textContent
+      Array.from(container.querySelectorAll("section"))
+        .find((card) => card.querySelector("h2")?.textContent === title)
+        ?.querySelector("header")?.textContent
 
     expect(headerFor("Overall status")).toContain("Healthy")
+
     expect(headerFor("Database")).toContain("Up")
+  })
+
+  it("shows the offers count from the offers list, not the status probe", async () => {
+    await render()
+
+    const expected = String(db.offers.length)
+    let dataCard: HTMLElement | undefined
+    for (let tries = 0; tries < 40; tries += 1) {
+      dataCard = Array.from(container.querySelectorAll("section")).find(
+        (card) => card.querySelector("h2")?.textContent === "Data",
+      )
+      if (dataCard?.textContent?.includes(expected)) break
+      await pause(100)
+    }
+
+    expect(dataCard?.textContent).toContain(expected)
+    expect(dataCard?.textContent).not.toContain("428")
   })
 
   it("keeps the cards on screen when refreshing", async () => {
     await render()
+
     await waitFor("Healthy")
+
+    const refreshButtons = Array.from(
+      container.querySelectorAll("button"),
+    ).filter((button) => button.textContent === "Refresh")
+
+    expect(refreshButtons).toHaveLength(1)
+
+    await act(async () => refreshButtons[0]?.click())
+
+    expect(container.querySelector(".animate-pulse")).toBeNull()
+
+    expect(container.textContent).toContain("Healthy")
+  })
+
+  it("refreshes as soon as a live change arrives", async () => {
+    let onChange: (() => void) | undefined
+    vi.spyOn(live, "subscribe").mockImplementation((_topics, listener) => {
+      onChange = () => listener([])
+      return () => {}
+    })
+    const statusCalls = vi.spyOn(systemApi, "status")
+
+    await render()
+
+    await waitFor("Healthy")
+
+    expect(statusCalls).toHaveBeenCalledTimes(1)
+
+    await act(async () => onChange?.())
+
+    expect(statusCalls).toHaveBeenCalledTimes(2)
+  })
+
+  it("shows a retryable error when the status call fails", async () => {
+    vi.spyOn(systemApi, "status").mockRejectedValue(
+      new Error("Status unavailable"),
+    )
+
+    await render()
+
+    await waitFor("Status unavailable")
+
+    expect(container.querySelector('[role="alert"]')?.textContent).toContain(
+      "Retry",
+    )
+  })
+
+  it("keeps the cards and marks data stale when a refresh fails", async () => {
+    await render()
+
+    await waitFor("Healthy")
+
+    vi.spyOn(systemApi, "status").mockRejectedValueOnce(
+      new Error("Network down"),
+    )
 
     const refresh = Array.from(container.querySelectorAll("button")).find(
       (button) => button.textContent === "Refresh",
@@ -100,17 +208,48 @@ describe("System status screen", () => {
 
     await act(async () => refresh?.click())
 
-    expect(container.querySelector(".animate-pulse")).toBeNull()
+    expect(container.textContent).toContain("Stale since")
+
     expect(container.textContent).toContain("Healthy")
   })
 
-  it("shows a retryable error when the status call fails", async () => {
-    vi.spyOn(systemApi, "status").mockRejectedValue(new Error("Status unavailable"))
-    await render()
-    await waitFor("Status unavailable")
+  it("renders Arabic without raw translation keys", async () => {
+    localStorage.setItem("technocom.app-language", "ar")
 
-    expect(container.querySelector('[role="alert"]')?.textContent).toContain(
-      "Retry",
+    await render()
+
+    await waitFor("حالة النظام")
+
+    await waitFor("سليم")
+
+    expect(container.textContent).toContain("قاعدة البيانات")
+
+    expect(container.textContent).not.toContain("system.reasons")
+
+    expect(document.documentElement.dir).toBe("rtl")
+  })
+
+  it("copies a plain-text snapshot of the whole status", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+
+      value: { writeText },
+    })
+
+    await render()
+
+    await waitFor("Healthy")
+
+    const copy = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent === "Copy diagnostics",
     )
+
+    await act(async () => copy?.click())
+
+    expect(writeText).toHaveBeenCalledTimes(1)
+
+    expect(writeText.mock.calls[0][0]).toContain('"environment": "Production"')
   })
 })
