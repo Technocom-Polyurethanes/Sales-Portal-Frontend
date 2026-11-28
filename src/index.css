@@ -39,6 +39,17 @@ html:root {
   --sileo-height: 46px;
 }
 
+[data-sileo-toast] [data-sileo-header] {
+  width: var(--_pw);
+  justify-content: center;
+}
+
+[dir="rtl"] [data-sileo-viewport][data-position$="right"] {
+  left: 0;
+  right: auto;
+  align-items: flex-start;
+}
+
 [data-sileo-toast] [data-sileo-title] {
   color: #ffffff;
   font-size: 0.92rem;
