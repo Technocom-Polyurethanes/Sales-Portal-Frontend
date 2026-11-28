@@ -63,7 +63,7 @@ export default function ApplicationCard({
             status.apiVersion ? (
               <span>
                 {status.apiVersion}
-                {differs ? "" : ""}
+                {differs}
               </span>
             ) : undefined
           }
